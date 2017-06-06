@@ -12,36 +12,35 @@ def test_100_names(data):
 		return False
 	else:
 		return good_name_data(data)
-#test whether or not a company name should be used
-def good_company_data(data):
-	if data.startswith("<http://dbpedia.org/resource"):
-		return False
-	#used https://www.tutorialspoint.com/python/string_translate.htm
-	#change if we want to preserve any of these things
-	intab = "\n"
-	outtab = " "
-	trantab = maketrans(intab, outtab)
-	data.translate(trantab)
+def is_english(data):
 	try:
 		data.encode('utf-8')
 	except UnicodeDecodeError:
 		return False
+	return True
+def fix_bad_chars(data):
+	#used https://www.tutorialspoint.com/python/string_translate.htm
+	#change if we want to preserve any of these things
+	intab = "\n|"
+	outtab = " I"
+	trantab = maketrans(intab, outtab)
+	return data.translate(trantab)
+#test whether or not a company name should be used
+def good_company_data(data):
+	if data.startswith("<http://dbpedia.org/resource"):
+		return False
+	if not is_english(data):
+		return False
+	data = fix_bad_chars(data)
 	data = data.lower()
 	for item in company_reject_set:
 		if item in data:
 			return False
 	return True
 def good_name_data(data):
-	#used https://www.tutorialspoint.com/python/string_translate.htm
-	#change if we want to preserve any of these things
-	intab = "\n"
-	outtab = " "
-	trantab = maketrans(intab, outtab)
-	data.translate(trantab)
-	try:
-		data.encode('utf-8')
-	except UnicodeDecodeError:
+	if not is_english(data):
 		return False
+	data = fix_bad_chars(data)
 	data = data.lower()
 	for item in name_reject_set:
 		if item in data:
@@ -54,6 +53,8 @@ def cleanseData(dataToCleanse, cleansing_function):
 	global maxlen
 	name_array = dataToCleanse.split("|")
 	for part in name_array:
+		if not part:
+			continue
 		if len(ret) >= 2:
 			break
 		if cleansing_function(part):
@@ -77,7 +78,7 @@ def parse_file(input_file, output_file, parsing_function):
 if len(argv) >= 3:
 	nametester = 0
 	parsing_function = good_name_data
-	function_dictionary = {"name":good_name_data, "company":good_company_data, "test100":test_100_names}
+	function_dictionary = {"name":good_name_data, "company":good_company_data, "test100":test_100_names, "names":good_name_data}
 	if len(argv) == 4:
 		parsing_function = function_dictionary[argv[3]]
 	input_file = open(argv[1])
