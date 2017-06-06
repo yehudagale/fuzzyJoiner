@@ -1,0 +1,14 @@
+-Lay out a series of milestones
+	-impliment a naive version of the algorythim.
+		-use wikipedia to get people and organization names
+		-100,000 companies and 
+		-column 1 url
+		-column 2-n variants of that person or company name
+		-see if they are part of the actuall name (clean data)
+			-start with postgresql
+		-if any
+-Download postgresql (get 96).
+-write data cleaner in python
+-implement basic 
+-data.gov
+	-free open data 
