@@ -3,8 +3,10 @@ from string import maketrans   # Required to call maketrans function.
 #first use a set of things we don't want in the final output
 name_reject_set = frozenset(["father of", "(", "author of"])
 company_reject_set = frozenset(["("])
-#test whether or not a name should be used
-def good_company_data:
+#test whether or not a company name should be used
+def good_company_data(data):
+	if data.startswith("<http://dbpedia.org/resource"):
+		return False
 	#used https://www.tutorialspoint.com/python/string_translate.htm
 	#change if we want to preserve any of these things
 	intab = "\n"
@@ -61,10 +63,10 @@ def parse_file(input_file, output_file, parsing_function):
 			output_file.write('\n')
 
 if len(argv) >= 3:
-	if len(argv == 3):
-		parsing_function = good_name_data
-	else:
-		parsing_function = argv[3]
+	parsing_function = good_name_data
+	function_dictionary = {"name":good_name_data, "company":good_company_data}
+	if len(argv) == 4:
+		parsing_function = function_dictionary[argv[3]]
 	input_file = open(argv[1])
 	output_file = open(argv[2], "w")
 	parse_file(input_file, output_file,parsing_function)
