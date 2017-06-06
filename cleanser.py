@@ -4,7 +4,6 @@ from string import maketrans   # Required to call maketrans function.
 name_reject_set = frozenset(["father of", "(", "author of"])
 company_reject_set = frozenset(["("])
 nametester = 0
-maxlen = 0
 def test_100_names(data):
 	global nametester
 	nametester += 1
@@ -21,8 +20,8 @@ def is_english(data):
 def fix_bad_chars(data):
 	#used https://www.tutorialspoint.com/python/string_translate.htm
 	#change if we want to preserve any of these things
-	intab = "\n|"
-	outtab = " I"
+	intab = "\n"
+	outtab = " "
 	trantab = maketrans(intab, outtab)
 	return data.translate(trantab)
 #test whether or not a company name should be used
@@ -50,7 +49,6 @@ def good_name_data(data):
 #if we cannot get 2 peices of good data returns the empty string
 def cleanseData(dataToCleanse, cleansing_function):
 	ret = []
-	global maxlen
 	name_array = dataToCleanse.split("|")
 	for part in name_array:
 		if not part:
@@ -60,8 +58,6 @@ def cleanseData(dataToCleanse, cleansing_function):
 		if cleansing_function(part):
 			if part[-1:] == "\n":
 				part = part[:-1]
-			if len(part) > maxlen:
-				maxlen = len(part)
 			ret.append(part)
 	if len(ret) == 2:
 		return "|".join(ret)
@@ -86,5 +82,4 @@ if len(argv) >= 3:
 	parse_file(input_file, output_file,parsing_function)
 	input_file.close()
 	output_file.close()
-	print maxlen
 
