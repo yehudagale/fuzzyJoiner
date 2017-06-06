@@ -1,5 +1,6 @@
 --used http://www.postgresqltutorial.com/import-csv-file-into-posgresql-table/
 --used https://stackoverflow.com/questions/8584119/how-to-apply-a-function-to-each-element-of-an-array-column-in-postgres to help learn function synatax
+#done to make sure that if the tables already exist they do not interfere
 DROP TABLE aliases;
 DROP TABLE final;
 DROP TABLE wordTable;
@@ -30,7 +31,3 @@ CREATE TABLE final(
 INSERT INTO final(name1, name2)
 SELECT DISTINCT A.name AS name1, B.name AS name2 FROM wordTable A, wordTable B WHERE A.word = B.word AND A.name <> B.name;
 SELECT * FROM final;
-DROP TABLE aliases;
-DROP TABLE final;
-DROP TABLE wordTable;
-DROP TABLE arrays;
