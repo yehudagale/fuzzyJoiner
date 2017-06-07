@@ -93,10 +93,13 @@ class data_cleanser(object):
 						output_file.write(newline)
 						output_file.write('\n')
 					else:
+						self.get = False;
 						break
 				else:
 					output_file.write(newline)
 					output_file.write('\n')
+		if self.get:
+			print "ran out of names, procced as many as where available"
 
 
 	def clean_file(self, args):
