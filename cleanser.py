@@ -4,6 +4,7 @@ from string import maketrans   # Required to call maketrans function.
 name_reject_set = frozenset(["father of", "(", "author of"])
 company_reject_set = frozenset(["("])
 nametester = 0
+#test_file = open("./test.txt", "w")
 def test_100_names(data):
 	global nametester
 	nametester += 1
@@ -40,6 +41,11 @@ def fix_bad_chars(data):
 	trantab = maketrans(intab, outtab)
 	return data.translate(trantab)
 #test whether or not a company name should be used
+def remove_bad(data):
+	data = data.replace('"', "(")
+	data = data.replace("\n", "")
+	return data
+
 def good_company_data(data):
 	if data.startswith("<http://dbpedia.org/resource"):
 		return False
@@ -71,12 +77,15 @@ def cleanseData(dataToCleanse, cleansing_function):
 		if len(ret) >= 2:
 			break
 		if cleansing_function(part):
-			if part[-1:] == "\n":
-				part = part[:-1]
+			# if part[-1:] == "\n":
+			# 	part = part[:-1]
 			if part not in ret:
+				part = remove_bad(part)
 				ret.append(part)
 	if len(ret) == 2:
 		return "|".join(ret)
+	#global test_file
+	#test_file.write(dataToCleanse)
 	return ""
 #parses input file and writes an output
 def parse_file(input_file, output_file, parsing_function):
@@ -97,5 +106,6 @@ if len(argv) >= 3:
 	output_file = open(argv[2], "w")
 	parse_file(input_file, output_file,parsing_function)
 	input_file.close()
+	#test_file.close();
 	output_file.close()
 
