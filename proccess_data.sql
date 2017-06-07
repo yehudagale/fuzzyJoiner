@@ -15,3 +15,5 @@ TMP4 AS (SELECT generate_subscripts(words, 1) AS s, words, name FROM TMP2),
 TMP5 AS (SELECT name, words[s] AS word FROM TMP3),
 TMP6 AS (SELECT name, words[s] AS word FROM TMP4)
 SELECT DISTINCT TMP5.name AS name1, TMP6.name AS name2 INTO finalTable FROM TMP5, TMP6 WHERE TMP5.word = TMP6.word;
+--This many successes:
+SELECT COUNT(finalTable.name1) AS successes FROM finalTable, aliases WHERE finalTable.name1 = aliases.aliase1 AND finalTable.name2 = aliases.aliase2;

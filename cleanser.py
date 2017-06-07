@@ -45,7 +45,7 @@ class data_cleanser(object):
 			return False
 		if not self.is_english(data):
 			return False
-		data = fix_bad_chars(data)
+		data = self.fix_bad_chars(data)
 		data = data.lower()
 		for item in self.company_reject_set:
 			if item in data:
