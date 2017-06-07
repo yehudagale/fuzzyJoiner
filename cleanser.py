@@ -11,6 +11,21 @@ def test_100_names(data):
 		return False
 	else:
 		return good_name_data(data)
+def test_10000_names(data):
+	global nametester
+	nametester += 1
+	if nametester > 10000:
+		return False
+	else:
+		return good_name_data(data)
+def get_x_names(data):
+	global nametester
+	print nametester;
+	nametester -= 1
+	if nametester <= 0:
+		return False
+	else:
+		return good_name_data(data)
 def is_english(data):
 	try:
 		data.encode('utf-8')
@@ -58,7 +73,8 @@ def cleanseData(dataToCleanse, cleansing_function):
 		if cleansing_function(part):
 			if part[-1:] == "\n":
 				part = part[:-1]
-			ret.append(part)
+			if part not in ret:
+				ret.append(part)
 	if len(ret) == 2:
 		return "|".join(ret)
 	return ""
@@ -74,7 +90,7 @@ def parse_file(input_file, output_file, parsing_function):
 if len(argv) >= 3:
 	nametester = 0
 	parsing_function = good_name_data
-	function_dictionary = {"name":good_name_data, "company":good_company_data, "test100":test_100_names, "names":good_name_data}
+	function_dictionary = {"test10000":test_10000_names, "name":good_name_data, "company":good_company_data, "test100":test_100_names, "names":good_name_data, "get":get_x_names}
 	if len(argv) == 4:
 		parsing_function = function_dictionary[argv[3]]
 	input_file = open(argv[1])
