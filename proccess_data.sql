@@ -1,8 +1,12 @@
 --used http://www.postgresqltutorial.com/import-csv-file-into-posgresql-table/
 --used https://stackoverflow.com/questions/8584119/how-to-apply-a-function-to-each-element-of-an-array-column-in-postgres to help learn function synatax
+--used how-to-find-duplicate-records-in-posgresql
 --done to make sure that if the tables already exist they do not interfere
 DROP TABLE aliases;
 DROP TABLE finalTable;
+DROP TABLE matches;
+DROP TABLE duplicatedTable;
+DROP TABLE match;
 CREATE TABLE aliases(
 	aliase1 text NOT NULL,
 	aliase2 text NOT NULL
@@ -19,6 +23,16 @@ TMP5 AS (SELECT name, words[s] AS word FROM TMP3),
 TMP6 AS (SELECT name, words[s] AS word FROM TMP4)
 --SELECT word, count(*) AS frequency INTO finalTable From TMP7 Group By word ORDER BY frequency DESC;
 SELECT DISTINCT TMP5.name AS name1, TMP6.name AS name2 INTO finalTable FROM TMP5, TMP6 WHERE TMP5.word = TMP6.word AND TMP5.word <> 'John' AND TMP5.word <> 'of' AND TMP5.word <> 'William';
---This many successes:
-SELECT COUNT(finalTable.name1) AS successes FROM finalTable, aliases WHERE finalTable.name1 = aliases.aliase1 AND finalTable.name2 = aliases.aliase2;
+DROP TABLE duplicatedTable;
+WITH TMP AS (SELECT string_to_array(finalTable.name1, ' ') AS array1, name1, string_to_array(finalTable.name2, ' ') AS array2, name2 FROM finalTable)
+SELECT TMP.name1, TMP.name2 INTO matches FROM TMP WHERE TMP.array1[1] = TMP.array2[1] AND TMP.array1[cardinality(TMP.array1)] = TMP.array2[cardinality(TMP.array2)];
+
+--this many possible:
+SELECT COUNT(finalTable.name1) FROM finalTable, aliases WHERE finalTable.name1 = aliases.aliase1 AND finalTable.name2 = aliases.aliase2;
+--This many correct matches:
+SELECT COUNT(matches.name1) FROM matches, aliases WHERE matches.name1 = aliases.aliase1 AND matches.name2 = aliases.aliase2;
+--Test
+SELECT * FROM matches EXCEPT SELECT matches.name1, matches.name2 FROM matches, aliases WHERE matches.name1 = aliases.aliase1 AND matches.name2 = aliases.aliase2;
+
+--Incorrect mathches is size of matches - correct matches, Missed matches is size of aliases - correct matches
 --SELECT * FROM finalTable;
