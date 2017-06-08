@@ -14,26 +14,25 @@ CREATE TABLE aliases(
 \copy aliases(aliase1, aliase2) FROM './testout.csv' DELIMITER '|' CSV;
 WITH --FIX1 AS (SELECT replace(aliase1, 'John ', '') AS aliase1, replace(aliase2, 'John ', '') AS aliase2 FROM aliases),
 --FIX2 AS (SELECT replace(aliase1, 'William ', '') AS aliase1, replace(aliase2, 'William ', '') AS aliase2 FROM FIX1),
---FIXED AS (SELECT replace(aliase1, 'of ', '') AS aliase1, replace(aliase2, 'of ', '') AS aliase2 FROM FIX2),
-FIXED AS (SELECT replace(aliase1, ',', '') AS aliase1, replace(aliase2, ',', '') AS aliase2 FROM aliases),
-TMP1 AS (SELECT aliase1 AS name, string_to_array(aliase1, ' ') AS words FROM FIXED),
-TMP2 AS (SELECT aliase2 AS name, string_to_array(aliase2, ' ') AS words FROM FIXED),
+--FIXED AS (SELECT replace(aliase1, 'of ', '') AS aliase1, replace(aliase2, 'of ', '') AS aliase2 FROM FIX2), 
+TMP1 AS (SELECT aliase1 AS name, string_to_array(aliase1, ' ') AS words FROM aliases),
+TMP2 AS (SELECT aliase2 AS name, string_to_array(aliase2, ' ') AS words FROM aliases),
 TMP3 AS (SELECT generate_subscripts(words, 1) AS s, words AS words, name AS name FROM TMP1),
 TMP4 AS (SELECT generate_subscripts(words, 1) AS s, words, name FROM TMP2),
 TMP5 AS (SELECT name, words[s] AS word FROM TMP3),
-TMP6 AS (SELECT name, words[s] AS word FROM TMP4)
+TMP6 AS (SELECT name, words[s] AS word FROM TMP4),
 --SELECT word, count(*) AS frequency INTO finalTable From TMP7 Group By word ORDER BY frequency DESC;
-SELECT DISTINCT TMP5.name AS name1, TMP6.name AS name2 INTO finalTable FROM TMP5, TMP6 WHERE TMP5.word = TMP6.word AND TMP5.word <> 'John' AND TMP5.word <> 'of' AND TMP5.word <> 'William';
-DROP TABLE duplicatedTable;
-WITH TMP AS (SELECT array_remove(array_remove(string_to_array(finalTable.name1, ' '), 'Sir'), 'Jr.') AS array1, name1, string_to_array(finalTable.name2, ' ') AS array2, name2 FROM finalTable)
-SELECT TMP.name1, TMP.name2 INTO matchesa FROM TMP WHERE TMP.array1[1] = TMP.array2[1] AND TMP.array1[cardinality(TMP.array1)] = TMP.array2[cardinality(TMP.array2)];
+--SELECT DISTINCT TMP5.name AS name1, TMP6.name AS name2 INTO finalTable FROM TMP5, TMP6 WHERE TMP5.word = TMP6.word AND TMP5.word <> 'John' AND TMP5.word <> 'of' AND TMP5.word <> 'William';
+TMP AS (SELECT array_remove(array_remove(string_to_array(TMP5.name, ' '), 'Sir'), 'Jr.') AS array1, TMP5.name AS name1, string_to_array(TMP6.name, ' ') AS array2, TMP6.name AS name2 FROM TMP5, TMP6 
+	WHERE TMP5.word = TMP6.word AND TMP5.word <> 'John' AND TMP5.word <> 'of' AND TMP5.word <> 'William')
+SELECT DISTINCT TMP.name1, TMP.name2 INTO matchesa FROM TMP WHERE (TMP.array1[1] = TMP.array2[1] AND TMP.array1[cardinality(TMP.array1)] = TMP.array2[cardinality(TMP.array2)]) OR (TMP.array1 @> TMP.array2 OR TMP.array2 @> TMP.array1);
 
 --this many possible:
-SELECT COUNT(finalTable.name1) FROM finalTable, aliases WHERE finalTable.name1 = aliases.aliase1 AND finalTable.name2 = aliases.aliase2;
---This many correct matches:
+--SELECT COUNT(finalTable.name1) FROM finalTable, aliases WHERE finalTable.name1 = aliases.aliase1 AND finalTable.name2 = aliases.aliase2;
+--This many correct matchesa:
 SELECT COUNT(matchesa.name1) FROM matchesa, aliases WHERE matchesa.name1 = aliases.aliase1 AND matchesa.name2 = aliases.aliase2;
---Test
+--These are the false positives
 --SELECT * FROM matchesa EXCEPT SELECT matchesa.name1, matchesa.name2 FROM matchesa, aliases WHERE matchesa.name1 = aliases.aliase1 AND matchesa.name2 = aliases.aliase2;
 
---Incorrect mathches is size of matches - correct matches, Missed matches is size of aliases - correct matches
+--Incorrect mathches is size of matchesa - correct matchesa, Missed matchesa is size of aliases - correct matchesa
 --SELECT * FROM finalTable;
