@@ -24,7 +24,7 @@ TMP6 AS (SELECT name, words[s] AS word FROM TMP4)
 --SELECT word, count(*) AS frequency INTO finalTable From TMP7 Group By word ORDER BY frequency DESC;
 SELECT DISTINCT TMP5.name AS name1, TMP6.name AS name2 INTO finalTable FROM TMP5, TMP6 WHERE TMP5.word = TMP6.word AND TMP5.word <> 'John' AND TMP5.word <> 'of' AND TMP5.word <> 'William';
 DROP TABLE duplicatedTable;
-WITH TMP AS (SELECT string_to_array(finalTable.name1, ' ') AS array1, name1, string_to_array(finalTable.name2, ' ') AS array2, name2 FROM finalTable)
+WITH TMP AS (SELECT array_remove(array_remove(string_to_array(finalTable.name1, ' '), 'Sir'), 'Jr.') AS array1, name1, string_to_array(finalTable.name2, ' ') AS array2, name2 FROM finalTable)
 SELECT TMP.name1, TMP.name2 INTO matches FROM TMP WHERE TMP.array1[1] = TMP.array2[1] AND TMP.array1[cardinality(TMP.array1)] = TMP.array2[cardinality(TMP.array2)];
 
 --this many possible:
@@ -32,7 +32,7 @@ SELECT COUNT(finalTable.name1) FROM finalTable, aliases WHERE finalTable.name1 =
 --This many correct matches:
 SELECT COUNT(matches.name1) FROM matches, aliases WHERE matches.name1 = aliases.aliase1 AND matches.name2 = aliases.aliase2;
 --Test
-SELECT * FROM matches EXCEPT SELECT matches.name1, matches.name2 FROM matches, aliases WHERE matches.name1 = aliases.aliase1 AND matches.name2 = aliases.aliase2;
+--SELECT * FROM matches EXCEPT SELECT matches.name1, matches.name2 FROM matches, aliases WHERE matches.name1 = aliases.aliase1 AND matches.name2 = aliases.aliase2;
 
 --Incorrect mathches is size of matches - correct matches, Missed matches is size of aliases - correct matches
 --SELECT * FROM finalTable;
