@@ -11,4 +11,5 @@
 -write data cleaner in python
 -implement basic 
 -data.gov
-	-free open data 
+	-free open data
+-possibly group by bucket to reduce size of large table 
