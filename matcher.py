@@ -54,40 +54,6 @@ def load_bucket(table, position):
         bucket.append(table[position][0].split())
         position += 1
     return [], None
-def load_buckets(table_string, con, meta):
-    table = meta.tables[table_string]
-    words = con.execute(select([table]))
-    word_list = []
-    prev_word = ""
-    curr_list = []
-    bucket_words = []
-    for row in words:
-        if row[1] != prev_word:
-            bucket_words.append(prev_word)
-            prev_word = row[1]
-            word_list.append(curr_list)
-            curr_list = []
-        curr_list.append(row[0].split())
-    return word_list, bucket_words
-def sort_buckets(to_sort):
-    for bucket in to_sort:
-        for name in bucket:
-            name.sort()
-        bucket.sort()
-    return to_sort
-def make_bucket_dict(bucket_words1, bucket_words2):
-    x = 0
-    y = 0
-    dictionary = {}
-    while x < len(bucket_words1) and y < len(bucket_words2):
-        if bucket_words1[x] > bucket_words2[y]:
-            y += 1
-        elif bucket_words1[x] < bucket_words2[y]:
-            x += 1
-        else:
-            dictionary[x] = y
-            x += 1
-    return dictionary
 def fscore(true_dict, test_dict, beta):
     true_positives = 0.0
     false_positive = 0.0

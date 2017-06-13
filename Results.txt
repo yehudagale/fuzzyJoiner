@@ -1,0 +1,2 @@
+Tue June 13th:
+This is a very simple rule based method that compares the first and last word of people with names that share at least one word. It has an F-score of 0.471543859649 and runs in about 2 minutes on my machine on all 183,000 names. It runs in seconds on the 37,000 companies but has an F-score of only about 0.207
