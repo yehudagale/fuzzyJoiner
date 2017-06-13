@@ -5,19 +5,19 @@
 DROP TABLE aliases;
 DROP TABLE finalTable;
 DROP TABLE matches;
-DROP TABLE duplicatedTable;
+DROP TABLE tempAliases;
 DROP TABLE match;
 DROP TABLE WORDTABLE1;
 DROP TABLE WORDTABLE2;
-CREATE TABLE aliases(
+CREATE TABLE tempAliases(
 	alias1 text NOT NULL,
 	alias2 text NOT NULL
 );
-\copy aliases(alias1, alias2) FROM './testout.csv' DELIMITER '|' CSV;
+\copy tempAliases(alias1, alias2) FROM './testout.csv' DELIMITER '|' CSV;
  --FIX1 AS (SELECT replace(alias1, 'John ', '') AS alias1, replace(alias2, 'John ', '') AS alias2 FROM aliases),
 --FIX2 AS (SELECT replace(alias1, 'William ', '') AS alias1, replace(alias2, 'William ', '') AS alias2 FROM FIX1),
 --FIXED AS (SELECT replace(alias1, 'of ', '') AS alias1, replace(alias2, 'of ', '') AS alias2 FROM FIX2),
-UPDATE aliases SET (alias1, alias2) = (SELECT lower(alias1), lower(alias2) FROM aliases); 
+SELECT lower(alias1) AS alias1, lower(alias2) AS alias2 INTO aliases FROM tempAliases; 
 WITH TMP1 AS (SELECT alias1 AS name, string_to_array(alias1, ' ') AS words FROM aliases),
 TMP3 AS (SELECT generate_subscripts(words, 1) AS s, words AS words, name AS name FROM TMP1)
 SELECT name, words[s] AS word INTO WORDTABLE1  FROM TMP3 ORDER BY word ASC;

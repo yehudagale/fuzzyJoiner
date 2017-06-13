@@ -38,7 +38,8 @@ class data_cleanser(object):
 	def remove_bad(self, data):
 		data = data.replace('"', "(")
 		data = data.replace("\n", "")
-		return data
+		data = data.replace("  ", "")
+		return data.lstrip()
 
 	def good_company_data(self, data):
 		if data.startswith("<http://dbpedia.org/resource"):
@@ -75,7 +76,8 @@ class data_cleanser(object):
 				# 	part = part[:-1]
 				if part not in ret:
 					part = self.remove_bad(part)
-					ret.append(part)
+					if part:
+						ret.append(part)
 		if len(ret) == 2:
 			return "|".join(ret)
 		#global test_file
@@ -121,6 +123,6 @@ class data_cleanser(object):
 			output_file.close()
 		else:
 			print "too few arguments please enter arguments in the following format: input_file output_file [function [get x OR test x]]"
-
+u'alma h. bliss'
 cleaner = data_cleanser()
 cleaner.clean_file(argv)
