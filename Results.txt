@@ -2,7 +2,19 @@ Tue June 13th(1):
 
 		F-Score | Time
 Name    
-Comany
+Company
 This is a very simple rule based method that compares the first and last word of people with names that share at least one word. It has an F-score of 0.471543859649 and runs in about 2 minutes on my machine on all 183,000 names. It runs in seconds on the 37,000 companies but has an F-score of only about 0.207
 Tue June 13th(2):
-Here is another mechanism where we tokenize the words, put them into a set and check if one name is a subset of the other. It has a better success rate for names, with an F-schore of 0.582207840022 and a much better one for companies, with an F-Score of 0.508912602583. However, it takes much longer to run running in just under five minutes for all 183,000 names and 20 seconds for the companies.
+Here is another mechanism where we tokenize the words, put them into a set and check if one name is a subset of the other. It has a better success rate for names, with an F-score of 0.582207840022 and a much better one for companies, with an F-Score of 0.508912602583. However, it takes much longer to run running in just under five minutes for all 183,000 names and 20 seconds for the companies.
+Mon June 19th:
+I have shifted focus too companies rather than names, so I will not be recording name data for now. I also changed the program to pick 3 possibilities and recorded it as a match if any of the names match. 
+I noticed that companies often take out or add spaces, and therefore developed a strategy where I remove all spaces in pre-proccesing and check if one name is a substring of another. Here is the data for that method:
+possible matches: 25897
+total names: 36629
+not indexed: 16619
+wrongly indexed: 2606.0
+all false negitives: 19225.0
+true positives: 17400.0
+false positives: 2573.0
+f-score 0.614862715997999
+As you can see, 1/3 of the misses are from missbucketing, it is rare ( <10% of the possible matches) that none of the first three matches match.

@@ -13,3 +13,13 @@
 -data.gov
 	-free open data
 -possibly group by bucket to reduce size of large table 
+
+-work on cleansing
+-remove titles
+-add nicknames (before blocking)
+-contract abreviations for companies (before blocking)
+-think about fetures 
+	-word frequency
+	-two names are substitutes
+		-auto vs. automobile
+		-holdings corperation

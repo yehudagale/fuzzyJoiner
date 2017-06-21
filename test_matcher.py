@@ -68,86 +68,42 @@ def create_double_alias_dicts(con, meta):
         word_to_num[row[1]] = serial_num
         serial_num += 1
     return num_to_word, word_to_num
-def fscore(true_items, test_dict, beta):
+def fscore(true_dict, test_dict, beta):
     true_positives = 0.0
     false_positive = 0.0
     false_negative = 0.0
-    not_indexed = 0
     for key in test_dict:
-        if test_key(true_items, test_dict, key):
+        if true_dict[key] == test_dict[key]:
             true_positives += 1
         else:
             false_positive += 1
-    for pair in true_items:
-        if pair[0] not in test_dict:
-            false_negative += 1
-            not_indexed += 1
-        elif pair[1] not in test_dict[pair[0]]:
+    for key in true_dict:
+        if key not in test_dict:
             false_negative +=1
-    print "total names: " + str(len(true_items))
-    print "not indexed: " + str(not_indexed)
-    print "wrongly indexed: " + str(false_negative - not_indexed)
-    print "all false negitives: "  + str(false_negative)
-    print "true positives: " + str(true_positives)
-    print "false positives: " + str(false_positive)
+        elif true_dict[key] != test_dict[key]:
+            false_negative += 1
+    print true_positives
+    print false_positive
+    print false_negative
     temp = ((1 + (beta * beta)) * true_positives)
     return  temp / (temp + false_positive + ((beta * beta) * false_negative))
-def test_key(true_items, test_dict, key):
-    for answer in test_dict[key]:
-        if (key, answer) in true_items:
-            return True
-    return False
-def make_test_dict(items):
-    dictionary = {}
-    for pair in items:
-        if pair[0] in dictionary:
-            if len(dictionary[pair[0]]) < 3:
-                dictionary[pair[0]].append(pair[1])
-        else:
-            dictionary[pair[0]] = [pair[1]]
-    return dictionary
 def get_aliases(con, meta):
-    table = meta.tables['aliases']
-    aliases = con.execute(select([table]))
-    dictionary = set([])
-    for row in aliases:
-        dictionary.add((row[0], row[1]))
-    return dictionary
-def run_test(pre_procces, test):
-    con, meta = connect('yehuda', 'test', 'fuzzyjoin')
-    num_to_word, word_to_num = create_double_alias_dicts(con, meta)
-    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, pre_procces, con, meta)
-    matches = set([])
-    for pair in bucket_list:
-        for name1 in pair[0]:
-            for name2 in pair[1]:
-                if test(name1[1], name2[1]):
-                    matches.add((num_to_word[name1[0]], num_to_word[name2[0]]))
-    return get_aliases(con, meta), matches
-def create_alias_dict(con, meta):
     table = meta.tables['aliases']
     aliases = con.execute(select([table]))
     dictionary = {}
     for row in aliases:
         dictionary[row[0]] = row[1]
     return dictionary
-def get_possible():
+def run_test(function, test):
     con, meta = connect('yehuda', 'test', 'fuzzyjoin')
     num_to_word, word_to_num = create_double_alias_dicts(con, meta)
-    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, lambda x : x, con, meta)
-    aliase_dict = create_alias_dict(con, meta)
-    testing_alias_dict = aliase_dict.copy()
-    original = len(aliase_dict)
-    for bucket_pair in bucket_list:
-        other_bucket = [bucket_pair[1][x][1] for x in range(len(bucket_pair[1]))]
-        for name in bucket_pair[0]:
-            try:
-                if aliase_dict[name[1]] in other_bucket:
-                        del aliase_dict[name[1]]
-            except KeyError:
-                pass
-    return original - len(aliase_dict)
-aliases, matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1)
-print "possible matches: " + str(get_possible())
-aliases, matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)) 
-print fscore(aliases, make_test_dict(matches.union(matches2)), 1)    
+    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, function, con, meta)
+    matches = {}
+    for pair in bucket_list:
+        for name1 in pair[0]:
+            for name2 in pair[1]:
+                if test(name1, name2):
+                    matches[num_to_word[name1[0]]] = num_to_word[name2[0]]
+    return get_aliases(con, meta), matches
+aliases, matches = run_test(lambda x : set(x.split()), lambda name1, name2 : name1[1].issubset(name2[1]) or name2[1].issubset(name1[1]))
+print fscore(aliases, matches, 1)
