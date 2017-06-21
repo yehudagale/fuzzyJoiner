@@ -1,5 +1,6 @@
 #using tutorial https://suhas.org/sqlalchemy-tutorial/
 import sqlalchemy
+from sys import argv
 from sqlalchemy.sql import select
 def connect(user, password, db, host='localhost', port=5432):
     '''Returns a connection and a metadata object'''
@@ -113,8 +114,8 @@ def get_aliases(con, meta):
     for row in aliases:
         dictionary.add((row[0], row[1]))
     return dictionary
-def run_test(pre_procces, test):
-    con, meta = connect('yehuda', 'test', 'fuzzyjoin')
+def run_test(pre_procces, test, args):
+    con, meta = connect(args[1], args[2], args[3])
     num_to_word, word_to_num = create_double_alias_dicts(con, meta)
     bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, pre_procces, con, meta)
     matches = set([])
@@ -131,8 +132,14 @@ def create_alias_dict(con, meta):
     for row in aliases:
         dictionary[row[0]] = row[1]
     return dictionary
-def get_possible():
-    con, meta = connect('yehuda', 'test', 'fuzzyjoin')
+def get_missed(aliases, test_dict):
+    missed = set([])
+    for pair in aliases:
+        if pair[0] not in test_dict or pair[1] not in test_dict[pair[0]]:
+            missed.add(pair)
+    return missed
+def get_possible(args):
+    con, meta = connect(args[1], args[2], args[3])
     num_to_word, word_to_num = create_double_alias_dicts(con, meta)
     bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, lambda x : x, con, meta)
     aliase_dict = create_alias_dict(con, meta)
@@ -147,7 +154,8 @@ def get_possible():
             except KeyError:
                 pass
     return original - len(aliase_dict)
-aliases, matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1)
-print "possible matches: " + str(get_possible())
-aliases, matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)) 
-print fscore(aliases, make_test_dict(matches.union(matches2)), 1)    
+aliases, matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1, argv)
+print "possible matches: " + str(get_possible(argv))
+aliases, matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), argv)
+test_dict = make_test_dict(matches.union(matches2))
+print "fscore: " + str(fscore(aliases, test_dict, 1))    
