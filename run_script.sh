@@ -8,10 +8,15 @@ user=$3
 passsword=$4
 db_name=$5
 new=1
-usage="run_script 1:input_file 2:proccess_method 3:user 4:passsword 5:db_name  [-n:number -s:psql location -p python location -o: don't clean new data]"
+usage=$'Usage: run_script input_file proccess_method user_name passsword db_name [OPTIONS]
+  -n, --number          proccess only this many names
+  -s, --psql            use this location for psql instead of the default
+  -p, --python          use this location for python instead of the default
+  -o, --old             use the names already in the database instead of proccessing new ones
+  -h, --help            display this help and exit'
 number=
 if [ "$1" = "" ]; then
-	echo $usage
+	echo "$usage"
 else
 	shift 5
 	while [ "$1" != "" ]; do
@@ -27,7 +32,7 @@ else
 	        -p | --python )        	shift
 									temp_python=$1
 	]                                ;;
-	        -h | help )             echo $usage
+	        -h | help )             echo "$usage"
 	                                exit 1
 	    esac
 	    shift

@@ -2,6 +2,7 @@
 import sqlalchemy
 from sys import argv
 from sqlalchemy.sql import select
+from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 def connect(user, password, db, host='localhost', port=5432):
     '''Returns a connection and a metadata object'''
     # We connect with the help of the PostgreSQL URL
@@ -138,6 +139,15 @@ def get_missed(aliases, test_dict):
         if pair[0] not in test_dict or pair[1] not in test_dict[pair[0]]:
             missed.add(pair)
     return missed
+def export_missed(aliases, test_dict, con, meta):
+        missed_items = get_missed(aliases, test_dict)
+        execute_pairs = []
+        missed = Table('missed', meta, Column('name1', String), Column('name2', String))
+        zipping_string = ('name1', 'name2')
+        for pair in missed_items:
+            execute_pairs.append(dict(zip(zipping_string, pair)))
+        meta.create_all(con)
+        con.execute(missed.insert(), execute_pairs)
 def get_possible(args):
     con, meta = connect(args[1], args[2], args[3])
     num_to_word, word_to_num = create_double_alias_dicts(con, meta)
@@ -154,8 +164,10 @@ def get_possible(args):
             except KeyError:
                 pass
     return original - len(aliase_dict)
+con, meta = connect(argv[1], argv[2], argv[3])
 aliases, matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1, argv)
 print "possible matches: " + str(get_possible(argv))
 aliases, matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), argv)
 test_dict = make_test_dict(matches.union(matches2))
-print "fscore: " + str(fscore(aliases, test_dict, 1))    
+print "fscore: " + str(fscore(aliases, test_dict, 1))
+export_missed(aliases, test_dict, con, meta)    

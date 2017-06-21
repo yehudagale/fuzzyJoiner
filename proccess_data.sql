@@ -2,13 +2,14 @@
 --used https://stackoverflow.com/questions/8584119/how-to-apply-a-function-to-each-element-of-an-array-column-in-postgres to help learn function synatax
 --used how-to-find-duplicate-records-in-posgresql
 --done to make sure that if the tables already exist they do not interfere
-DROP TABLE aliases;
-DROP TABLE finalTable;
-DROP TABLE matches;
-DROP TABLE tempAliases;
-DROP TABLE match;
-DROP TABLE WORDTABLE1;
-DROP TABLE WORDTABLE2;
+DROP TABLE IF EXISTS aliases;
+DROP TABLE IF EXISTS missed;
+DROP TABLE IF EXISTS finalTable;
+DROP TABLE IF EXISTS matches;
+DROP TABLE IF EXISTS tempAliases;
+DROP TABLE IF EXISTS match;
+DROP TABLE IF EXISTS WORDTABLE1;
+DROP TABLE IF EXISTS WORDTABLE2;
 CREATE TABLE tempAliases(
 	alias1 text NOT NULL,
 	alias2 text NOT NULL
