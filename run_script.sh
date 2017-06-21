@@ -44,7 +44,7 @@ else
 		else
 			$temp_python ./cleanser.py $input_file testout.csv $proccess_method get $number
 		fi
-		$temp_psql $db_name -f ./proccess_data.sql
+		$temp_psql $db_name -U $user -f ./proccess_data.sql
 	fi
 	$temp_python ./matcher.py $user $passsword $db_name
 fi

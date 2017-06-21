@@ -101,12 +101,16 @@ def test_key(true_items, test_dict, key):
     return False
 def make_test_dict(items):
     dictionary = {}
+    overflow = 0
     for pair in items:
         if pair[0] in dictionary:
             if len(dictionary[pair[0]]) < 3:
                 dictionary[pair[0]].append(pair[1])
+            else:
+                overflow += 1
         else:
             dictionary[pair[0]] = [pair[1]]
+    print overflow
     return dictionary
 def get_aliases(con, meta):
     table = meta.tables['aliases']
