@@ -85,7 +85,7 @@ def fscore(true_items, test_dict, beta):
             false_negative += 1
             not_indexed += 1
         elif pair[1] not in test_dict[pair[0]]:
-            false_negative +=1
+            false_negative += 1
     print "total names: " + str(len(true_items))
     print "not indexed: " + str(not_indexed)
     print "wrongly indexed: " + str(false_negative - not_indexed)
@@ -99,18 +99,18 @@ def test_key(true_items, test_dict, key):
         if (key, answer) in true_items:
             return True
     return False
-def make_test_dict(items):
+def make_test_dict(items, k):
     dictionary = {}
     overflow = 0
     for pair in items:
         if pair[0] in dictionary:
-            if len(dictionary[pair[0]]) < 3:
+            if len(dictionary[pair[0]]) < k:
                 dictionary[pair[0]].append(pair[1])
             else:
                 overflow += 1
         else:
             dictionary[pair[0]] = [pair[1]]
-    print overflow
+    print "overflow: "overflow
     return dictionary
 def get_aliases(con, meta):
     table = meta.tables['aliases']
@@ -119,8 +119,7 @@ def get_aliases(con, meta):
     for row in aliases:
         dictionary.add((row[0], row[1]))
     return dictionary
-def run_test(pre_procces, test, args):
-    con, meta = connect(args[1], args[2], args[3])
+def run_test(pre_procces, test, con, meta):
     num_to_word, word_to_num = create_double_alias_dicts(con, meta)
     bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, pre_procces, con, meta)
     matches = set([])
@@ -129,7 +128,7 @@ def run_test(pre_procces, test, args):
             for name2 in pair[1]:
                 if test(name1[1], name2[1]):
                     matches.add((num_to_word[name1[0]], num_to_word[name2[0]]))
-    return get_aliases(con, meta), matches
+    return matches
 def create_alias_dict(con, meta):
     table = meta.tables['aliases']
     aliases = con.execute(select([table]))
@@ -168,10 +167,20 @@ def get_possible(args):
             except KeyError:
                 pass
     return original - len(aliase_dict)
+def run_special_test(con, meta):
+    num_to_word, word_to_num = create_double_alias_dicts(con, meta)
+    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, lambda x : x, con, meta)
+    matches = set([])
+    for pair in bucket_list:
+        if len(pair[0]) == 1 and len(pair[1]) == 1:
+            matches.add((num_to_word[pair[0][0][0]], num_to_word[pair[1][0][0]]))
+    return matches
 con, meta = connect(argv[1], argv[2], argv[3])
-aliases, matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1, argv)
+aliases = get_aliases(con, meta)
+matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1, con, meta)
 print "possible matches: " + str(get_possible(argv))
-aliases, matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), argv)
-test_dict = make_test_dict(matches.union(matches2))
+matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), con, meta)
+matches3 = run_special_test(con, meta)
+test_dict = make_test_dict(matches.union(matches2).union(matches3), 3)
 print "fscore: " + str(fscore(aliases, test_dict, 1))
 export_missed(aliases, test_dict, con, meta)    

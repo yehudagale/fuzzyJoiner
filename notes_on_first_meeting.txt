@@ -23,3 +23,8 @@
 	-two names are substitutes
 		-auto vs. automobile
 		-holdings corperation
+-first deal punctuation
+-block by slamming things together
+-think about less deteriministic mixes
+-remove by frequency count in blocking
+	-binary search
