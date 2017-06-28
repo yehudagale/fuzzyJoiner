@@ -31,7 +31,7 @@ else
 									;;
 	        -p | --python )        	shift
 									temp_python=$1
-	]                                ;;
+	                                ;;
 	        -h | help )             echo "$usage"
 	                                exit 1
 	    esac
