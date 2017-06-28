@@ -110,7 +110,7 @@ def make_test_dict(items, k):
                 overflow += 1
         else:
             dictionary[pair[0]] = [pair[1]]
-    print "overflow: "overflow
+    print "overflow: " + str(overflow)
     return dictionary
 def get_aliases(con, meta):
     table = meta.tables['aliases']
