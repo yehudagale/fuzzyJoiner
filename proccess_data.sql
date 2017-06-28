@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS finalTable;
 DROP TABLE IF EXISTS matches;
 DROP TABLE IF EXISTS tempAliases;
 DROP TABLE IF EXISTS match;
+DROP TABLE IF EXISTS WORDTABLE;
 DROP TABLE IF EXISTS WORDTABLE1;
 DROP TABLE IF EXISTS WORDTABLE2;
 CREATE TABLE tempAliases(
@@ -22,12 +23,15 @@ WITH TMP AS (SELECT replace(replace(replace(replace(alias1, ',', ' '), '-', ' ')
 SELECT lower(alias1) AS alias1, lower(alias2) AS alias2 INTO aliases FROM TMP; 
 WITH TMP1 AS (SELECT alias1 AS name, string_to_array(alias1, ' ') AS words FROM aliases),
 TMP3 AS (SELECT generate_subscripts(words, 1) AS s, words AS words, name AS name FROM TMP1)
-SELECT name, words[s] AS word INTO WORDTABLE1  FROM TMP3 WHERE words[s] <> '' ORDER BY word ASC;
+SELECT name, words[s] AS word INTO WORDTABLE FROM TMP3 WHERE words[s] <> '';
+INSERT INTO wordtable SELECT alias1 AS name, replace(alias1, ' ', '') AS word FROM aliases;
+SELECT *  INTO wordtable1 FROM wordtable ORDER BY word ASC; 
+DROP TABLE wordtable;
 WITH TMP2 AS (SELECT alias2 AS name, string_to_array(alias2, ' ') AS words FROM aliases),
 TMP4 AS (SELECT generate_subscripts(words, 1) AS s, words, name FROM TMP2)
-SELECT name, words[s] AS word INTO WORDTABLE2 FROM TMP4 WHERE words[s] <> '' ORDER BY word ASC;
-INSERT INTO wordtable1 SELECT alias1 AS name, replace(alias1, ' ', '') AS word FROM aliases;
-INSERT INTO wordtable2 SELECT alias2 AS name, replace(alias2, ' ', '') AS word FROM aliases;
+SELECT name, words[s] AS word INTO WORDTABLE FROM TMP4 WHERE words[s] <> '';
+INSERT INTO wordtable SELECT alias2 AS name, replace(alias2, ' ', '') AS word FROM aliases;
+SELECT * INTO wordtable2 FROM wordtable ORDER BY word ASC; 
 --SELECT word, count(*) AS frequency INTO finalTable From TMP7 Group By word ORDER BY frequency DESC;
 --SELECT DISTINCT TMP5.name AS name1, TMP6.name AS name2 INTO finalTable FROM TMP5, TMP6 WHERE TMP5.word = TMP6.word AND TMP5.word <> 'John' AND TMP5.word <> 'of' AND TMP5.word <> 'William';
 --TMP AS (SELECT array_remove(array_remove(string_to_array(TMP5.name, ' '), 'Sir'), 'Jr.') AS array1, TMP5.name AS name1, string_to_array(TMP6.name, ' ') AS array2, TMP6.name AS name2 FROM TMP5, TMP6 

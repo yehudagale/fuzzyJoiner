@@ -28,3 +28,6 @@ all false negitives: 18630.0
 true positives: 17995.0
 false positives: 2563.0
 0.629382858542
+Tue June 28:
+I started to pay attention to the significance of words, in that if a bucket contains only one pair, I automatically pair the two items in it. This is the output for combinig this method with the other two:
+

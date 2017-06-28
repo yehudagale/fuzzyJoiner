@@ -181,6 +181,6 @@ matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in
 print "possible matches: " + str(get_possible(argv))
 matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), con, meta)
 matches3 = run_special_test(con, meta)
-test_dict = make_test_dict(matches.union(matches2).union(matches3), 3)
+test_dict = make_test_dict(matches.union(matches2).union(matches3), 1000)
 print "fscore: " + str(fscore(aliases, test_dict, 1))
 export_missed(aliases, test_dict, con, meta)    
