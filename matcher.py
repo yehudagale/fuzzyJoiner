@@ -18,12 +18,12 @@ def connect(user, password, db, host='localhost', port=5432):
 
     return con, meta
 
-def load_good_buckets(table_string1, table_string2, dictionary, function, con, meta):
+def load_good_buckets(table_string1, table_string2, dictionary, con, meta):
     table = meta.tables[table_string1]
     words1 = [list(row) for row in con.execute(select([table]))]
     table = meta.tables[table_string2]
     words2 = [list(row) for row in con.execute(select([table]))]
-    word_list = []
+    buckets = []
     bucket_words = []
     temp_list1 = []
     temp_list2 = []
@@ -36,10 +36,10 @@ def load_good_buckets(table_string1, table_string2, dictionary, function, con, m
             y = find_next_bucket(words2, y)
         else:
             bucket_words.append(words1[x][1])
-            temp_list1, x = load_bucket(words1, x, dictionary, function)
-            temp_list2, y = load_bucket(words2, y, dictionary, function)
-            word_list.append([temp_list1, temp_list2])
-    return word_list, bucket_words
+            temp_list1, x = load_bucket(words1, x, dictionary)
+            temp_list2, y = load_bucket(words2, y, dictionary)
+            buckets.append([temp_list1, temp_list2])
+    return buckets, bucket_words
 def find_next_bucket(table, position):
     prev_word = table[position][1]
     while position < len(table):
@@ -47,28 +47,24 @@ def find_next_bucket(table, position):
             return position
         position += 1
     return None
-def load_bucket(table, position, dictionary, function):
+def load_bucket(table, position, dictionary):
     bucket = []
     prev_word = table[position][1]
     while position < len(table):
         if table[position][1] != prev_word:
             return (bucket, position)
-        bucket.append([dictionary[table[position][0]], function(table[position][0])])
+        bucket.append([dictionary[table[position][0]], table[position][0]])
         position += 1
-    return [], None
-def create_double_alias_dicts(con, meta):
-    table = meta.tables['aliases']
-    aliases = con.execute(select([table]))
+    return bucket, None
+def create_double_num_dicts(aliases):
     serial_num = 0
     num_to_word = {}
     word_to_num = {}
-    for row in aliases:
-        num_to_word[serial_num] = row[0]
-        word_to_num[row[0]] = serial_num
-        serial_num += 1
-        num_to_word[serial_num] = row[1]
-        word_to_num[row[1]] = serial_num
-        serial_num += 1
+    for pair in aliases:
+        for name in pair:
+            num_to_word[serial_num] = name
+            word_to_num[name] = serial_num
+            serial_num += 1
     return num_to_word, word_to_num
 def fscore(true_items, test_dict, beta):
     true_positives = 0.0
@@ -119,9 +115,8 @@ def get_aliases(con, meta):
     for row in aliases:
         dictionary.add((row[0], row[1]))
     return dictionary
-def run_test(pre_procces, test, con, meta):
-    num_to_word, word_to_num = create_double_alias_dicts(con, meta)
-    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, pre_procces, con, meta)
+def run_test(pre_procces, test, num_to_word, bucket_list):
+    bucket_list = pre_proccess_words(num_to_word, bucket_list, pre_procces)
     matches = set([])
     for pair in bucket_list:
         for name1 in pair[0]:
@@ -142,45 +137,86 @@ def get_missed(aliases, test_dict):
         if pair[0] not in test_dict or pair[1] not in test_dict[pair[0]]:
             missed.add(pair)
     return missed
+def export_unbucketed(impossible, con, meta):
+    execute_pairs = []
+    if 'unbucketed' in meta.tables:
+        meta.tables['unbucketed'].drop(con)
+    unbucketed = Table('unbucketed', meta, Column('name1', String), Column('name2', String), extend_existing=True)
+    zipping_string = ('name1', 'name2')
+    for key in impossible:
+        for name in impossible[key]:
+            execute_pairs.append(dict(zip(zipping_string, (key, name))))
+    meta.create_all(con)
+    con.execute(unbucketed.insert(), execute_pairs)
 def export_missed(aliases, test_dict, con, meta):
         missed_items = get_missed(aliases, test_dict)
         execute_pairs = []
-        missed = Table('missed', meta, Column('name1', String), Column('name2', String))
+        if 'missed' in meta.tables:
+            meta.tables['missed'].drop(con)
+        missed = Table('missed', meta, Column('name1', String), Column('name2', String), extend_existing=True)
         zipping_string = ('name1', 'name2')
         for pair in missed_items:
             execute_pairs.append(dict(zip(zipping_string, pair)))
         meta.create_all(con)
         con.execute(missed.insert(), execute_pairs)
-def get_possible(args):
-    con, meta = connect(args[1], args[2], args[3])
-    num_to_word, word_to_num = create_double_alias_dicts(con, meta)
-    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, lambda x : x, con, meta)
-    aliase_dict = create_alias_dict(con, meta)
-    testing_alias_dict = aliase_dict.copy()
-    original = len(aliase_dict)
+def get_impossible(aliases, bucket_list, num_to_word):
+    testing_dict = {}
+    for pair in aliases:
+        if pair[0] in testing_dict:
+            testing_dict[pair[0]].append(pair[1])
+        else:
+            testing_dict[pair[0]] = [pair[1]]
+    bucket_list = pre_proccess_words(num_to_word, bucket_list, lambda x : x)
     for bucket_pair in bucket_list:
-        other_bucket = [bucket_pair[1][x][1] for x in range(len(bucket_pair[1]))]
+        other_bucket = set([bucket_pair[1][x][1] for x in range(len(bucket_pair[1]))])
         for name in bucket_pair[0]:
-            try:
-                if aliase_dict[name[1]] in other_bucket:
-                        del aliase_dict[name[1]]
-            except KeyError:
-                pass
-    return original - len(aliase_dict)
-def run_special_test(con, meta):
-    num_to_word, word_to_num = create_double_alias_dicts(con, meta)
-    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, lambda x : x, con, meta)
+            other_name = 0
+            while other_name < len(testing_dict[name[1]]):
+                try:
+                    if testing_dict[name[1]][other_name] in other_bucket:
+                            testing_dict[name[1]].pop(other_name)
+                except ValueError:
+                    pass
+                other_name += 1
+    for key in testing_dict.copy():
+        if not testing_dict[key]:
+            del testing_dict[key]
+    return testing_dict
+def pre_proccess_words(num_to_word, bucket_list, function):
+    for pair in bucket_list:
+        for bucket in pair:
+            for name in bucket:
+                name[1] = function(num_to_word[name[0]])
+    return bucket_list
+def run_special_test(bucket_list, num_to_word):
     matches = set([])
     for pair in bucket_list:
         if len(pair[0]) == 1 and len(pair[1]) == 1:
             matches.add((num_to_word[pair[0][0][0]], num_to_word[pair[1][0][0]]))
     return matches
+#establish connection to database
 con, meta = connect(argv[1], argv[2], argv[3])
+#load pairs from database
 aliases = get_aliases(con, meta)
-matches = run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1, con, meta)
-print "possible matches: " + str(get_possible(argv))
-matches2 = run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), con, meta)
-matches3 = run_special_test(con, meta)
-test_dict = make_test_dict(matches.union(matches2).union(matches3), 1000)
+#create dictionaries assingning serial numbers to names and names from serial numbers
+num_to_word, word_to_num = create_double_num_dicts(aliases)
+#load the buckets from the database bucket_list is aranges as follows:
+#bucket_list[pair_of_buckets][bucket(this must be 0 or 1)][name (this represents a single name)][0 for number and 1 for pre-procced name]
+bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, con, meta)
+#print out the number of names that are possible to get just based on bucketing:
+impossible = get_impossible(aliases, bucket_list, num_to_word)
+print "possible matches: " + str(len(aliases) - len(impossible))
+#next make a list to store the outcomes of all our tests:
+matches_list = []
+#then run our tests
+matches_list.append(run_test(lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1, num_to_word, bucket_list))
+matches_list.append(run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), num_to_word, bucket_list))
+matches_list.append(run_special_test(bucket_list, num_to_word))
+#next create a test dictionary relating each item in the first set to k items in other set
+test_dict = make_test_dict(set([]).union(*matches_list), 1000)
+#use this dictionary to calculate and print the f-score
 print "fscore: " + str(fscore(aliases, test_dict, 1))
-export_missed(aliases, test_dict, con, meta)    
+#next export the items we missed
+export_missed(aliases, test_dict, con, meta)
+#lastly export the items we could not have gotten since they were not in the same bucket:
+export_unbucketed(impossible, con, meta)

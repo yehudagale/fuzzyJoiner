@@ -28,3 +28,10 @@
 -think about less deteriministic mixes
 -remove by frequency count in blocking
 	-binary search
+
+-clean up the code
+-look up some nlps for udfs (nltk)
+-misses from blocking
+-throw out big buckets
+-open corperate
+-try to understand why I am throwing out so many names

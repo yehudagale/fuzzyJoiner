@@ -84,7 +84,7 @@ class data_cleanser(object):
 		#test_file.write(dataToCleanse)
 		return ""
 	#parses input file and writes an output
-	def parse_file(self,input_file, output_file, parsing_function):
+	def parse_file(self,input_file, output_file, parsing_function, output_rejects_file):
 		lines = input_file.readlines()
 		for line in lines:
 			newline = self.cleanseData(line, parsing_function)
@@ -100,6 +100,9 @@ class data_cleanser(object):
 				else:
 					output_file.write(newline)
 					output_file.write('\n')
+			else:
+				output_rejects_file.write(line)
+				output_rejects_file.write('\n')
 		if self.get:
 			print "ran out of names, procced as many as where available"
 
@@ -117,7 +120,9 @@ class data_cleanser(object):
 					self.get = True
 			input_file = open(args[1])
 			output_file = open(args[2], "w")
-			self.parse_file(input_file, output_file, parsing_function)
+			output_rejects_file = open('./rejects.txt', 'w')
+			self.parse_file(input_file, output_file, parsing_function, output_rejects_file)
+			output_rejects_file.close()
 			input_file.close()
 			#test_file.close();
 			output_file.close()
