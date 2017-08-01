@@ -327,6 +327,7 @@ def create_base_network(input_dim, embedding_layer):
     seq = Sequential()
 
     seq.add(embedding_layer)
+    seq.add(Flatten())
     seq.add(Dense(128, input_shape=(input_dim,), activation='relu'))
     seq.add(Dropout(0.1))
     seq.add(Dense(128, activation='relu'))
@@ -345,7 +346,7 @@ def compute_accuracy(predictions, labels):
 #need to change this not sure how
 
 input_dim = MAX_SEQUENCE_LENGTH
-epochs = 1
+epochs = 20
 
 # create training+test positive and negative pairs
 # these next lines also need to change
@@ -382,6 +383,8 @@ model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
 
 # compute final accuracy on training and test sets
 pred = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
+print (len(pred))
+print (pred[0])
 tr_acc = compute_accuracy(pred, tr_y)
 pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 te_acc = compute_accuracy(pred, te_y)
