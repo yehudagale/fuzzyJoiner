@@ -66,21 +66,6 @@ MAX_SEQUENCE_LENGTH = 10
 
 
 
-# hack to check if the label is english
-
-def is_english(data):
-
-    try:
-
-        data.encode('utf-8')
-
-    except UnicodeDecodeError:
-
-        return False
-
-    return True
-
-
 
 # Total number of unique tokens in peoples names is 90K, including a lot of non-English names.  To remove those
 
@@ -289,9 +274,9 @@ print('Training model.')
 
 # train a 1D convnet with global maxpooling
 
-sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
-
-embedded_sequences = embedding_layer(sequence_input)
+#sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+#need two of these
+#embedded_sequences = embedding_layer(sequence_input)
 
 
 def euclidean_distance(vects):
@@ -312,30 +297,36 @@ def contrastive_loss(y_true, y_pred):
     return K.mean(y_true * K.square(y_pred) +
                   (1 - y_true) * K.square(K.maximum(margin - y_pred, 0)))
 
-#rewrite
-def create_pairs(x, digit_indices):
+#for now will take any bad pairs, will take only relivent ones later
+def create_pairs(x, y):
     '''Positive and negative pair creation.
     Alternates between positive and negative pairs.
     '''
     pairs = []
     labels = []
-    n = min([len(digit_indices[d]) for d in range(10)]) - 1
-    for d in range(10):
-        for i in range(n):
-            z1, z2 = digit_indices[d][i], digit_indices[d][i + 1]
-            pairs += [[x[z1], x[z2]]]
-            inc = random.randrange(1, 10)
-            dn = (d + inc) % 10
-            z1, z2 = digit_indices[d][i], digit_indices[dn][i]
-            pairs += [[x[z1], x[z2]]]
-            labels += [1, 0]
+    for index in range(len(x)):
+        pairs += [[x[index], y[index]]]
+        pairs += [[x[index], y[(index + 1) % len(x)]]]
+        labels += [1, 0]
+    # n = min([len(digit_indices[d]) for d in range(10)]) - 1
+    # for d in range(10):
+    #     for i in range(n):
+    #         z1, z2 = digit_indices[d][i], digit_indices[d][i + 1]
+    #         pairs += [[x[z1], x[z2]]]
+    #         inc = random.randrange(1, 10)
+    #         dn = (d + inc) % 10
+    #         z1, z2 = digit_indices[d][i], digit_indices[dn][i]
+    #         pairs += [[x[z1], x[z2]]]
+    #         labels += [1, 0]
     return np.array(pairs), np.array(labels)
 
 
-def create_base_network(input_dim):
+def create_base_network(input_dim, embedding_layer):
     '''Base network to be shared (eq. to feature extraction).
     '''
     seq = Sequential()
+
+    seq.add(embedding_layer)
     seq.add(Dense(128, input_shape=(input_dim,), activation='relu'))
     seq.add(Dropout(0.1))
     seq.add(Dense(128, activation='relu'))
@@ -352,26 +343,20 @@ def compute_accuracy(predictions, labels):
 
 # the data, shuffled and split between train and test sets
 #need to change this not sure how
-x_train = x_train.reshape(60000, 784)
-x_test = x_test.reshape(10000, 784)
-x_train = x_train.astype('float32')
-x_test = x_test.astype('float32')
-x_train /= 255
-x_test /= 255
 
-input_dim = 784
-epochs = 20
+input_dim = MAX_SEQUENCE_LENGTH
+epochs = 1
 
 # create training+test positive and negative pairs
 # these next lines also need to change
-digit_indices = [np.where(y_train == i)[0] for i in range(10)]
-tr_pairs, tr_y = create_pairs(x_train, digit_indices)
+#digit_indices = [np.where(y_train == i)[0] for i in range(10)]
+tr_pairs, tr_y = create_pairs(x_train, y_train)
 
-digit_indices = [np.where(y_test == i)[0] for i in range(10)]
-te_pairs, te_y = create_pairs(x_test, digit_indices)
-
+#digit_indices = [np.where(y_test == i)[0] for i in range(10)]
+te_pairs, te_y = create_pairs(x_test, y_test)
+print (len(tr_y))
 # network definition
-base_network = create_base_network(input_dim)
+base_network = create_base_network(input_dim, embedding_layer)
 
 input_a = Input(shape=(input_dim,))
 input_b = Input(shape=(input_dim,))
