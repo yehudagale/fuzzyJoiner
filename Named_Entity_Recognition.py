@@ -341,7 +341,27 @@ def compute_accuracy(predictions, labels):
     '''
     return labels[predictions.ravel() < 0.5].mean()
 
-
+def f1score(predictions, labels):
+    #labels[predictions.ravel() < 0.5].sum()
+    predictions = predictions.ravel()
+    fsocre = 0.0
+    true_positive = 0.0
+    false_positive = 0
+    false_negitive = 0
+    for i in range(len(labels)):
+        if predictions[i] < 0.5:
+            if labels[i] == 1:
+                true_positive += 1
+            else:
+                false_positive += 1
+        elif labels[i] == 1:
+            false_negitive += 1
+    print('tp' + str(true_positive))
+    print('fp' + str(false_positive))
+    print('fn' + str(false_negitive))
+    fscore = (2 * true_positive) / ((2 * true_positive) + false_negitive + false_positive)
+    print (fscore)
+    return fscore 
 # the data, shuffled and split between train and test sets
 #need to change this not sure how
 
@@ -388,13 +408,16 @@ model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
 # matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
 pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
 tr_acc = compute_accuracy(pred_learning, tr_y)
+tr_f1 = f1score(pred_learning, tr_y)
 pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
+te_f1 = f1score(pred, te_y)
 print(tr_acc)
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
-
+print('* f1score on the training set: %0.4f%%' % (tr_f1))
+print('* f1socre on test set: %0.4f%%' % (te_f1))
 #compute accuracy using a rule based matcher
 def sequence_to_word(sequence, reverse_word_index):
     return " ".join([reverse_word_index[x] for x in sequence if x in reverse_word_index])
@@ -412,11 +435,15 @@ matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
 
 pred_rules = np.asarray([int(not matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in tr_pairs])
 tr_acc = compute_accuracy(pred_rules, tr_y)
+tr_f1 = f1score(pred_rules, tr_y)
 pred = np.asarray([int(not matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in te_pairs])
 pred_rules = np.append(pred_rules, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
+te_f1 = f1score(pred, te_y)
 print('* Accuracy on training set (rules): %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set (rules): %0.2f%%' % (100 * te_acc))
+print('* f1score on the training set: %0.4f%%' % (tr_f1))
+print('* f1socre on test set: %0.4f%%' % (te_f1))
 con, meta = connect(argv[1], argv[2], argv[3])
 execute_pairs = []
 if 'predictions' in meta.tables:
