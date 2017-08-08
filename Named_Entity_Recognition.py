@@ -366,7 +366,7 @@ def f1score(predictions, labels):
 #need to change this not sure how
 
 input_dim = MAX_SEQUENCE_LENGTH
-epochs = 1
+epochs = 5
 
 # create training+test positive and negative pairs
 # these next lines also need to change
@@ -416,8 +416,8 @@ te_f1 = f1score(pred, te_y)
 print(tr_acc)
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
-print('* f1score on the training set: %0.4f%%' % (tr_f1))
-print('* f1socre on test set: %0.4f%%' % (te_f1))
+print('* f1score on the training set: %0.4f' % (tr_f1))
+print('* f1socre on test set: %0.4f' % (te_f1))
 #compute accuracy using a rule based matcher
 def sequence_to_word(sequence, reverse_word_index):
     return " ".join([reverse_word_index[x] for x in sequence if x in reverse_word_index])
@@ -442,8 +442,8 @@ te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
 print('* Accuracy on training set (rules): %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set (rules): %0.2f%%' % (100 * te_acc))
-print('* f1score on the training set: %0.4f%%' % (tr_f1))
-print('* f1socre on test set: %0.4f%%' % (te_f1))
+print('* f1score on the training set: %0.4f' % (tr_f1))
+print('* f1socre on test set: %0.4f' % (te_f1))
 con, meta = connect(argv[1], argv[2], argv[3])
 execute_pairs = []
 if 'predictions' in meta.tables:
