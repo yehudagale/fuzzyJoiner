@@ -421,10 +421,19 @@ con, meta = connect(argv[1], argv[2], argv[3])
 execute_pairs = []
 if 'predictions' in meta.tables:
     meta.tables['predictions'].drop(con)
-predictions = Table('predictions', meta, Column('name1', String), Column('name2', String), Column('rule_predict', Integer), Column('learning_predict', Float), Column('true_pair', Integer), extend_existing=True)
-zipping_string = ('name1', 'name2', 'true_pair', 'rule_predict', 'learning_predict')
+predictions = Table('predictions', meta, Column('name1', String), Column('name2', String), Column('rule_predict', Integer), Column('learning_predict', Float), Column('true_pair', Integer), Column('te_or_tr', String), extend_existing=True)
+zipping_string = ('name1', 'name2', 'true_pair', 'rule_predict', 'learning_predict', 'te_or_tr')
+print(len(tr_y))
+print(len(tr_pairs))
+print(len(pred_rules))
+print(len(pred_learning))
+print(len(te_y))
+print(len(te_pairs))
 for i in range(len(tr_y)):
-    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), tr_y[i], pred_rules[i], pred_learning[i][0].item()))))
+    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), tr_y[i], pred_rules[i], pred_learning[i][0].item(), 'tr'))))
+offset = len(tr_y)
+for i in range(len(te_y)):
+    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), te_y[i], pred_rules[offset + i], pred_learning[offset + i][0].item(), 'te'))))
 meta.create_all(con)
 con.execute(predictions.insert(), execute_pairs)
 
