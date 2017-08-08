@@ -11,13 +11,12 @@ for our own purposes
 from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
-
-
-
+from matcher_functions import connect
+from matcher_class import matcher
 import os
-
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, Float
 import sys
-
+from sys import argv
 import numpy as np
 
 import random
@@ -40,7 +39,7 @@ from keras import backend as K
 
 
 
-BASE_DIR = './'
+BASE_DIR = './Machine_Learning/'
 
 # directory containing glove encodings from Wikipedia (we can swap this out for another encoding later)
 
@@ -184,7 +183,6 @@ tokenizer.fit_on_texts(texts1 + texts2)
 sequences1 = tokenizer.texts_to_sequences(texts1)
 sequences2 = tokenizer.texts_to_sequences(texts2)
 
-
 word_index = tokenizer.word_index
 
 print('Found %s unique tokens.' % len(word_index))
@@ -193,8 +191,10 @@ print('Found %s unique tokens.' % len(word_index))
 
 data1 = pad_sequences(sequences1, maxlen=MAX_SEQUENCE_LENGTH)
 data2 = pad_sequences(sequences2, maxlen=MAX_SEQUENCE_LENGTH)
-
-
+print (data1[0])
+print (data2[0])
+print (texts1[0])
+print (texts2[0])
 #labels = to_categorical(np.asarray(labels))
 
 print('Shape of data1 tensor:', data1.shape)
@@ -233,7 +233,8 @@ print('Preparing embedding matrix.')
 
 # prepare embedding matrix
 
-num_words = min(MAX_NB_WORDS, len(word_index) - 1)
+num_words = min(MAX_NB_WORDS, len(word_index))
+num_words = MAX_NB_WORDS
 embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
 print (embedding_matrix)
 for word, i in word_index.items():
@@ -325,7 +326,6 @@ def create_base_network(input_dim, embedding_layer):
     '''Base network to be shared (eq. to feature extraction).
     '''
     seq = Sequential()
-
     seq.add(embedding_layer)
     seq.add(Flatten())
     seq.add(Dense(128, input_shape=(input_dim,), activation='relu'))
@@ -346,7 +346,7 @@ def compute_accuracy(predictions, labels):
 #need to change this not sure how
 
 input_dim = MAX_SEQUENCE_LENGTH
-epochs = 20
+epochs = 1
 
 # create training+test positive and negative pairs
 # these next lines also need to change
@@ -375,21 +375,56 @@ model = Model([input_a, input_b], distance)
 
 # train
 rms = RMSprop()
+#change the optimizer (adam)
 model.compile(loss=contrastive_loss, optimizer=rms)
 model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
           batch_size=128,
           epochs=epochs,
           validation_data=([te_pairs[:, 0], te_pairs[:, 1]], te_y))
-
 # compute final accuracy on training and test sets
-pred = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
-print (len(pred))
-print (pred[0])
-tr_acc = compute_accuracy(pred, tr_y)
+#add an LSTM layer (later)
+# test_pairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
+#  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
+# matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
+pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
+tr_acc = compute_accuracy(pred_learning, tr_y)
 pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
+pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
 
+#compute accuracy using a rule based matcher
+def sequence_to_word(sequence, reverse_word_index):
+    return " ".join([reverse_word_index[x] for x in sequence if x in reverse_word_index])
+def sequence_pair_to_word_pair(sequence_pair, reverse_word_index):
+    return [sequence_to_word(sequence_pair[0], reverse_word_index), sequence_to_word(sequence_pair[1], reverse_word_index)]
+reverse_word_index = {v: k for k, v in tokenizer.word_index.iteritems()}
+print(tr_pairs)
+print(sequence_to_word(tr_pairs[0][0], reverse_word_index))
+print(sequence_to_word(tr_pairs[0][1], reverse_word_index))
+print(tr_y[0])
+
+test_pairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
+ [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
+matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
+
+pred_rules = np.asarray([int(matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in tr_pairs])
+tr_acc = compute_accuracy(pred_rules, tr_y)
+pred = np.asarray([int(matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in te_pairs])
+pred_rules = np.append(pred_rules, pred, axis=0)
+te_acc = compute_accuracy(pred, te_y)
+print('* Accuracy on training set (rules): %0.2f%%' % (100 * tr_acc))
+print('* Accuracy on test set (rules): %0.2f%%' % (100 * te_acc))
+con, meta = connect(argv[1], argv[2], argv[3])
+execute_pairs = []
+if 'predictions' in meta.tables:
+    meta.tables['predictions'].drop(con)
+predictions = Table('predictions', meta, Column('name1', String), Column('name2', String), Column('rule_predict', Integer), Column('learning_predict', Float), Column('true_pair', Integer), extend_existing=True)
+zipping_string = ('name1', 'name2', 'true_pair', 'rule_predict', 'learning_predict')
+for i in range(len(tr_y)):
+    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), tr_y[i], pred_rules[i], pred_learning[i][0].item()))))
+meta.create_all(con)
+con.execute(predictions.insert(), execute_pairs)
 
