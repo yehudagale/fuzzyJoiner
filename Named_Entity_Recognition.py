@@ -11,7 +11,7 @@ for our own purposes
 from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
-from matcher_functions import connect
+from matcher_functions import connect, get_aliases, load_good_buckets, create_double_num_dicts 
 from matcher_class import matcher
 import os
 from sqlalchemy import Table, Column, Integer, String, ForeignKey, Float
@@ -152,19 +152,53 @@ else:
     f = open(fpath, encoding='latin-1')
 
 
+#change to get from sql and not read from file
+con, meta = connect(argv[1], argv[2], argv[3])
+#load pairs from database
+aliases = get_aliases(con, meta)
+for pair in aliases:
 
-for t in f.readlines():
-
-    num_tokens = len(t.strip().split(' '))
+    num_tokens = len(pair[0].strip().split(' ')) + len(pair[1].strip().split(' '))
 
     if 0 < num_tokens < MAX_SEQUENCE_LENGTH:
-        split_text = t.split('|')
 
-        texts1.append(split_text[0])
+        texts1.append(pair[0])
 
-        texts2.append(split_text[1])
+        texts2.append(pair[1])
 
 f.close()
+#this returns a new set of texts to use as similar non-matches for texts1
+def get_no_match_texts(argv, texts1):
+    def get_non_match(name1, bucket_words, matching_set):
+        for word in name1.split(" "):
+            if word in bucket_words:
+                bucket = bucket_words[word]
+            else:
+                print(word)
+                return None
+            if len(bucket[1]) > 1:
+                for name2 in bucket[1]:
+                    if (name1, name2[1]) not in matching_set:
+                        return name2[1]
+        return None
+    no_match_texts = []
+    #this should not be done here and needs to be fixed up before more work is done
+    #it should instead be done by a singel function in matcher_functions
+    #establish connection to database
+    con, meta = connect(argv[1], argv[2], argv[3])
+    #load pairs from database
+    aliases = get_aliases(con, meta)
+    #create dictionaries assingning serial numbers to names and names from serial numbers
+    num_to_word, word_to_num = create_double_num_dicts(aliases)
+    #load the buckets from the database bucket_list is aranges as follows:
+    #bucket_list[pair_of_buckets][bucket(this must be 0 or 1)][name (this represents a single name)][0 for number and 1 for pre-procced name]
+    bucket_list, bucket_words = load_good_buckets('wordtable1', 'wordtable2', word_to_num, con, meta)
+    for index in range(len(texts1)):
+        new_text = get_non_match(texts1[index], bucket_words, aliases)
+        if new_text == None:
+            new_text = texts1[(index + 1) % len(texts1)]
+        no_match_texts.append(new_text)
+    return no_match_texts
 
 
 
@@ -175,14 +209,20 @@ print('Found %s texts.' % len(texts1))
 # finally, vectorize the text samples into a 2D integer tensor
 
 tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
+#gets the special no match charectars
+texts3 = get_no_match_texts(argv, texts1)
 
-tokenizer.fit_on_texts(texts1 + texts2)
+#this removes all non-ascii charectars from the 3 sets of strings
+texts1 = [str(item) for item in texts1]
+texts2 = [str(item) for item in texts2]
+texts3 = [str(item) for item in texts3]
 
+tokenizer.fit_on_texts(texts1 + texts2 + texts3)
+#this step should get similar but non-matching items to keep for later matching
 # this step creates a sequence of words ids for each word in each label
-
 sequences1 = tokenizer.texts_to_sequences(texts1)
 sequences2 = tokenizer.texts_to_sequences(texts2)
-
+no_match_sequences = tokenizer.texts_to_sequences(texts3)
 word_index = tokenizer.word_index
 
 print('Found %s unique tokens.' % len(word_index))
@@ -191,6 +231,7 @@ print('Found %s unique tokens.' % len(word_index))
 
 data1 = pad_sequences(sequences1, maxlen=MAX_SEQUENCE_LENGTH)
 data2 = pad_sequences(sequences2, maxlen=MAX_SEQUENCE_LENGTH)
+no_match_data = pad_sequences(no_match_sequences, maxlen=MAX_SEQUENCE_LENGTH)
 print (data1[0])
 print (data2[0])
 print (texts1[0])
@@ -213,6 +254,8 @@ data1 = data1[indices]
 
 data2 = data2[indices]
 
+no_match_data = no_match_data[indices]
+
 num_validation_samples = int(VALIDATION_SPLIT * data1.shape[0])
 
 
@@ -221,11 +264,13 @@ x_train = data1[:-num_validation_samples]
 
 y_train = data2[:-num_validation_samples]
 
+z_train = no_match_data[:-num_validation_samples]
+
 x_test = data1[-num_validation_samples:]
 
 y_test = data2[-num_validation_samples:]
 
-
+z_test = no_match_data[-num_validation_samples:]
 
 print('Preparing embedding matrix.')
 
@@ -299,7 +344,7 @@ def contrastive_loss(y_true, y_pred):
                   (1 - y_true) * K.square(K.maximum(margin - y_pred, 0)))
 
 #for now will take any bad pairs, will take only relivent ones later
-def create_pairs(x, y):
+def create_pairs(x, y, z):
     '''Positive and negative pair creation.
     Alternates between positive and negative pairs.
     '''
@@ -307,7 +352,7 @@ def create_pairs(x, y):
     labels = []
     for index in range(len(x)):
         pairs += [[x[index], y[index]]]
-        pairs += [[x[index], y[(index + 1) % len(x)]]]
+        pairs += [[x[index], z[index]]]
         labels += [1, 0]
     # n = min([len(digit_indices[d]) for d in range(10)]) - 1
     # for d in range(10):
@@ -366,15 +411,15 @@ def f1score(predictions, labels):
 #need to change this not sure how
 
 input_dim = MAX_SEQUENCE_LENGTH
-epochs = 5
+epochs = 20
 
 # create training+test positive and negative pairs
 # these next lines also need to change
 #digit_indices = [np.where(y_train == i)[0] for i in range(10)]
-tr_pairs, tr_y = create_pairs(x_train, y_train)
+tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
 
 #digit_indices = [np.where(y_test == i)[0] for i in range(10)]
-te_pairs, te_y = create_pairs(x_test, y_test)
+te_pairs, te_y = create_pairs(x_test, y_test, z_test)
 print (len(tr_y))
 # network definition
 base_network = create_base_network(input_dim, embedding_layer)

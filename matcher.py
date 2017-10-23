@@ -20,7 +20,7 @@ matches_list.append(run_test(lambda x : x.replace(" ", ""), lambda name1, name2 
 matches_list.append(run_test(lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1), num_to_word, bucket_list))
 matches_list.append(run_special_test(bucket_list, num_to_word))
 #next create a test dictionary relating each item in the first set to k items in other set
-test_dict = make_test_dict(set([]).union(*matches_list), 1000)
+test_dict = make_test_dict(set([]).union(*matches_list), 3)
 #use this dictionary to calculate and print the f-score
 print "fscore: " + str(fscore(aliases, test_dict, 1))
 #next export the items we missed

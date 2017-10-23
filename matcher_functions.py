@@ -15,7 +15,9 @@ def connect(user, password, db, host='localhost', port=5432):
     meta = sqlalchemy.MetaData(bind=con, reflect=True)
 
     return con, meta
-
+#this should combine several functions and return alisases and bucket lists.
+def condensed_start():
+    pass
 def load_good_buckets(table_string1, table_string2, dictionary, con, meta):
     table = meta.tables[table_string1]
     words1 = [list(row) for row in con.execute(select([table]))]
