@@ -174,7 +174,6 @@ def get_no_match_texts(argv, texts1):
             if word in bucket_words:
                 bucket = bucket_words[word]
             else:
-                print(word)
                 return None
             if len(bucket[1]) > 1:
                 for name2 in bucket[1]:
