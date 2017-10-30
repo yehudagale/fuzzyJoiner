@@ -410,7 +410,7 @@ def f1score(predictions, labels):
 #need to change this not sure how
 
 input_dim = MAX_SEQUENCE_LENGTH
-epochs = 20
+epochs = 10
 
 # create training+test positive and negative pairs
 # these next lines also need to change
