@@ -18,7 +18,7 @@ from sqlalchemy import Table, Column, Integer, String, ForeignKey, Float
 import sys
 from sys import argv
 import numpy as np
-
+from embeddings import KazumaCharEmbedding
 import random
 
 from keras.preprocessing.text import Tokenizer
@@ -92,29 +92,29 @@ VALIDATION_SPLIT = 0.2
 
 # words in Glove and then their embeddings which should be a 100 sized array of floats
 
-print('Reading word embeddings: Indexing word vectors.')
+# print('Reading word embeddings: Indexing word vectors.')
 
 
 
-embeddings_index = {}
+# embeddings_index = {}
 
-f = open(os.path.join(GLOVE_DIR, 'glove.6B.100d.txt'))
+# f = open(os.path.join(GLOVE_DIR, 'glove.6B.100d.txt'))
 
-for line in f:
+# for line in f:
 
-    values = line.split()
+#     values = line.split()
 
-    word = values[0]
+#     word = values[0]
 
-    coefs = np.asarray(values[1:], dtype='float32')
+#     coefs = np.asarray(values[1:], dtype='float32')
 
-    embeddings_index[word] = coefs
+#     embeddings_index[word] = coefs
 
-f.close()
+# f.close()
 
 
 
-print('Found %s word vectors.' % len(embeddings_index))
+# print('Found %s word vectors.' % len(embeddings_index))
 
 
 
@@ -280,6 +280,8 @@ print('Preparing embedding matrix.')
 num_words = min(MAX_NB_WORDS, len(word_index))
 num_words = MAX_NB_WORDS
 embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
+k = KazumaCharEmbedding()
+
 print (embedding_matrix)
 for word, i in word_index.items():
 
@@ -287,7 +289,7 @@ for word, i in word_index.items():
 
         continue
 
-    embedding_vector = embeddings_index.get(word)
+    embedding_vector = k.emb(word)
 
     if embedding_vector is not None:
 
