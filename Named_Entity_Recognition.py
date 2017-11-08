@@ -288,7 +288,7 @@ for word, i in word_index.items():
     if i >= MAX_NB_WORDS:
 
         continue
-
+    print(word)                                                 
     embedding_vector = k.emb(word)
 
     if embedding_vector is not None:
