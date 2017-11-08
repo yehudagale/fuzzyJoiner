@@ -107,7 +107,7 @@ class data_cleanser(object):
 				output_rejects_file.write(line)
 				output_rejects_file.write('\n')
 		if self.get:
-			print "ran out of names, procced as many as were available"
+			print ("ran out of names, procced as many as were available")
 
 
 	def clean_file(self, args):
@@ -133,6 +133,6 @@ class data_cleanser(object):
 			#test_file.close();
 			output_file.close()
 		else:
-			print "too few arguments please enter arguments in the following format: input_file output_file [function [get x OR test x]]"
+			print ("too few arguments please enter arguments in the following format: input_file output_file [function [get x OR test x]]")
 cleaner = data_cleanser()
 cleaner.clean_file(argv)

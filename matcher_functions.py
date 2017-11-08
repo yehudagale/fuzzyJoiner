@@ -84,14 +84,14 @@ def fscore(true_items, test_dict, beta):
             not_indexed += 1
         elif pair[1] not in test_dict[pair[0]]:
             false_negative += 1
-    print "total names: " + str(len(true_items))
-    print "not indexed: " + str(not_indexed)
-    print "wrongly indexed: " + str(false_negative - not_indexed)
-    print "all false negitives: "  + str(false_negative)
-    print "true positives: " + str(true_positives)
-    print "false positives: " + str(false_positive)
-    temp = ((1 + (beta * beta)) * true_positives)
-    return  temp / (temp + false_positive + ((beta * beta) * false_negative))
+    print( "total names: " + str(len(true_items)))
+    print( "not indexed: " + str(not_indexed))
+    print ("wrongly indexed: " + str(false_negative - not_indexed))
+    print ("all false negitives: "  + str(false_negative))
+    print ("true positives: " + str(true_positives))
+    print ("false positives: " + str(false_positive))
+    temp = ((1 + (beta * beta)) * true_positives))
+    return  temp / (temp + false_positive + ((beta * beta) * false_negative)))
 def test_key(true_items, test_dict, key):
     for answer in test_dict[key]:
         if (key, answer) in true_items:
@@ -108,7 +108,7 @@ def make_test_dict(items, k):
                 overflow += 1
         else:
             dictionary[pair[0]] = [pair[1]]
-    print "overflow: " + str(overflow)
+    print( "overflow: " + str(overflow))
     return dictionary
 def get_aliases(con, meta):
     table = meta.tables['aliases']
