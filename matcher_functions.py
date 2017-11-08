@@ -90,7 +90,7 @@ def fscore(true_items, test_dict, beta):
     print ("all false negitives: "  + str(false_negative))
     print ("true positives: " + str(true_positives))
     print ("false positives: " + str(false_positive))
-    temp = ((1 + (beta * beta)) * true_positives))
+    temp = ((1 + (beta * beta)) * true_positives)
     return  temp / (temp + false_positive + ((beta * beta) * false_negative)))
 def test_key(true_items, test_dict, key):
     for answer in test_dict[key]:
