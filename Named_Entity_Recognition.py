@@ -506,7 +506,7 @@ print(len(pred_learning))
 print(len(te_y))
 print(len(te_pairs))
 for i in range(len(tr_y)):
-    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), tr_y[i], pred_rules[i], pred_learning[i][0].item(), 'tr'))))
+    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), int(tr_y[i]), int(pred_rules[i]), float(pred_learning[i][0].item()), 'tr'))))
 offset = len(tr_y)
 for i in range(len(te_y)):
     execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), te_y[i], pred_rules[offset + i], pred_learning[offset + i][0].item(), 'te'))))
