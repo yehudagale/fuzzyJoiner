@@ -471,7 +471,7 @@ def sequence_to_word(sequence, reverse_word_index):
     return " ".join([reverse_word_index[x] for x in sequence if x in reverse_word_index])
 def sequence_pair_to_word_pair(sequence_pair, reverse_word_index):
     return [sequence_to_word(sequence_pair[0], reverse_word_index), sequence_to_word(sequence_pair[1], reverse_word_index)]
-reverse_word_index = {v: k for k, v in tokenizer.word_index.iteritems()}
+reverse_word_index = {v: k for k, v in tokenizer.word_index.items()}
 print(tr_pairs)
 print(sequence_to_word(tr_pairs[0][0], reverse_word_index))
 print(sequence_to_word(tr_pairs[0][1], reverse_word_index))
