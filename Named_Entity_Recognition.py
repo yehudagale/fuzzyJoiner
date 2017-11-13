@@ -231,10 +231,10 @@ print('Found %s unique tokens.' % len(word_index))
 data1 = pad_sequences(sequences1, maxlen=MAX_SEQUENCE_LENGTH)
 data2 = pad_sequences(sequences2, maxlen=MAX_SEQUENCE_LENGTH)
 no_match_data = pad_sequences(no_match_sequences, maxlen=MAX_SEQUENCE_LENGTH)
-print (data1[0])
-print (data2[0])
-print (texts1[0])
-print (texts2[0])
+# print (data1[0])
+# print (data2[0])
+# print (texts1[0])
+# print (texts2[0])
 #labels = to_categorical(np.asarray(labels))
 
 print('Shape of data1 tensor:', data1.shape)
@@ -282,13 +282,12 @@ num_words = MAX_NB_WORDS
 embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
 k = KazumaCharEmbedding()
 
-print (embedding_matrix)
 for word, i in word_index.items():
 
     if i >= MAX_NB_WORDS:
 
         continue
-    print(word)                                                 
+    #print(word)                                                 
     embedding_vector = k.emb(word)
 
     if embedding_vector is not None:
@@ -296,6 +295,8 @@ for word, i in word_index.items():
         # words not found in embedding index will be all-zeros.
 
         embedding_matrix[i] = embedding_vector
+    #else:
+     #   print(word + )
 
 
 
@@ -459,6 +460,7 @@ pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
+print("Machine Learning Accuracy")
 print(tr_acc)
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
@@ -486,6 +488,7 @@ pred = np.asarray([int(not matcher.match(*sequence_pair_to_word_pair(name_pair, 
 pred_rules = np.append(pred_rules, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
+print("Rule-Based Accuracy")
 print('* Accuracy on training set (rules): %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set (rules): %0.2f%%' % (100 * te_acc))
 print('* f1score on the training set: %0.4f' % (tr_f1))
