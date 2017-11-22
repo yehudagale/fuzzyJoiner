@@ -377,11 +377,11 @@ def create_base_network(input_dim, embedding_layer):
     seq = Sequential()
     seq.add(embedding_layer)
     seq.add(Flatten())
-    seq.add(Dense(128, input_shape=(input_dim,), activation='relu'),
-                    kernel_regularizer=regularizers.l2(0.1))
+    seq.add(Dense(128, input_shape=(input_dim,), activation='relu',
+                    kernel_regularizer=regularizers.l2(0.1)))
     # seq.add(Dropout(0.1))
-    seq.add(Dense(128, activation='relu'),
-                    kernel_regularizer=regularizers.l2(0.1))
+    seq.add(Dense(128, activation='relu',
+                    kernel_regularizer=regularizers.l2(0.1)))
     # seq.add(Dropout(0.1))
     seq.add(Dense(128, activation='relu',
                     kernel_regularizer=regularizers.l2(0.1)))
