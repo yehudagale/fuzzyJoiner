@@ -2,8 +2,10 @@ from sys import argv
 #used https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory
 from os import listdir
 from os.path import isfile, join
-from string import maketrans   # Required to call maketrans function.
+#from str import maketrans   # Required to call maketrans function.
 #first use a set of things we don't want in the final output
+#make sure encoding is set correctly
+
 class data_cleanser(object):
 
 	"""docstring for data_cleanser"""
@@ -122,11 +124,11 @@ class data_cleanser(object):
 				elif args[4] == "get":
 					self.get = True
 			onlyfiles = [f for f in listdir(args[1]) if isfile(join(args[1], f))]
-			output_file = open(args[2], "w")
-			output_rejects_file = open('./rejects.txt', 'w')
-			output_file = open(args[2], "w")
+			output_file = open(args[2], "w", encoding='utf-8')
+			output_rejects_file = open('./rejects.txt', 'w', encoding='utf-8')
+			output_file = open(args[2], "w", encoding='utf-8')
 			for file_path in onlyfiles:
-				input_file = open(args[1] + "/" + file_path)
+				input_file = open(args[1] + "/" + file_path, encoding='utf-8')
 				self.parse_file(input_file, output_file, parsing_function, output_rejects_file)
 			output_rejects_file.close()
 			input_file.close()
