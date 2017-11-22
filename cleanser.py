@@ -35,7 +35,7 @@ class data_cleanser(object):
 		#change if we want to preserve any of these things
 		intab = "\n"
 		outtab = " "
-		trantab = maketrans(intab, outtab)
+		trantab = str.maketrans(intab, outtab)
 		return data.translate(trantab)
 	#test whether or not a company name should be used
 	def remove_bad(self, data):
