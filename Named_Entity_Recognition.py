@@ -37,6 +37,8 @@ from keras.optimizers import RMSprop
 
 from keras import backend as K
 
+from keras import regularizers
+
 
 
 BASE_DIR = './Machine_Learning/'
