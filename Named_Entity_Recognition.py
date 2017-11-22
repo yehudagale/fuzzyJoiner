@@ -376,10 +376,14 @@ def create_base_network(input_dim, embedding_layer):
     seq.add(embedding_layer)
     seq.add(Flatten())
     seq.add(Dense(128, input_shape=(input_dim,), activation='relu'))
-    # seq.add(Dropout(0.1))
-    # seq.add(Dense(128, activation='relu'))
-    # seq.add(Dropout(0.1))
-    # seq.add(Dense(128, activation='relu'))
+    seq.add(Dropout(0.1))
+    seq.add(Dense(128, activation='relu',
+                    kernel_regularizer=regularizers.l2(0.01),
+                    activity_regularizer=regularizers.l1(0.01)))
+    seq.add(Dropout(0.1))
+    seq.add(Dense(128, activation='relu',
+                    kernel_regularizer=regularizers.l2(0.01),
+                    activity_regularizer=regularizers.l1(0.01)))
     return seq
 
 
