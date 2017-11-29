@@ -29,7 +29,7 @@ class data_cleanser(object):
 	def is_english(self, data):
 		try:
 			data.encode('ascii')
-		except UnicodeDecodeError:
+		except UnicodeEncodeError:
 			return False
 		return True
 	def fix_bad_chars(self, data):
