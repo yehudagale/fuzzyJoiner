@@ -49,6 +49,8 @@ class data_cleanser(object):
 	def good_company_data(self, data):
 		if data.startswith("<http://dbpedia.org/resource"):
 			return False
+		if data.startswith("The Master Trust Bank of Japan"):
+			return False
 		if not self.is_english(data):
 			return False
 		data = self.fix_bad_chars(data)
