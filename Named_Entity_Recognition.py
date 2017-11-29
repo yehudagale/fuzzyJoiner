@@ -7,6 +7,7 @@ and ttps://github.com/fchollet/keras/blob/master/examples/
 for our own purposes
 
 """
+from keras.regularizers import L1L2
 
 from __future__ import absolute_import
 from __future__ import print_function
@@ -371,20 +372,20 @@ def create_pairs(x, y, z):
     return np.array(pairs), np.array(labels)
 
 
-def create_base_network(input_dim, embedding_layer):
+def create_base_network(input_dim, embedding_layer, reg):
     '''Base network to be shared (eq. to feature extraction).
     '''
     seq = Sequential()
     seq.add(embedding_layer)
     seq.add(Flatten())
     seq.add(Dense(128, input_shape=(input_dim,), activation='relu',
-                    kernel_regularizer=regularizers.l2(0.1)))
+                    recurrent_regularizer=reg))
     # seq.add(Dropout(0.1))
     seq.add(Dense(128, activation='relu',
-                    kernel_regularizer=regularizers.l2(0.1)))
+                    recurrent_regularizer=reg))
     # seq.add(Dropout(0.1))
     seq.add(Dense(128, activation='relu',
-                    kernel_regularizer=regularizers.l2(0.1)))
+                    recurrent_regularizer=reg))
     return seq
 
 
@@ -429,7 +430,7 @@ tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
 te_pairs, te_y = create_pairs(x_test, y_test, z_test)
 print (len(tr_y))
 # network definition
-base_network = create_base_network(input_dim, embedding_layer)
+base_network = create_base_network(input_dim, embedding_layer, L1L2(0.01,0.01))
 
 input_a = Input(shape=(input_dim,))
 input_b = Input(shape=(input_dim,))
