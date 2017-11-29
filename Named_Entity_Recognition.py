@@ -7,7 +7,6 @@ and ttps://github.com/fchollet/keras/blob/master/examples/
 for our own purposes
 
 """
-from keras.regularizers import L1L2
 
 from __future__ import absolute_import
 from __future__ import print_function
@@ -39,6 +38,7 @@ from keras.optimizers import RMSprop
 from keras import backend as K
 
 from keras import regularizers
+from keras.regularizers import L1L2
 
 
 
