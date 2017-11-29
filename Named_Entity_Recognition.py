@@ -381,11 +381,11 @@ def create_base_network(input_dim, embedding_layer, reg):
     seq.add(Dense(128, input_shape=(input_dim,), activation='relu',
                     kernel_regularizer=reg))
     # seq.add(Dropout(0.1))
-    seq.add(Dense(128, activation='relu',
-                    kernel_regularizer=reg))
+    seq.add(Dense(128, activation='relu'))
+#                    kernel_regularizer=reg))
     # seq.add(Dropout(0.1))
-    seq.add(Dense(128, activation='relu',
-                    kernel_regularizer=reg))
+    seq.add(Dense(128, activation='relu'))
+ #                   kernel_regularizer=reg))
     return seq
 
 
@@ -430,7 +430,7 @@ tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
 te_pairs, te_y = create_pairs(x_test, y_test, z_test)
 print (len(tr_y))
 # network definition
-base_network = create_base_network(input_dim, embedding_layer, L1L2(0.01,0.01))
+base_network = create_base_network(input_dim, embedding_layer, L1L2(0.0,0.0))
 
 input_a = Input(shape=(input_dim,))
 input_b = Input(shape=(input_dim,))
