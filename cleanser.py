@@ -28,7 +28,7 @@ class data_cleanser(object):
 			return self.good_company_data(data)
 	def is_english(self, data):
 		try:
-			data.encode('utf-8')
+			data.encode('ascii')
 		except UnicodeDecodeError:
 			return False
 		return True
