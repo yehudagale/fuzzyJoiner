@@ -15,7 +15,7 @@ CREATE TABLE tempAliases(
 );
 \copy tempAliases(alias1, alias2) FROM './Machine_Learning/nerData/cleansedData.txt' DELIMITER '|' CSV;
 WITH TMP AS (SELECT replace(replace(replace(replace(alias1, ',', ' '), '-', ' '), '.', ' '), '  ', ' ') AS alias1, replace(replace(replace(replace(alias2, ',', ' '), '-', ' '), '.', ' '), '  ', ' ') AS alias2 FROM tempAliases)
-SELECT lower(alias1) AS alias1, lower(alias2) AS alias2 INTO aliases FROM TMP; 
+SELECT DISTINCT lower(alias1) AS alias1, lower(alias2) AS alias2 INTO aliases FROM TMP; 
 WITH TMP1 AS (SELECT alias1 AS name, string_to_array(alias1, ' ') AS words FROM aliases),
 TMP3 AS (SELECT generate_subscripts(words, 1) AS s, words AS words, name AS name FROM TMP1)
 SELECT name, words[s] AS word INTO wordtable1 FROM TMP3 WHERE words[s] <> ''
