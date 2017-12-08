@@ -131,7 +131,6 @@ class data_cleanser(object):
 			output_file = open(args[2], "w", encoding='utf-8')
 			for file_path in onlyfiles:
 				input_file = open(args[1] + "/" + file_path, encoding='utf-8')
-				print(parsing_function)
 				self.parse_file(input_file, output_file, parsing_function, output_rejects_file)
 			output_rejects_file.close()
 			input_file.close()
