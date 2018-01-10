@@ -425,6 +425,7 @@ epochs = 1
 # create training+test positive and negative pairs
 # these next lines also need to change
 #digit_indices = [np.where(y_train == i)[0] for i in range(10)]
+print("x_train {} , y_train {} , z_train {} ".format(x_train, y_train, z_train))
 tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
 
 #digit_indices = [np.where(y_test == i)[0] for i in range(10)]
