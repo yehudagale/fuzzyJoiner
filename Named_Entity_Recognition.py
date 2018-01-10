@@ -218,7 +218,9 @@ texts3 = get_no_match_texts(argv, texts1)
 texts1 = [str(item) for item in texts1]
 texts2 = [str(item) for item in texts2]
 texts3 = [str(item) for item in texts3]
-
+print ("1 is {}".format(texts1[1]))
+print ("2 is {}".format(texts2[1]))
+print ("3 is {}".format(texts3[1]))
 tokenizer.fit_on_texts(texts1 + texts2 + texts3)
 #this step should get similar but non-matching items to keep for later matching
 # this step creates a sequence of words ids for each word in each label
