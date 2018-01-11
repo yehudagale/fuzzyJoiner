@@ -358,6 +358,9 @@ def create_pairs(x, y, z):
     pairs = []
     labels = []
     for index in range(len(x)):
+        if sum(x[index]) == 0:
+            print(sequence_to_word(y[index], reverse_word_index))
+            print("X::{}:: y::{}:: z::{}::".format(x[index], y[index], z[index]))
         pairs += [[x[index], y[index]]]
         pairs += [[x[index], z[index]]]
         labels += [1, 0]
@@ -513,11 +516,12 @@ print(len(pred_rules))
 print(len(pred_learning))
 print(len(te_y))
 print(len(te_pairs))
+print(tr_pairs[1][0])
 for i in range(len(tr_y)):
     execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), int(tr_y[i]), int(pred_rules[i]), float(pred_learning[i][0].item()), 'tr'))))
 offset = len(tr_y)
 for i in range(len(te_y)):
-    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), int(te_y[i]), int(pred_rules[offset + i]), float(pred_learning[offset + i][0].item()), 'te'))))
+    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(te_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), int(te_y[i]), int(pred_rules[offset + i]), float(pred_learning[offset + i][0].item()), 'te'))))
 meta.create_all(con)
 con.execute(predictions.insert(), execute_pairs)
 
