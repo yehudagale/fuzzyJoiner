@@ -285,7 +285,7 @@ print('Preparing embedding matrix.')
 num_words = min(MAX_NB_WORDS, len(word_index))
 num_words = MAX_NB_WORDS
 embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
-k = KazumaCharEmbedding()
+kz = KazumaCharEmbedding()
 
 for word, i in word_index.items():
 
@@ -293,7 +293,7 @@ for word, i in word_index.items():
 
         continue
     #print(word)                                                 
-    embedding_vector = k.emb(word)
+    embedding_vector = kz.emb(word)
     # i = 0
     # while sum(embedding_vector) == 0 and i < 1000:
     #     embedding_vector = k.emb(word)
@@ -467,14 +467,15 @@ model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
 #  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
 # matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
 pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
-out = model.layers[7].output
+out = model.layers[2].get_output_at(0)
 inp = model.input
-func = model.function([inp], [out])   # evaluation functions
-print("here should be a vector {}".format(func([tr_pairs[0][0]])))
+func = K.function([inp], [out])   # evaluation functions
+print("here should be a vector")
+print(func([tr_pairs[0][0]], 1.))
 # Testing
 test = np.random.random(input_shape)[np.newaxis,...]
 layer_outs = [func([test]) for func in functors]
-print layer_outs
+print (layer_outs)
 
 tr_acc = compute_accuracy(pred_learning, tr_y)
 tr_f1 = f1score(pred_learning, tr_y)
