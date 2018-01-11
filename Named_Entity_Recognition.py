@@ -477,11 +477,11 @@ pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
 # layer_outs = [func([test]) for func in functors]
 # print (layer_outs)
 inp = model.input                                           # input placeholder
-outputs = [layer.output for layer in model.layers]          # all layer outputs
+outputs = [layer.get_output_at(0) for layer in model.layers]          # all layer outputs
 functor = K.function([inp]+ [K.learning_phase()], outputs ) # evaluation function
 
 # Testing
-test = np.random.random(input_shape)[np.newaxis,...]
+test = np.random.random(input_dim,)[np.newaxis,...]
 layer_outs = functor([test, 1.])
 print (layer_outs)
 tr_acc = compute_accuracy(pred_learning, tr_y)
