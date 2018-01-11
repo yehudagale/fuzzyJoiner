@@ -467,22 +467,12 @@ model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
 #  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
 # matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
 pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
-# out = model.layers[2].get_output_at(0)
-# inp = model.input
-# func = K.function([inp], [out])   # evaluation functions
-# print("here should be a vector")
-# print(func([tr_pairs[0][0]], 1.))
-# # Testing
-# test = np.random.random(input_shape)[np.newaxis,...]
-# layer_outs = [func([test]) for func in functors]
-# print (layer_outs)
-inp = model.input                                           # input placeholder
-outputs = [layer.get_output_at(0) for layer in model.layers]          # all layer outputs
-functor = K.function([inp]+ [K.learning_phase()], outputs ) # evaluation function
-
+out = model.layers[2].get_output_at(0)
+inp = model.input
+func = K.function([inp], [out])   # evaluation functions
+print("here should be a vector")
+print(func(tr_pairs[0][0], 1.))
 # Testing
-test = np.random.random(input_dim,)[np.newaxis,...]
-layer_outs = functor([test, 1.])
 print (layer_outs)
 tr_acc = compute_accuracy(pred_learning, tr_y)
 tr_f1 = f1score(pred_learning, tr_y)
