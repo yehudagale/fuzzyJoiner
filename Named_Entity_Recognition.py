@@ -295,12 +295,11 @@ for word, i in word_index.items():
     #print(word)                                                 
     embedding_vector = k.emb(word)
     i = 0
-    while (sum(embedding_vector) == 0 or embedding_vector is None)  and i <= 1000:
+    while sum(embedding_vector) == 0 and i < 1000:
         embedding_vector = k.emb(word)
-        i += 1
+        i++;
         if i == 1000:
             print("fail")
-                                                        
     if embedding_vector is not None:
 
         # words not found in embedding index will be all-zeros.
@@ -357,18 +356,13 @@ def contrastive_loss(y_true, y_pred):
                   (1 - y_true) * K.square(K.maximum(margin - y_pred, 0)))
 
 #for now will take any bad pairs, will take only relivent ones later
-def create_pairs(x, y, z, reverse_word_index):
+def create_pairs(x, y, z):
     '''Positive and negative pair creation.
     Alternates between positive and negative pairs.
     '''
-    def sequence_to_word(sequence, reverse_word_index):
-            return " ".join([reverse_word_index[x] for x in sequence if x in reverse_word_index])
     pairs = []
     labels = []
     for index in range(len(x)):
-        if sum(x[index]) == 0:
-            print("X::{}:: y::{}:: z::{}::".format(sequence_to_word(x[index], reverse_word_index), sequence_to_word(y[index], reverse_word_index), sequence_to_word(z[index], reverse_word_index)))
-            print("X::{}:: y::{}:: z::{}::".format(x[index], y[index], z[index]))
         pairs += [[x[index], y[index]]]
         pairs += [[x[index], z[index]]]
         labels += [1, 0]
@@ -437,11 +431,10 @@ epochs = 1
 # these next lines also need to change
 #digit_indices = [np.where(y_train == i)[0] for i in range(10)]
 print("x_train {} , y_train {} , z_train {} ".format(x_train, y_train, z_train))
-reverse_word_index = {v: k for k, v in tokenizer.word_index.items()}
-tr_pairs, tr_y = create_pairs(x_train, y_train, z_train, reverse_word_index)
+tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
 
 #digit_indices = [np.where(y_test == i)[0] for i in range(10)]
-te_pairs, te_y = create_pairs(x_test, y_test, z_test, reverse_word_index)
+te_pairs, te_y = create_pairs(x_test, y_test, z_test)
 print (len(tr_y))
 # network definition
 base_network = create_base_network(input_dim, embedding_layer, L1L2(0.0,0.0))
@@ -474,6 +467,15 @@ model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
 #  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
 # matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
 pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
+out = model.layers[7].output
+inp = model.input
+func = model.function([inp], [out])   # evaluation functions
+print("here should be a vector {}".format(func([tr_pairs[0][0]])))
+# Testing
+test = np.random.random(input_shape)[np.newaxis,...]
+layer_outs = [func([test]) for func in functors]
+print layer_outs
+
 tr_acc = compute_accuracy(pred_learning, tr_y)
 tr_f1 = f1score(pred_learning, tr_y)
 pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
@@ -494,7 +496,7 @@ def sequence_pair_to_word_pair(sequence_pair, reverse_word_index):
 reverse_word_index = {v: k for k, v in tokenizer.word_index.items()}
 print(tr_pairs)
 print(sequence_to_word(tr_pairs[0][0], reverse_word_index))
-print(sequence_to_word(tr_pairs[0][1], reverse_word_index))
+print(sequence_to_word(tr_pairs[1][1], reverse_word_index))
 print(tr_y[0])
 
 test_pairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
@@ -525,12 +527,11 @@ print(len(pred_rules))
 print(len(pred_learning))
 print(len(te_y))
 print(len(te_pairs))
-print(tr_pairs[1][0])
 for i in range(len(tr_y)):
     execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), int(tr_y[i]), int(pred_rules[i]), float(pred_learning[i][0].item()), 'tr'))))
 offset = len(tr_y)
 for i in range(len(te_y)):
-    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(te_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), int(te_y[i]), int(pred_rules[offset + i]), float(pred_learning[offset + i][0].item()), 'te'))))
+    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), int(te_y[i]), int(pred_rules[offset + i]), float(pred_learning[offset + i][0].item()), 'te'))))
 meta.create_all(con)
 con.execute(predictions.insert(), execute_pairs)
 
