@@ -294,12 +294,12 @@ for word, i in word_index.items():
         continue
     #print(word)                                                 
     embedding_vector = k.emb(word)
-    i = 0
-    while sum(embedding_vector) == 0 and i < 1000:
-        embedding_vector = k.emb(word)
-        i++;
-        if i == 1000:
-            print("fail")
+    # i = 0
+    # while sum(embedding_vector) == 0 and i < 1000:
+    #     embedding_vector = k.emb(word)
+    #     i++;
+    #     if i == 1000:
+    #         print("fail")
     if embedding_vector is not None:
 
         # words not found in embedding index will be all-zeros.
