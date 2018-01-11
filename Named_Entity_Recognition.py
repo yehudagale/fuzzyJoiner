@@ -294,7 +294,13 @@ for word, i in word_index.items():
         continue
     #print(word)                                                 
     embedding_vector = k.emb(word)
-
+    i = 0
+    while (sum(embedding_vector) == 0 or embedding_vector is None)  and i <= 1000:
+        embedding_vector = k.emb(word)
+        i += 1
+        if i == 1000:
+            print("fail")
+                                                        
     if embedding_vector is not None:
 
         # words not found in embedding index will be all-zeros.
@@ -351,15 +357,17 @@ def contrastive_loss(y_true, y_pred):
                   (1 - y_true) * K.square(K.maximum(margin - y_pred, 0)))
 
 #for now will take any bad pairs, will take only relivent ones later
-def create_pairs(x, y, z):
+def create_pairs(x, y, z, reverse_word_index):
     '''Positive and negative pair creation.
     Alternates between positive and negative pairs.
     '''
+    def sequence_to_word(sequence, reverse_word_index):
+            return " ".join([reverse_word_index[x] for x in sequence if x in reverse_word_index])
     pairs = []
     labels = []
     for index in range(len(x)):
         if sum(x[index]) == 0:
-            print(sequence_to_word(y[index], reverse_word_index))
+            print("X::{}:: y::{}:: z::{}::".format(sequence_to_word(x[index], reverse_word_index), sequence_to_word(y[index], reverse_word_index), sequence_to_word(z[index], reverse_word_index)))
             print("X::{}:: y::{}:: z::{}::".format(x[index], y[index], z[index]))
         pairs += [[x[index], y[index]]]
         pairs += [[x[index], z[index]]]
@@ -429,10 +437,11 @@ epochs = 1
 # these next lines also need to change
 #digit_indices = [np.where(y_train == i)[0] for i in range(10)]
 print("x_train {} , y_train {} , z_train {} ".format(x_train, y_train, z_train))
-tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
+reverse_word_index = {v: k for k, v in tokenizer.word_index.items()}
+tr_pairs, tr_y = create_pairs(x_train, y_train, z_train, reverse_word_index)
 
 #digit_indices = [np.where(y_test == i)[0] for i in range(10)]
-te_pairs, te_y = create_pairs(x_test, y_test, z_test)
+te_pairs, te_y = create_pairs(x_test, y_test, z_test, reverse_word_index)
 print (len(tr_y))
 # network definition
 base_network = create_base_network(input_dim, embedding_layer, L1L2(0.0,0.0))
