@@ -467,13 +467,13 @@ model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
 #  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
 # matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
 pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
-out = model.layers[2].get_output_at(0)
-inp = model.input
-func = K.function([inp], [out])   # evaluation functions
-print("here should be a vector")
-print(func([tr_pairs[:, 0][0], tr_pairs[:, 1][0]]))
+# out = model.layers[2].get_output_at(0)
+# inp = model.input
+# func = K.function([inp], [out])   # evaluation functions
+# print("here should be a vector")
+# print(func([tr_pairs[:, 0][0], tr_pairs[:, 1][0]]))
 # Testing
-print (layer_outs)
+# print (layer_outs)
 tr_acc = compute_accuracy(pred_learning, tr_y)
 tr_f1 = f1score(pred_learning, tr_y)
 pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
