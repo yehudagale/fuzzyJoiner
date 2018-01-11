@@ -471,7 +471,7 @@ out = model.layers[2].get_output_at(0)
 inp = model.input
 func = K.function([inp], [out])   # evaluation functions
 print("here should be a vector")
-print(func(tr_pairs[0][0]))
+print(func(tr_pairs[0][0], tr_pairs[1][0]))
 # Testing
 print (layer_outs)
 tr_acc = compute_accuracy(pred_learning, tr_y)
