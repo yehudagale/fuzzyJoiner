@@ -295,7 +295,7 @@ for word, i in word_index.items():
     #print(word)                                                 
     embedding_vector = kz.emb(word)
     # i = 0
-    # while sum(embedding_vector) == 0 and i < 1000:
+    # while sum(embedding_vector) == 0 and i <= 1000:
     #     embedding_vector = k.emb(word)
     #     i++;
     #     if i == 1000:
@@ -309,11 +309,14 @@ for word, i in word_index.items():
      #   print(word + )
 
 
-
+def check_for_zeroes(to_check, intro_string):
+    for vector in to_check:
+        if sum(vector) == 0:
+            print(intro_string + str(vector))
 # load pre-trained word embeddings into an Embedding layer
 
 # note that we set trainable = False so as to keep the embeddings fixed
-
+check_for_zeroes(embedding_matrix, "here is the first pass")
 embedding_layer = Embedding(num_words,
 
                             EMBEDDING_DIM,
