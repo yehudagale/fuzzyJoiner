@@ -79,7 +79,7 @@ MAX_SEQUENCE_LENGTH = 10
 
 # but according to the Keras documentation, this can even be left unset
 
-MAX_NB_WORDS = 40000
+MAX_NB_WORDS = 140000
 
 # Size of embeddings from Glove (we will try the 100 dimension encoding to start with)
 
@@ -227,9 +227,12 @@ texts3 = get_no_match_texts(argv, texts1)
 texts1 = [str(item) for item in texts1]
 texts2 = [str(item) for item in texts2]
 texts3 = [str(item) for item in texts3]
+
+# for i in range(len(texts1)):
 print ("1 is {}".format(texts1[1]))
 print ("2 is {}".format(texts2[1]))
 print ("3 is {}".format(texts3[1]))
+
 tokenizer.fit_on_texts(texts1 + texts2 + texts3)
 #this step should get similar but non-matching items to keep for later matching
 # this step creates a sequence of words ids for each word in each label
@@ -294,8 +297,9 @@ print('Preparing embedding matrix.')
 
 # prepare embedding matrix
 
-num_words = min(MAX_NB_WORDS, len(word_index))
-num_words = MAX_NB_WORDS
+# num_words = min(MAX_NB_WORDS, len(word_index))
+num_words = len(word_index) + 1                     # word_index is indexed from 1-N
+
 embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
 kz = KazumaCharEmbedding()
 
@@ -304,8 +308,8 @@ for word, i in word_index.items():
     if i >= MAX_NB_WORDS:
 
         continue
-    #print(word)                                                 
     embedding_vector = kz.emb(word)
+
     # i = 0
     # while sum(embedding_vector) == 0 and i <= 1000:
     #     embedding_vector = k.emb(word)
@@ -314,7 +318,7 @@ for word, i in word_index.items():
     #         print("fail")
     if embedding_vector is not None:
         if sum(embedding_vector) == 0:
-            print(word)
+            print("failed to find embedding for:" + word)
         # words not found in embedding index will be all-zeros.
 
         embedding_matrix[i] = embedding_vector
