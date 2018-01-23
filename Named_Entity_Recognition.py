@@ -88,7 +88,16 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.05
 
 
-
+def check_for_zeroes(to_check, intro_string):
+        found = 0
+        for vector in to_check:
+            if sum(vector) == 0:
+                print(intro_string + str(vector))
+                found += 1
+        if not found:
+            print(intro_string + " no problems found")
+        else:
+                print(intro_string + ' found this many: '+ str(found))
 # first, build index mapping words in the glove embeddings set
 
 # to their embedding vector.  This is a straightforward lookup of
@@ -225,10 +234,13 @@ tokenizer.fit_on_texts(texts1 + texts2 + texts3)
 #this step should get similar but non-matching items to keep for later matching
 # this step creates a sequence of words ids for each word in each label
 sequences1 = tokenizer.texts_to_sequences(texts1)
+for sc in range(len(texts1)):
+        if sum(sequences1[sc]) == 0:
+                print('here is a problem word :' + texts1[sc] + '::')
 sequences2 = tokenizer.texts_to_sequences(texts2)
 no_match_sequences = tokenizer.texts_to_sequences(texts3)
 word_index = tokenizer.word_index
-
+check_for_zeroes(sequences1, " sequences")
 print('Found %s unique tokens.' % len(word_index))
 
 
@@ -301,7 +313,8 @@ for word, i in word_index.items():
     #     if i == 1000:
     #         print("fail")
     if embedding_vector is not None:
-
+        if sum(embedding_vector) == 0:
+            print(word)
         # words not found in embedding index will be all-zeros.
 
         embedding_matrix[i] = embedding_vector
@@ -309,11 +322,6 @@ for word, i in word_index.items():
      #   print(word + )
 
 
-def check_for_zeroes(to_check, intro_string):
-    for vector in to_check:
-        if sum(vector) == 0:
-            print(intro_string + str(vector))
-# load pre-trained word embeddings into an Embedding layer
 
 # note that we set trainable = False so as to keep the embeddings fixed
 check_for_zeroes(embedding_matrix, "here is the first pass")
@@ -435,7 +443,7 @@ epochs = 1
 #digit_indices = [np.where(y_train == i)[0] for i in range(10)]
 print("x_train {} , y_train {} , z_train {} ".format(x_train, y_train, z_train))
 tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
-
+check_for_zeroes(x_train, "checking x_train")
 #digit_indices = [np.where(y_test == i)[0] for i in range(10)]
 te_pairs, te_y = create_pairs(x_test, y_test, z_test)
 print (len(tr_y))
