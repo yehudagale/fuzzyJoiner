@@ -516,6 +516,7 @@ u = AnnoyIndex(f)
 u.load('test.ann') # super fast, will just mmap the file
 nearest = u.get_nns_by_item(0, 10) # will find the 10 nearest neighbors
 all_texts = texts1 + texts2
+print(len(texts1))
 for i in range(len(texts1)):
     match = 0
     no_match = 0
