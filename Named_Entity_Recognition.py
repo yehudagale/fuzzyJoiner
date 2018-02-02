@@ -259,11 +259,11 @@ no_match_data = pad_sequences(no_match_sequences, maxlen=MAX_SEQUENCE_LENGTH)
 # print (texts2[0])
 #labels = to_categorical(np.asarray(labels))
 
-print('Shape of data1 tensor:', data1.shape)
+print('Shape of data1 tensor:', annoy_data1.shape)
 
 #print('Shape of label tensor:', labels.shape)
 
-print('Shape of data2 tensor:', data2.shape)
+print('Shape of data2 tensor:', annoy_data2.shape)
 
 # split the data into a training set and a validation set
 
