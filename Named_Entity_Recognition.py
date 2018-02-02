@@ -20,6 +20,8 @@ from sys import argv
 import numpy as np
 from embeddings import KazumaCharEmbedding
 import random
+from annoy import AnnoyIndex
+import random
 
 from keras.preprocessing.text import Tokenizer
 
@@ -496,6 +498,24 @@ pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
 mid_predictions = base_network.predict(data1) + base_network.predict(data2)
+# from https://github.com/spotify/annoy
+f = MAX_SEQUENCE_LENGTH
+print(mid_predictions[0])
+print (len(mid_predictions[0]))
+exit(0)
+t = AnnoyIndex(f)  # Length of item vector that will be indexed
+for i in range(len(data1 + data2)):
+    v = mid_predictions[i]
+    t.add_item(i, v)
+
+t.build(10) # 10 trees
+t.save('test.ann')
+
+# ...
+
+u = AnnoyIndex(f)
+u.load('test.ann') # super fast, will just mmap the file
+print(u.get_nns_by_item(0, 1000)) # will find the 1000 nearest neighbors
 
 print("Machine Learning Accuracy")
 print(tr_acc)
