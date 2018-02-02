@@ -250,8 +250,8 @@ print('Found %s unique tokens.' % len(word_index))
 
 
 
-data1 = pad_sequences(sequences1, maxlen=MAX_SEQUENCE_LENGTH)
-data2 = pad_sequences(sequences2, maxlen=MAX_SEQUENCE_LENGTH)
+annoy_data1 = pad_sequences(sequences1, maxlen=MAX_SEQUENCE_LENGTH)
+annoy_data2 = pad_sequences(sequences2, maxlen=MAX_SEQUENCE_LENGTH)
 no_match_data = pad_sequences(no_match_sequences, maxlen=MAX_SEQUENCE_LENGTH)
 # print (data1[0])
 # print (data2[0])
@@ -271,9 +271,9 @@ indices = np.arange(data1.shape[0])
 
 np.random.shuffle(indices)
 
-data1 = data1[indices]
+data1 = annoy_data1[indices]
 
-data2 = data2[indices]
+data2 = annoy_data2[indices]
 
 no_match_data = no_match_data[indices]
 
@@ -497,7 +497,7 @@ pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
-mid_predictions = base_network.predict(data1) + base_network.predict(data2)
+mid_predictions = base_network.predict(annoy_data1) + base_network.predict(annoy_data2)
 # from https://github.com/spotify/annoy
 f = 128
 # print(mid_predictions[0])
@@ -514,8 +514,9 @@ t.save('test.ann')
 
 u = AnnoyIndex(f)
 u.load('test.ann') # super fast, will just mmap the file
-print(u.get_nns_by_item(0, 10)) # will find the 1000 nearest neighbors
-
+nearest = u.get_nns_by_item(0, 10) # will find the 10 nearest neighbors
+all_texts = texts1 + texts2
+print("numbers = {}, names = {}".format(nearest, [all_texts[i] for i in nearest]))
 print("Machine Learning Accuracy")
 print(tr_acc)
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
