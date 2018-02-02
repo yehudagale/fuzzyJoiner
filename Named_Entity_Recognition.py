@@ -518,9 +518,10 @@ nearest = u.get_nns_by_item(0, 10) # will find the 10 nearest neighbors
 all_texts = texts1 + texts2
 print("numbers = {}, names = {} true_match = {}".format(nearest, [all_texts[i] for i in nearest], texts2[0]))
 print(len(texts1))
+match = 0
+no_match = 0
+
 for index in range(len(texts1)):
-    match = 0
-    no_match = 0
     nearest = u.get_nns_by_item(index, 10)
     print("numbers = {}, names = {} true_match = {}".format(nearest, [all_texts[i] for i in nearest], texts2[index]))
     if (index + len(texts1)) in nearest:
