@@ -468,7 +468,7 @@ distance = Lambda(euclidean_distance,
                   output_shape=eucl_dist_output_shape)([processed_a, processed_b])
 
 model = Model([input_a, input_b], distance)
-print(model.summary())
+print(base_network.summary())
 # train
 rms = RMSprop()
 #change the optimizer (adam)
