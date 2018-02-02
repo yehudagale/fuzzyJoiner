@@ -514,7 +514,7 @@ t.save('test.ann')
 
 u = AnnoyIndex(f)
 u.load('test.ann') # super fast, will just mmap the file
-print(u.get_nns_by_item(0, 1000)) # will find the 1000 nearest neighbors
+print(u.get_nns_by_item(0, 10)) # will find the 1000 nearest neighbors
 
 print("Machine Learning Accuracy")
 print(tr_acc)
