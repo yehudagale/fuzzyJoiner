@@ -405,9 +405,10 @@ def create_base_network(input_dim, embedding_layer, reg):
     seq.add(Dense(128, activation='relu'))
 #                    kernel_regularizer=reg))
     seq.add(Dropout(0.1))
-    seq.add(Dense(128, activation='relu'))
+    final_layer = Dense(128, activation='relu')
+    seq.add(final_layer)
  #                   kernel_regularizer=reg))
-    return seq
+    return seq, final_layer
 
 
 def compute_accuracy(predictions, labels):
@@ -452,7 +453,7 @@ check_for_zeroes(x_train, "checking x_train")
 te_pairs, te_y = create_pairs(x_test, y_test, z_test)
 print (len(tr_y))
 # network definition
-base_network = create_base_network(input_dim, embedding_layer, L1L2(0.0,0.0))
+base_network, final_layer = create_base_network(input_dim, embedding_layer, L1L2(0.0,0.0))
 
 input_a = Input(shape=(input_dim,))
 input_b = Input(shape=(input_dim,))
@@ -467,7 +468,7 @@ distance = Lambda(euclidean_distance,
                   output_shape=eucl_dist_output_shape)([processed_a, processed_b])
 
 model = Model([input_a, input_b], distance)
-
+print(model.summary())
 # train
 rms = RMSprop()
 #change the optimizer (adam)
