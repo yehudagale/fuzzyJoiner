@@ -523,7 +523,7 @@ for index in range(len(texts1)):
     no_match = 0
     nearest = u.get_nns_by_item(index, 10)
     print("numbers = {}, names = {} true_match = {}".format(nearest, [all_texts[i] for i in nearest], texts2[index]))
-    if index + len(texts1) in nearest:
+    if (index + len(texts1)) in nearest:
         match += 1
     else:
         no_match += 1
