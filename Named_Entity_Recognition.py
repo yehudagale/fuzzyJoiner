@@ -520,7 +520,7 @@ for i in range(len(texts1)):
     match = 0
     no_match = 0
     nearest = u.get_nns_by_item(i, 10)
-    if annoy_data2[i] in nearest:
+    if i + len(texts1) in nearest:
         match += 1
     else:
         no_match += 1
