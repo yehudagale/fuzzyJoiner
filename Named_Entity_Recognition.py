@@ -497,7 +497,7 @@ pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
-mid_predictions = np.concat(base_network.predict(annoy_data1), base_network.predict(annoy_data2))
+mid_predictions = np.concatenate((base_network.predict(annoy_data1), base_network.predict(annoy_data2)))
 # from https://github.com/spotify/annoy
 f = 128
 # print(mid_predictions[0])
