@@ -267,7 +267,7 @@ print('Shape of data2 tensor:', annoy_data2.shape)
 
 # split the data into a training set and a validation set
 
-indices = np.arange(data1.shape[0])
+indices = np.arange(annoy_data1.shape[0])
 
 np.random.shuffle(indices)
 
@@ -516,7 +516,7 @@ u = AnnoyIndex(f)
 u.load('test.ann') # super fast, will just mmap the file
 nearest = u.get_nns_by_item(0, 10) # will find the 10 nearest neighbors
 all_texts = texts1 + texts2
-print("numbers = {}, names = {}".format(nearest, [all_texts[i] for i in nearest]))
+print("numbers = {}, names = {} true_match = {}".format(nearest, [all_texts[i] for i in nearest], texts2[0]))
 print("Machine Learning Accuracy")
 print(tr_acc)
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
