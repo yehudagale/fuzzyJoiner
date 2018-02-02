@@ -448,7 +448,6 @@ epochs = 1
 #digit_indices = [np.where(y_train == i)[0] for i in range(10)]
 print("x_train {} , y_train {} , z_train {} ".format(x_train, y_train, z_train))
 tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
-check_for_zeroes(x_train, "checking x_train")
 #digit_indices = [np.where(y_test == i)[0] for i in range(10)]
 te_pairs, te_y = create_pairs(x_test, y_test, z_test)
 print (len(tr_y))
@@ -496,7 +495,7 @@ pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
-print("test 1: " + str(base_network.predict("test")))
+print("test 1: " + str(base_network.predict(x_train[0])))
 print("Machine Learning Accuracy")
 print(tr_acc)
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
