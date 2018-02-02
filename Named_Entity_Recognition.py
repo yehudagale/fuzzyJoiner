@@ -478,7 +478,7 @@ model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
           validation_data=([te_pairs[:, 0], te_pairs[:, 1]], te_y))
 # compute final accuracy on training and test sets
 #add an LSTM layer (later)
-# test_pairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
+# testpairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
 #  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
 # matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
 pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
@@ -495,7 +495,8 @@ pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
-print("test 1: " + str(base_network.predict(x_train[0])))
+mid_predictions = base_network.predict(data1) + base_network.predict(data2)
+
 print("Machine Learning Accuracy")
 print(tr_acc)
 print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
