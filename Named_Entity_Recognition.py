@@ -499,10 +499,9 @@ te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
 mid_predictions = base_network.predict(data1) + base_network.predict(data2)
 # from https://github.com/spotify/annoy
-f = MAX_SEQUENCE_LENGTH
-print(mid_predictions[0])
-print (len(mid_predictions[0]))
-exit(0)
+f = 128
+# print(mid_predictions[0])
+# print (len(mid_predictions[0]))
 t = AnnoyIndex(f)  # Length of item vector that will be indexed
 for i in range(len(data1 + data2)):
     v = mid_predictions[i]
