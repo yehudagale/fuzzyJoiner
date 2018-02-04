@@ -100,6 +100,7 @@ def check_for_zeroes(to_check, intro_string):
             print(intro_string + " no problems found")
         else:
                 print(intro_string + ' found this many: '+ str(found))
+
 # first, build index mapping words in the glove embeddings set
 
 # to their embedding vector.  This is a straightforward lookup of
@@ -292,6 +293,14 @@ x_test = data1[-num_validation_samples:]
 y_test = data2[-num_validation_samples:]
 
 z_test = no_match_data[-num_validation_samples:]
+
+texts1 = np.array(texts1)
+texts2 = np.array(texts2)
+texts3 = np.array(texts3)
+
+texts1 = texts1[indices]
+texts2 = texts2[indices]
+texts3 = texts3[indices]
 
 print('Preparing embedding matrix.')
 
@@ -497,33 +506,53 @@ pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
 pred_learning = np.append(pred_learning, pred, axis=0)
 te_acc = compute_accuracy(pred, te_y)
 te_f1 = f1score(pred, te_y)
-mid_predictions = np.concatenate((base_network.predict(annoy_data1), base_network.predict(annoy_data2)))
+
+x_test_text = texts1[-num_validation_samples:]
+y_test_text = texts2[-num_validation_samples:]
+z_test_text = texts3[-num_validation_samples:]
+
+for i in range(len(x_test_text)):
+    print(x_test_text[i] + "|" + y_test_text[i])
+    print(pred[i])
+    print(x_test_text[i] + "|" + z_test_text[i])
+    print(pred[i + 1])
+
+inter_model = Model(input_a, processed_a)
+intermediate_output1 = inter_model.predict(annoy_data1)
+intermediate_output2 = inter_model.predict(annoy_data2)
+mid_predictions = np.concatenate((intermediate_output1, intermediate_output2))
 # from https://github.com/spotify/annoy
 f = 128
 # print(mid_predictions[0])
 # print (len(mid_predictions[0]))
-t = AnnoyIndex(f)  # Length of item vector that will be indexed
+t = AnnoyIndex(f, metric='euclidean')  # Length of item vector that will be indexed
 for i in range(len(mid_predictions)):
     v = mid_predictions[i]
     t.add_item(i, v)
 
-t.build(10) # 10 trees
+t.build(100) # 100 trees
 t.save('test.ann')
 
 # ...
 
-u = AnnoyIndex(f)
-u.load('test.ann') # super fast, will just mmap the file
-nearest = u.get_nns_by_item(0, 10) # will find the 10 nearest neighbors
-all_texts = texts1 + texts2
-print("numbers = {}, names = {} true_match = {}".format(nearest, [all_texts[i] for i in nearest], texts2[0]))
-print(len(texts1))
+all_texts = np.concatenate((texts1, texts2))
 match = 0
 no_match = 0
+print("shape of annoy data1")
+print(annoy_data1[0].shape)
+print(tr_pairs[:, 0].shape)
 
 for index in range(len(texts1)):
-    nearest = u.get_nns_by_item(index, 10)
-    print("numbers = {}, names = {} true_match = {}".format(nearest, [all_texts[i] for i in nearest], texts2[index]))
+    nearest = t.get_nns_by_vector(mid_predictions[index], 2)
+    print("query={} names = {} true_match = {}".format(texts1[index], [all_texts[i] for i in nearest], texts2[index]))
+    
+    for i in nearest:
+        print(t.get_distance(index, i))
+        print(model.predict([np.array([annoy_data1[index]]), np.array([annoy_data2[i - len(annoy_data1)]])]))
+
+    print(t.get_distance(index, index + len(texts1)))
+    print(model.predict([np.array([annoy_data1[index]]), np.array([annoy_data2[index]])]))
+
     if (index + len(texts1)) in nearest:
         match += 1
     else:
@@ -536,6 +565,7 @@ print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
 print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
 print('* f1score on the training set: %0.4f' % (tr_f1))
 print('* f1socre on test set: %0.4f' % (te_f1))
+
 #compute accuracy using a rule based matcher
 def sequence_to_word(sequence, reverse_word_index):
     return " ".join([reverse_word_index[x] for x in sequence if x in reverse_word_index])
