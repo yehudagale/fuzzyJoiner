@@ -425,7 +425,8 @@ def create_base_network(input_dim, embedding_layer, reg):
 def compute_accuracy(predictions, labels):
     '''Compute classification accuracy with a fixed threshold on distances.
     '''
-    return labels[predictions.ravel() < 0.5].mean()
+    return np.mean(np.equal(predictions.ravel() < 0.5, labels))
+    # return labels[predictions.ravel() < 0.5].mean()
 
 def f1score(predictions, labels):
     #labels[predictions.ravel() < 0.5].sum()
