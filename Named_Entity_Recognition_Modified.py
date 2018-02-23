@@ -41,6 +41,8 @@ GLOVE_DIR = BASE_DIR + 'glove/'
 
 TEXT_DATA_DIR = BASE_DIR + 'nerData'
 
+DO_ANN_ON_EMBEDDINGS = True
+
 # number of words an entity is allowed to have
 
 # distribution of number of words in peoples names can be found in peopleNamesDisbn
@@ -64,7 +66,7 @@ MAX_SEQUENCE_LENGTH = 10
 
 # but according to the Keras documentation, this can even be left unset
 
-MAX_NB_WORDS = 60000
+MAX_NB_WORDS = 150000
 
 # Size of embeddings from Glove (we will try the 100 dimension encoding to start with)
 
@@ -452,22 +454,26 @@ for i in range(len(text_pairs)):
 # from https://github.com/spotify/annoy
 f = 128
 
-# inter_model = Model(input_a, processed_a)
-# see what NNs are for the embedded representations first
-inter_model = embedded_representation(embedding_layer)
+if DO_ANN_ON_EMBEDDINGS:
+    inter_model = embedded_representation(embedding_layer)
+else:
+    inter_model = Model(input_a, processed_a) 
 
-intermediate_output1 = inter_model.predict(data1)
-intermediate_output2 = inter_model.predict(data2)
-intermediate_output3 = inter_model.predict(no_match_data)
+intermediate_output1 = inter_model.predict(x_test)
+intermediate_output2 = inter_model.predict(y_test)
+intermediate_output3 = inter_model.predict(z_test)
 
 mid_predictions = np.concatenate((intermediate_output1, intermediate_output2, intermediate_output3))
 
 
 # print(mid_predictions[0])
 # print (len(mid_predictions[0]))
-# t = AnnoyIndex(f, metric='euclidean')  # Length of item vector that will be indexed
 
-t = AnnoyIndex(len(mid_predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
+if DO_ANN_ON_EMBEDDINGS:
+    t = AnnoyIndex(len(mid_predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
+else:
+    t = AnnoyIndex(f, metric='euclidean')  # Length of item vector that will be indexed
+
 for i in range(len(mid_predictions)):
     v = mid_predictions[i]
     t.add_item(i, v)
@@ -477,31 +483,37 @@ t.save('test.ann')
 
 # ...
 
-all_texts = np.concatenate((texts1, texts2, texts3))
+all_texts = np.concatenate((x_test_text, y_test_text, z_test_text))
 match = 0
 no_match = 0
 
-for index in range(len(texts1)):
-    nearest = t.get_nns_by_vector(mid_predictions[index], 10)
+for index in range(len(x_test_text)):
+    nearest = t.get_nns_by_vector(mid_predictions[index], 3)
     print(nearest)
-    print("query={} names = {} true_match = {}".format(texts1[index], [all_texts[i] for i in nearest], texts2[index]))
+    print("query={} names = {} true_match = {} reject= {}".format(x_test_text[index], [all_texts[i] for i in nearest], y_test_text[index], z_test_text[index]))
 
     for i in nearest:
         print(all_texts[i])
-        if i >= len(texts1) and i < len(texts1) + len(texts2):
-            arr = np.array([data2[i - len(texts1)]])
-        elif i >= len(texts1) + len(texts2):
-            arr = np.array([no_match_data[i - len(texts1) - len(texts2)]])
+        if i >= len(x_test_text) and (i < len(x_test_text) + len(y_test_text)):
+            arr = np.array([y_test[i - len(x_test_text)]])
+        elif i >= len(x_test_text) + len(y_test_text):
+            arr = np.array([z_test[i - len(x_test_text) - len(y_test_text)]])
         else:
-            arr = np.array([data1[i]])
-        print(model.predict([np.array([data1[index]]), arr]))
+            arr = np.array([x_test[i]])
+        print(model.predict([np.array([x_test[index]]), arr]))
         print(t.get_distance(index, i))
 
     print("true match prediction:")
-    print(model.predict([np.array([data1[index]]), np.array([data2[index]])]))
+    print(model.predict([np.array([x_test[index]]), np.array([y_test[index]])]))
     print("true match distance:")
-    print(t.get_distance(index, index + len(texts1)))
-    if (index + len(texts1)) in nearest:
+    print(t.get_distance(index, index + len(x_test_text)))
+
+    print("true reject prediction:")
+    print(model.predict([np.array([x_test[index]]), np.array([z_test[index]])]))
+    print("true reject distance:")
+    print(t.get_distance(index, index + len(x_test_text) + len(y_test_text)))
+
+    if index >= len(x_test_text) and index < len(x_test_text) + len(y_test_text) and index + len(x_test_text) in nearest:
         match += 1
     else:
         no_match += 1
