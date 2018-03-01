@@ -11,19 +11,20 @@ DROP TABLE IF EXISTS WORDTABLE2;
 
 CREATE TABLE tempAliases(
 	alias1 text NOT NULL,
-	alias2 text NOT NULL
+	alias2 text NOT NULL,
+	entityid text NOT NULL
 );
-\copy tempAliases(alias1, alias2) FROM './Machine_Learning/nerData/cleansedData.txt' DELIMITER '|' CSV;
-WITH TMP AS (SELECT replace(replace(replace(replace(alias1, ',', ' '), '-', ' '), '.', ' '), '  ', ' ') AS alias1, replace(replace(replace(replace(alias2, ',', ' '), '-', ' '), '.', ' '), '  ', ' ') AS alias2 FROM tempAliases)
-SELECT DISTINCT lower(alias1) AS alias1, lower(alias2) AS alias2 INTO aliases FROM TMP; 
-WITH TMP1 AS (SELECT alias1 AS name, string_to_array(alias1, ' ') AS words FROM aliases),
-TMP3 AS (SELECT generate_subscripts(words, 1) AS s, words AS words, name AS name FROM TMP1)
-SELECT name, words[s] AS word INTO wordtable1 FROM TMP3 WHERE words[s] <> ''
+\copy tempAliases(alias1, alias2, entityid) FROM './Machine_Learning/nerData/cleansedData.txt' DELIMITER '|' CSV;
+WITH TMP AS (SELECT replace(replace(replace(replace(alias1, ',', ' , '), '-', ' '), '.', ' . '), '  ', ' ') AS alias1, replace(replace(replace(replace(alias2, ',', ' , '), '-', ' '), '.', ' . '), '  ', ' ') AS alias2, entityid FROM tempAliases)
+SELECT DISTINCT lower(alias1) AS alias1, lower(alias2) AS alias2, entityid INTO aliases FROM TMP;
+WITH TMP1 AS (SELECT alias1 AS name, string_to_array(alias1, ' ') AS words, entityid FROM aliases),
+TMP3 AS (SELECT generate_subscripts(words, 1) AS s, words AS words, name AS name, entityid FROM TMP1)
+SELECT name, words[s] AS word, entityid INTO wordtable1 FROM TMP3 WHERE words[s] <> ''
 UNION ALL
-SELECT alias1 AS name, replace(alias1, ' ', '') AS word FROM aliases ORDER BY word ASC;
+SELECT alias1 AS name, replace(alias1, ' ', '') AS word, entityid FROM aliases ORDER BY word ASC;
 --repeat for the next wordtable
-WITH TMP2 AS (SELECT alias2 AS name, string_to_array(alias2, ' ') AS words FROM aliases),
-TMP4 AS (SELECT generate_subscripts(words, 1) AS s, words, name FROM TMP2)
-SELECT name, words[s] AS word INTO WORDTABLE2 FROM TMP4 WHERE words[s] <> ''
+WITH TMP2 AS (SELECT alias2 AS name, string_to_array(alias2, ' ') AS words, entityid FROM aliases),
+TMP4 AS (SELECT generate_subscripts(words, 1) AS s, words, name, entityid FROM TMP2)
+SELECT name, words[s] AS word, entityid INTO WORDTABLE2 FROM TMP4 WHERE words[s] <> ''
 UNION ALL
-SELECT alias2 AS name, replace(alias2, ' ', '') AS word FROM aliases ORDER BY word ASC;
+SELECT alias2 AS name, replace(alias2, ' ', '') AS word, entityid FROM aliases ORDER BY word ASC;

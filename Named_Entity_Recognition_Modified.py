@@ -106,7 +106,7 @@ def get_no_match_texts(argv, texts1):
     con, meta = connect(argv[1], argv[2], argv[3])
     #load pairs from database
     aliases = get_aliases(con, meta)
-    #create dictionaries assingning serial numbers to names and names from serial numbers
+    #create dictionaries assigning serial numbers to names and names from serial numbers
     num_to_word, word_to_num = create_double_num_dicts(aliases)
     #load the buckets from the database bucket_list is aranges as follows:
     #bucket_list[pair_of_buckets][bucket(this must be 0 or 1)][name (this represents a single name)][0 for number and 1 for pre-procced name]
