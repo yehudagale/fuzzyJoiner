@@ -5,6 +5,7 @@ import nltk
 from nltk import bigrams
 from os import listdir
 from os.path import isfile, join
+import sys
 
 
 class GenericDataCleanser(object):
@@ -12,7 +13,7 @@ class GenericDataCleanser(object):
 	name_reject_set = frozenset(['father of', '(', 'author of', 'pope', 'emperor'])
 	company_reject_set = frozenset(["("])
 
-	def __init__(self, entity_type, function = None, number=None):
+	def __init__(self, entity_type, function = None, number=None, pairs=2):
 		if number:
 			self.get=True
 			self.number_of_names = number
@@ -24,6 +25,7 @@ class GenericDataCleanser(object):
 			self.parsing_function = function_dictionary[entity_type]
 		elif function and function == "test":
 			self.parsing_function = function_dictionary[entity_type + "test"]
+		self.pairs = 2
 
 
 	def test_x_names(self, data):
@@ -94,7 +96,7 @@ class GenericDataCleanser(object):
 		for part in name_array:
 			if not part:
 				continue
-			if len(ret) >= 2:
+			if len(ret) >= self.pairs:
 				break
 			if self.parsing_function(part):
 				# if part[-1:] == "\n":
@@ -103,25 +105,37 @@ class GenericDataCleanser(object):
 					part = self.remove_bad(part)
 					if part:
 						ret.append(part)
-		if len(ret) == 2:
-			return "|".join(ret) + '\n'
-		return ""
+		if len(ret) != self.pairs:
+			return None
+		return ret
 
 	#parses input file and writes an output
 	def parse_file(self,input_file, output_file, output_rejects_file):
 		lines = input_file.readlines()
+		entity_id = 0
 		for line in lines:
-			newline = self.cleanse_data(line)
-			if newline and newline != "":
-				if self.get:
-					self.number_of_names -= 1
-					if self.number_of_names >= 0:
-						output_file.write(newline)
+			ret = self.cleanse_data(line)
+			if ret and len(ret) == self.pairs:
+				# all these entity names are in the exact same set
+				# we can create the number of pairs that we were asked to create
+				# for now, create it with the 'anchor' (first element of the list)
+				# and all other names
+				anchor = ret[0]
+				entity_id += 1
+				newline =''
+				for i in range(1, len(ret)):
+					newline += anchor + '|' + ret[i] + "|" + str(entity_id) + '\n'
+					if self.get:
+						self.number_of_names -= 1
+						if self.number_of_names >= 0:
+							output_file.write(newline)
+						else:
+							self.get = False;
+							break
 					else:
-						self.get = False;
+						output_file.write(newline)
+					if i > self.pairs:
 						break
-				else:
-					output_file.write(newline)
 			else:
 				output_rejects_file.write(line)
 		if self.get:
@@ -143,12 +157,13 @@ class GenericDataCleanser(object):
 
 class NameDataCleanser(GenericDataCleanser):
 
-	def __init__(self, number=0):
+	def __init__(self, number=0, pairs = 2):
 		if number:
 			self.get=True
 			self.number_of_names = number
 		else:
 			self.get = False
+		self.pairs = 2
 
 
 	def cleanse_data(self, line):
@@ -167,20 +182,23 @@ class NameDataCleanser(GenericDataCleanser):
 	    # remove any names with "..."  with nothing. also remove all (.*)
 		line = re.sub('["][^"]*["]', '', line)
 		line = re.sub('[(][^)]*[)]', '', line)
-
+		# remove any non-Latin characters from the line
+		line = re.sub('[^\x00-\x7F\x80-\xFF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF]','',line)
 		arr = line.split("|")
 
 
 		# remove silly names
 		cleansed_arr = []
 		for name in arr:
+			if name.strip() == '' or name.strip() == '.':
+				continue
 			# remove all abbreviated names that end with .
 			if name.endswith('.'):
 				continue
 			# remove all single names
 			if len(name.split(' ')) == 1:
 				continue
-			cleansed_arr.append(name)
+			cleansed_arr.append(name.replace('\n', '').replace('"',''))
 
 		if len(cleansed_arr) == 0 or len(cleansed_arr[0].strip().split(' ')) == 1:
 			return
@@ -200,8 +218,11 @@ class NameDataCleanser(GenericDataCleanser):
 		# print(cleansed_arr[0])
 		for j in range(1, len(cleansed_arr)):
 			cmp = cleansed_arr[j].lower().replace(' ', '')
+			# same name just changed case
+			if base == cmp:	
+				continue
 			ratio = Levenshtein.ratio(base, cmp)
-			if (ratio == 0):
+			if (ratio == 0 and cleansed_arr[j] in ret):
 				ret.remove(cleansed_arr[j])
 				# print('removing due to ratio' + cleansed_arr[j] + "|" + cleansed_arr[0])
 				continue
@@ -241,16 +262,37 @@ class NameDataCleanser(GenericDataCleanser):
 					ret.remove(cleansed_arr[j])
 				continue 
 
-		if len(ret) == 1:
-			line = cleansed_arr[0]
-		else:
+		ret_val = []
+		ret_val.append(cleansed_arr[0])
+
+		names = cleansed_arr[0].split()
+
+		if len(ret) < self.pairs and self.pairs <= 4 and len(names) == 2:
+			# augment the data, create a first name initial + name - clearly this data augmentation technique is only valid
+			# for people's names, if we have only 2 name parts
+			if self.pairs == 2:
+				if len(names[1]) > 1: 
+					ret_val.append(names[0][0] + ' . ' + names[1])
+				else:
+					print("Skipping line because of inadequate number of names:" + line)
+			elif self.pairs == 3:
+				ret_val.append(names[1] + ' , ' + names[0])
+			elif self.pairs == 4:
+				ret_val.append(names[1] + ' , ' + names[0][0])
+		if len(ret) < self.pairs and self.pairs <= 4 and len(names) > 2:
+			if self.pairs == 2:
+				ret_val.append(names[0] + ' ' + names[1][0] + ' . ' + names[-1])
+			elif self.pairs == 3:
+				ret_val.append(names[-1] + ' , ' + names[0] + ' ' + names[1])
+			elif self.pairs == 4:
+				ret_val.append(names[-1] + ' , ' + names[0] + ' ' + names[1][0] + ' . ')
+		elif len(ret) >= self.pairs:
 			# put the first guy in first... or else we lose track of the 'anchor'
 			ret.remove(cleansed_arr[0])
-			line = cleansed_arr[0] + '|'
-			line += '|'.join(ret)
-			line = line
+			ret_val.extend(list(ret))
+			ret_val = ret_val[0:self.pairs]
 
-		return line
+		return ret_val
 
 
 if __name__ == '__main__':
@@ -258,17 +300,20 @@ if __name__ == '__main__':
 	parser.add_argument('-f', dest="input_file", help="file to cleanse file")
 	parser.add_argument('-o', dest="output_file", help="cleansed data file name")
 	parser.add_argument('-t', dest="entity_type", help="names or people")
+	parser.add_argument('-p', dest="num_pairs", help="how many same pairs should be created (default=2)", nargs='?', default=2, type=int)
 	parser.add_argument('-u', dest="function", help="use test parsing function", nargs='?', default=None)
 	parser.add_argument('-n', dest="number", help="process only this many from the file (useful for debugging)", nargs='?', type=int)
+
 	args = parser.parse_args()
-	
+	assert args.num_pairs <= 4
+
 	if args.entity_type == 'names':
-		cleaner = NameDataCleanser(args.number)
+		cleaner = NameDataCleanser(args.number, args.num_pairs)
 	else:
-		cleaner = GenericDataCleanser(args.entity_type, args.function, args.number)
+		cleaner = GenericDataCleanser(args.entity_type, args.function, args.number, args.num_pairs)
 
 	# Uncomment next line to test old code
-	cleaner = GenericDataCleanser(args.entity_type, args.function, args.number)
+	# cleaner = GenericDataCleanser(args.entity_type, args.function, args.number, args.num_pairs)
 	cleaner.clean_file(args.input_file, args.output_file)
     
 
