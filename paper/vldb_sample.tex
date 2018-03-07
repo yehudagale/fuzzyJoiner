@@ -1,12 +1,8 @@
-% THIS IS AN EXAMPLE DOCUMENT FOR VLDB 2010
+% THIS IS AN EXAMPLE DOCUMENT FOR VLDB 2012
 % based on ACM SIGPROC-SP.TEX VERSION 2.7
 % Modified by  Gerald Weber <gerald@cs.auckland.ac.nz>
-
-
-% This example *does* use the .bib file (from which the .bbl file
-% is produced). REMEMBER HOWEVER: After having produced the .bbl file,
-% and prior to final submission, you need to 'insert'  your .bbl file into
-% your source .tex file so as to provide ONE 'self-contained' source file.
+% Removed the requirement to include *bbl file in here. (AhmetSacan, Sep2012)
+% Fixed the equation on page 3 to prevent line overflow. (AhmetSacan, Sep2012)
 
 \documentclass{vldb}
 \usepackage{graphicx}
@@ -111,9 +107,8 @@ one who did all the really hard work.}\\
 % author on the opening page (as the 'third row') but we ask,
 % for aesthetic reasons that you place these 'additional authors'
 % in the \additional authors block, viz.
-\additionalauthors{Additional authors: John Smith (The Th{\o}rv\"{a}ld Group,
-email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
-(The Kumquat Consortium, email: {\small \texttt{jpkumquat@consortium.net}})}
+\additionalauthors{Additional authors: John Smith (The Th{\o}rv\"{a}ld Group, {\texttt{jsmith@affiliation.org}}), Julius P.~Kumquat
+(The \raggedright{Kumquat} Consortium, {\small \texttt{jpkumquat@consortium.net}}), and Ahmet Sacan (Drexel University, {\small \texttt{ahmetdevel@gmail.com}})}
 \date{30 July 1999}
 % Just remember to make sure that the TOTAL number of authors
 % is the number that will appear on the first page PLUS the
@@ -181,56 +176,6 @@ Because the entire article is contained in
 the \textbf{document} environment, you can indicate the
 start of a new paragraph with a blank line in your
 input file; that is why this sentence forms a separate paragraph.
-\section{Problem}
-The problem we are dealing with is the fuzzy join problem. EXPAND
-\section{Algorithm}
-We started our process with a simple rule based method for matching and another one for blocking. We then replaced individual peices with a machine learning method and compared the preformance. In the final product we have an elegant completly machine learning based method.
-
-\subsection{Rule-based Matching}
-\begin{table}
-\centering
-\caption{Table 1}
-\begin{tabular}{|c|c|} \hline
-Name&Match\\ \hline
-Douglas Adams&Douglas Noel Adams\\ \hline
-Andreas Capellanus&Andrea Cappellano \\ \hline
-John Adams Whipple&John A. Whipple \\
-\hline\end{tabular}
-\end{table}
-
-\begin{table*}
-\centering
-\caption{Table 2}
-\begin{tabular}{|c|c|} \hline
-Bucket Name&Contents\\ \hline
-A&\{John A. Whipple\} \\ \hline
-Adams&\{Douglas Adams, Douglas Noel Adams, John Adams Whipple\} \\ \hline
-Andreas&\{Andreas Capellanus\} \\ \hline
-Andrea&\{Andrea Cappellano\} \\ \hline
-Cappellano&\{Andrea Cappellano\} \\ \hline
-Capellanus&\{Andreas Capellanus\} \\ \hline
-Douglas&\{Douglas Adams, Douglas Noel Adams\} \\ \hline
-John&\{John Adams Whipple, John A. Whipple\} \\ \hline
-Noel&\{Douglas Noel Adams\} \\ \hline
-Whipple&\{John Adams Whipple, John A. Whipple\} \\
-\hline\end{tabular}
-\end{table*}
-
-In the rule-based method, we block based on items that have one word in common. This is the simplest reasonable blocking strategy. Table 2 illustrates what the blocking of the three names from Table 1 would look like. Out of NUMBER1 pairs, NUMBER2 ended up in the same bucket as all their correct matches. NUMBER3 had at least one correct match in the same bucket. To perform the actual matching, we used three simple rules see Table 3:
-\begin{enumerate}
-
-\item If a word is unique to two items, we match them. (`John Adams Whipple' matches `John A. Whipple' since `Whipple' only apears in those two names)
-\item If, when all spaces are removed, one of the items is a substring of the other, we match them. (`the flower company' matches `theflowercompany.com' since `theflowercompany' is a subset of `theflowercompany.com')
-\item If we treat each name as a set of words, and one set is a subset of the other set, we match them. (`Douglas Adams' matches `Douglas Noel Adams' since \{`Douglas', `Adams'\} $\subseteq$ \{`Douglas', `Noel', `Adams'\})
-
-\end{enumerate} 
-Even using these three rules in combination resulted in too many false negatives. Therefore we decided to treat all matches resulting from any of the three rules as valid. If we treat it as a success if there is a correct match in any of the first three slots, we get an F\textsubscript{1} of FSCORE1. Since the issue is mostly false negatives, and therefore even some of the first three slots were often empty, so even if we accept any of the top 1000 as a success, we get FSCORE2, not much better.
-\subsection{Siamese Netwok}
-The first part we replaced was the matcher. To compare the two matchers we created a rule-based matcher using the rules from the rule-based system. To replace it we created a siamese network (figure 1) INSERT FIGURE 1. A Siamese network is two deep neural networks that share weights. One entity is fed into each of the two networks. The output of the two networks is fed into a final layer which determines the distance between the two outputs and accepts or rejects. Siamese networks have been shown to work well for image matching.\cite{Hasdell:Siamese} Before feeding the entities into the networks, we used Kazuma charecter embeddings to encode each entity as a vector. We trained the network on our NUMBER1*0.95 pairs and withheld NUMBER1*0.05 for testing. We chose an equal number of negitive pairs to train the model on. We chose negitive pairs that had at least one word in common with the positive ones. We found that the fscore on the training data was FSCORE3 and FSCORE4 on the test date. This was better than the rule-based matcher which had an f-score of FSCORE5.
-
-We next approached the blocking problem with machine learning. Since the hidden layer of the siamese network is optimized for matching, it should output an embedding of the entity which has its essential qualities with regaurds to matching (figure 2). We then used an aproximate nearest neighbors algorithm to find the nearest neighbors. EXPLAIN MORE Using these techniques we can find the most similar items without needing to block at all. The problem we ran into is only PERCENT1 of the correct matches were in the 10 nearest neighbors. The problem seems to be that since we trained the model using negative pairs that have at least one word in common, it did not learn that names that are completly different should be mapped seperatly (figure 3). We could try to fix this by feeding the model better negative pairs, but we found a more elegant solution. Instead of trying to aproximate the correct location using a siamese network trained for matching, we can use a triplet loss function and teach it to maximize the distance to the closest false pair and minimize the distance to the true matches. To find these closest entities we use our charecter embedings. This allowed us to get an f-score of FSCORE6 on the training set and FSCORE7 on the test set reading the 10 closest entities. Notice that at this point we can do away with the matching algorithm alltogether. We simply use the closest entiies as our matches.
-\section{Related Works}
-There have been a number of attemts to solve the fuzzy join problem. Many of the attemts use varios string matching algorithms for example \cite{Wang:String}. The main issue with using string matching comparisons is that they do not work across a wide variaty of enties ASK DR. SRINIVAS. To our knowledge no serios machine learning aproach has been used for this problem. The problem of blocking has also been dealt with using MapReduce \cite{Vernica:MapReduce}. This approach requires alot of computing power and, since they use a string matching approach in the end, is hard to generalize accross many types of entities. 
 
 \subsection{Type Changes and {\subsecit Special} Characters}
 We have already seen several typeface changes in this sample.  You
@@ -385,13 +330,14 @@ of figures, use the environment
 \textbf{figure} to enclose the figure and its caption.
 
 This sample document contains examples of \textbf{.pdf} files to be
-displayable with \LaTeX.  More details on each of these is found in the
+displayable with \LaTeX (See Figures \ref{fig:fly} and \ref{fig:bigfly}).  More details on each of these is found in the
 \textit{Author's Guide}.
 
 \begin{figure}
 \centering
 \includegraphics{fly}
 \caption{A sample black and white graphic (.pdf format).}
+\label{fig:fly}
 \end{figure}
 
 \begin{figure}
@@ -399,13 +345,23 @@ displayable with \LaTeX.  More details on each of these is found in the
 \includegraphics[width=1in,height=1in]{fly}
 \caption{A sample black and white graphic (.pdf format)
 that has been resized with the \texttt{includegraphics} command.}
+\label{fig:bigfly}
 \end{figure}
 
 
 As was the case with tables, you may want a figure
 that spans two columns.  To do this, and still to
 ensure proper ``floating'' placement of tables, use the environment
-\textbf{figure*} to enclose the figure and its caption.
+\textbf{figure*} to enclose the figure and its caption (See Figure~\ref{fig:flies}). And don't forget to end the environment with {figure*}, not {figure}!
+
+\begin{figure*}
+\centering
+\includegraphics{flies}
+\caption{A sample black and white graphic (.pdf format)
+that needs to span two columns of text.}
+\label{fig:flies}
+\end{figure*}
+
 
 Note that only {\textbf{.pdf}} files were used; if you want to include
 {\textbf{.ps}} or {\textbf{.eps}} formats, you can use the
@@ -440,25 +396,10 @@ unique number which has
 logarithm $z$: \begin{displaymath}{\log e^z = z}\end{displaymath}
 \end{definition}
 
-\begin{figure}
-\centering
-\includegraphics[height=1in,width=1in]{rosette}
-\caption{A sample black and white graphic (.pdf format) that has
-been resized with the \texttt{includegraphics} command.}
-\end{figure}
-
 Two lists of constructs that use one of these
 forms is given in the
 \textit{Author's  Guidelines}.
 
-\begin{figure*}
-\centering
-\includegraphics{flies}
-\caption{A sample black and white graphic (.pdf format)
-that needs to span two columns of text.}
-\end{figure*}
-and don't forget to end the environment with
-{figure*}, not {figure}!
 
 There is one other similar construct environment, which is
 already set up
@@ -472,13 +413,13 @@ Suppose on the contrary there exists a real number $L$ such that
 \lim_{x\rightarrow\infty} \frac{f(x)}{g(x)} = L.
 \end{displaymath}
 Then
-\begin{displaymath}
-l=\lim_{x\rightarrow c} f(x)
+\begin{align*}
+l&=\lim_{x\rightarrow c} f(x)
 = \lim_{x\rightarrow c}
-\left[ g{x} \cdot \frac{f(x)}{g(x)} \right ]
-= \lim_{x\rightarrow c} g(x) \cdot \lim_{x\rightarrow c}
+\left[ g{x} \cdot \frac{f(x)}{g(x)} \right ] \\
+&= \lim_{x\rightarrow c} g(x) \cdot \lim_{x\rightarrow c}
 \frac{f(x)}{g(x)} = 0\cdot L = 0,
-\end{displaymath}
+\end{align*}
 which contradicts our assumption that $l\neq 0$.
 \end{proof}
 
@@ -534,7 +475,7 @@ and the \textbf{.cls} and \textbf{.tex} files that it describes.
 % initial runs of your .tex file to
 % produce the bibliography for the citations in your paper.
 \bibliographystyle{abbrv}
-\bibliography{paper}  % vldb_sample.bib is the name of the Bibliography in this case
+\bibliography{vldb_sample}  % vldb_sample.bib is the name of the Bibliography in this case
 % You must have a proper ".bib" file
 %  and remember to run:
 % latex bibtex latex latex
@@ -542,25 +483,18 @@ and the \textbf{.cls} and \textbf{.tex} files that it describes.
 
 \subsection{References}
 Generated by bibtex from your ~.bib file.  Run latex,
-then bibtex, then latex twice (to resolve references)
-to create the ~.bbl file.  Insert that ~.bbl file into
-the .tex source file and comment out
-the command \texttt{{\char'134}thebibliography}.
+then bibtex, then latex twice (to resolve references).
 
-
+%APPENDIX is optional.
 % ****************** APPENDIX **************************************
-
 % Example of an appendix; typically would start on a new page
 %pagebreak
 
 \begin{appendix}
-\section{PVLDB Format has  8+4 pages}
-The PVLDB paper length is limited to 8 pages. You are permitted a 4 page appendix beyond these 8 pages. However, reviewers (as well as any readers) are not required to read this appendix, and the paper should be self-contained, complete and understandable within the 8 pages. Typically, it is appropriate to place proofs, algorithm pseudocode, data set descriptions, etc. in the appendix.
-
-Any references to the appendix from the main paper should only be in the nature of "for additional detail see..". In particular, there should be nothing in the appendix that is necessary for a reader to understand the paper. This 8+4 page rule applies to both submissions and camera-ready.
+You can use an appendix for optional proofs or details of your evaluation which are not absolutely necessary to the core understanding of your paper. 
 
 \section{Final Thoughts on Good Layout}
-Please restrain yourself from squeezing too much information into the first eight pages; you can use the appendix for optional proofs or details of your evaluation which are not absolutely necessary to the core understanding of your paper. This way, you can use readable font sizes in the figures and graphs, as well as avoid tempering with the correct border values, and the spacing (and format) of both text and captions of the PVLDB format (e.g. captions are bold).
+Please use readable font sizes in the figures and graphs. Avoid tempering with the correct border values, and the spacing (and format) of both text and captions of the PVLDB format (e.g. captions are bold).
 
 At the end, please check for an overall pleasant layout, e.g. by ensuring a readable and logical positioning of any floating figures and tables. Please also check for any line overflows, which are only allowed in extraordinary circumstances (such as wide formulas or URLs where a line wrap would be counterintuitive).
 

@@ -1384,12 +1384,12 @@
 
 % Future proceedings chair, please update the following: 1) conference sequence number, 2) date,
 % 3) location, 4) volume number, 5) Copyright year.
-\global\boilerplate={Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. To copy otherwise, to republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee.  Articles from this volume were invited to present their results at The 41st International Conference on Very Large Data Bases, August 31st - September 4th 2015, Kohala Coast, Hawai'i.}
+\global\boilerplate={Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. To copy otherwise, to republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee.  Articles from this volume were invited to present their results at The 42nd International Conference on Very Large Data Bases, September 2016, New Delhi, India.}
 
 \global\conf{Proceedings of the VLDB Endowment,}
-\global\confinfo{Vol. 8, No. X}
+\global\confinfo{Vol. 9, No. X}
 \newtoks\copyrightetc
-\global\copyrightetc{Copyright 201X VLDB Endowment 2150-8097/YY/MM... \$ 10.00}
+\global\copyrightetc{Copyright 2016 VLDB Endowment 2150-8097/11/11... \$ 10.00}
 
 %% Uncomment for camera ready
 %\toappear{\the\boilerplate\par

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2018.1.31)  6 MAR 2018 13:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2018.1.31)  6 MAR 2018 20:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -204,8 +204,7 @@ Using 'Abbrev' bibliography style
 ) (/usr/share/texlive/texmf-dist/tex/latex/preprint/balance.sty
 Package: balance 1999/02/23 4.3 (PWD)
 \oldvsize=\dimen131
-)
-No file paper.aux.
+) (./paper.aux)
 \openout1 = `paper.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
@@ -220,6 +219,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
+
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
 * driver: pdftex
@@ -344,136 +344,72 @@ run
 
 
 ]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 204.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 206.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 204.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 206.
+
+Overfull \hbox (6.3533pt too wide) in paragraph at lines 224--225
+\OT1/cmr/m/n/9 Adams' matches `Dou-glas Noel Adams' since \OMS/cmsy/m/n/9 f\OT1
+/cmr/m/n/9 `Douglas',
+ []
 
 
-LaTeX Warning: Citation `Lamport:LaTeX' on page 2 undefined on input line 249.
+Underfull \vbox (badness 2035) has occurred while \output is active []
 
+ [2]
+Underfull \vbox (badness 1215) has occurred while \output is active []
 
-LaTeX Warning: Citation `Lamport:LaTeX' on page 2 undefined on input line 264.
-
-[2]
-
-LaTeX Warning: Citation `bowman:reasoning' on page 3 undefined on input line 29
-0.
-
-
-LaTeX Warning: Citation `clark:pct' on page 3 undefined on input line 290.
-
-
-LaTeX Warning: Citation `braams:babel' on page 3 undefined on input line 290.
-
-
-LaTeX Warning: Citation `herlihy:methodology' on page 3 undefined on input line
- 290.
-
-
-LaTeX Warning: Citation `clark:pct' on page 3 undefined on input line 292.
-
-
-LaTeX Warning: Citation `salas:calculus' on page 3 undefined on input line 292.
-
-
-
-LaTeX Warning: Citation `Lamport:LaTeX' on page 3 undefined on input line 292.
-
-
-LaTeX Warning: Citation `Lamport:LaTeX' on page 3 undefined on input line 298.
-
-
-LaTeX Warning: Citation `Lamport:LaTeX' on page 3 undefined on input line 309.
-
-
-! LaTeX Error: File `fly' not found.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.384 \includegraphics{fly}
-                           
-I could not locate the file with any of these extensions:
-.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,.eps
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-! LaTeX Error: File `fly' not found.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.390 \includegraphics[width=1in,height=1in]{fly}
-                                                 
-I could not locate the file with any of these extensions:
-.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,.eps
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
+ [3]
+<fly.pdf, id=30, 34.1275pt x 32.12pt>
+File: fly.pdf Graphic file (type pdf)
+ <use fly.pdf>
+Package pdftex.def Info: fly.pdf used on input line 393.
+(pdftex.def)             Requested size: 34.1274pt x 32.1199pt.
+File: fly.pdf Graphic file (type pdf)
+ <use fly.pdf>
+Package pdftex.def Info: fly.pdf used on input line 399.
+(pdftex.def)             Requested size: 72.27492pt x 72.27565pt.
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <9> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 392.
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 401.
 
-Underfull \hbox (badness 1412) in paragraph at lines 392--392
+Underfull \hbox (badness 1412) in paragraph at lines 401--401
 []\OT1/cmr/bx/n/9 Figure 2: A sam-ple black and white graphic
  []
 
 
-Underfull \hbox (badness 1895) in paragraph at lines 392--392
+Underfull \hbox (badness 1895) in paragraph at lines 401--401
 \OT1/cmr/bx/n/9 (.pdf for-mat) that has been re-sized with the
  []
 
-[3]
 \c@theorem=\count118
 \c@definition=\count119
+<rosette.pdf, id=31, 614.295pt x 794.97pt>
+File: rosette.pdf Graphic file (type pdf)
+ <use rosette.pdf>
+Package pdftex.def Info: rosette.pdf used on input line 445.
+(pdftex.def)             Requested size: 72.2687pt x 72.25989pt.
 
-
-! LaTeX Error: File `rosette' not found.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.436 ...degraphics[height=1in,width=1in]{rosette}
-                                                  
-I could not locate the file with any of these extensions:
-.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,.eps
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-Underfull \hbox (badness 1412) in paragraph at lines 438--438
+Underfull \hbox (badness 1412) in paragraph at lines 447--447
 []\OT1/cmr/bx/n/9 Figure 3: A sam-ple black and white graphic
  []
 
 
-Underfull \hbox (badness 1895) in paragraph at lines 438--438
+Underfull \hbox (badness 1895) in paragraph at lines 447--447
 \OT1/cmr/bx/n/9 (.pdf for-mat) that has been re-sized with the
  []
 
+<flies.pdf, id=32, 307.1475pt x 114.4275pt>
+File: flies.pdf Graphic file (type pdf)
+ <use flies.pdf>
+Package pdftex.def Info: flies.pdf used on input line 456.
+(pdftex.def)             Requested size: 307.14674pt x 114.42722pt.
 
-! LaTeX Error: File `flies' not found.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.447 \includegraphics{flies}
-                             
-I could not locate the file with any of these extensions:
-.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,.eps
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-Overfull \hbox (15.60826pt too wide) detected at line 472
+Overfull \hbox (15.60826pt too wide) detected at line 481
 \OML/cmm/m/it/9 l \OT1/cmr/m/n/9 = [] \OML/cmm/m/it/9 f\OT1/cmr/m/n/9 (\OML/cmm
 /m/it/9 x\OT1/cmr/m/n/9 ) = [] [] = [] \OML/cmm/m/it/9 g\OT1/cmr/m/n/9 (\OML/cm
 m/m/it/9 x\OT1/cmr/m/n/9 ) \OMS/cmsy/m/n/9 ^^A [] [] \OT1/cmr/m/n/9 = 0 \OMS/cm
@@ -481,50 +417,59 @@ sy/m/n/9 ^^A \OML/cmm/m/it/9 L \OT1/cmr/m/n/9 = 0\OML/cmm/m/it/9 ;
  []
 
 
-LaTeX Warning: Citation `salas:calculus' on page 4 undefined on input line 482.
-
-
-No file paper.bbl.
-
 Package balance Warning: You have called \balance in second column
 (balance)                Columns might not be balanced.
 
-[4]
-Overfull \hbox (2.51642pt too wide) in paragraph at lines 551--552
+[4 <./fly.pdf> <./rosette.pdf>] (./paper.bbl
+Overfull \hbox (7.45743pt too wide) in paragraph at lines 1--1
+\OT1/cmr/m/n/9 (The Kumquat Con-sor-tium, email: \OT1/cmtt/m/n/8 jpkumquat@cons
+ortium.net\OT1/cmr/m/n/9 ) 
+ []
+
+)
+Overfull \hbox (2.51642pt too wide) in paragraph at lines 560--561
 []\OT1/cmr/m/n/9 Any ref-er-ences to the ap-pendix from the main pa-per should
  []
 
-[5] (./paper.aux) ) 
+[5 <./flies.pdf>]
+Overfull \vbox (4.125pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (5.875pt too high) has occurred while \output is active []
+
+ [6]
+(./paper.aux) ) 
 Here is how much of TeX's memory you used:
- 3072 strings out of 494953
- 40433 string characters out of 6180977
- 116373 words of memory out of 5000000
- 6273 multiletter control sequences out of 15000+600000
- 29553 words of font info for 65 fonts, out of 8000000 for 9000
+ 3085 strings out of 494953
+ 40707 string characters out of 6180977
+ 121377 words of memory out of 5000000
+ 6292 multiletter control sequences out of 15000+600000
+ 30020 words of font info for 67 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  41i,14n,28p,1438b,308s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}<
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/sh
-are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex9.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmss12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmt
-i7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/s
-hare/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1
-/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb
-i8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (5 pages, 221384 bytes).
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr
+/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex9.pfb></usr/share/texlive
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmss12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti7.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texliv
+e/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/urw/helvetic/uhvbo8a.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/
+utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on paper.pdf (6 pages, 243040 bytes).
 PDF statistics:
- 97 PDF objects out of 1000 (max. 8388607)
- 70 compressed objects within 1 object stream
+ 129 PDF objects out of 1000 (max. 8388607)
+ 91 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
