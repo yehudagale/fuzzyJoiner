@@ -1,21 +1,10 @@
 \begin{thebibliography}{1}
 
-\bibitem{bowman:reasoning}
-M.~Bowman, S.~K. Debray, and L.~L. Peterson.
-\newblock Reasoning about naming systems.
-\newblock {\em ACM Trans. Program. Lang. Syst.}, 15(5):795--825, November 1993.
-
-\bibitem{braams:babel}
-J.~Braams.
-\newblock Babel, a multilingual style-option system for use with latex's
-  standard document styles.
-\newblock {\em TUGboat}, 12(2):291--301, June 1991.
-
-\bibitem{clark:pct}
-M.~Clark.
-\newblock Post congress tristesse.
-\newblock In {\em TeX90 Conference Proceedings}, pages 84--89. TeX Users Group,
-  March 1991.
+\bibitem{Cohen2003}
+W.~W. Cohen, P.~Ravikumar, and S.~E. Fienberg.
+\newblock A comparison of string distance metrics for name-matching tasks.
+\newblock In {\em Proceedings of IJCAI-03 Workshop on Information Integration},
+  pages 73--78, August 2003.
 
 \bibitem{Hasdell:Siamese}
 R.~Hadsell, S.~Chopra, and Y.~Lecun.
@@ -23,20 +12,11 @@ R.~Hadsell, S.~Chopra, and Y.~Lecun.
 \newblock {\em 2006 IEEE Computer Society Conference on Computer Vision and
   Pattern Recognition - Volume 2 (CVPR06)}.
 
-\bibitem{herlihy:methodology}
-M.~Herlihy.
-\newblock A methodology for implementing highly concurrent data objects.
-\newblock {\em ACM Trans. Program. Lang. Syst.}, 15(5):745--770, November 1993.
-
-\bibitem{Lamport:LaTeX}
-L.~Lamport.
-\newblock {\em LaTeX User's Guide and Document Reference Manual}.
-\newblock Addison-Wesley Publishing Company, Reading, Massachusetts, 1986.
-
-\bibitem{salas:calculus}
-S.~Salas and E.~Hille.
-\newblock {\em Calculus: One and Several Variable}.
-\newblock John Wiley and Sons, New York, 1978.
+\bibitem{He:2015:SJS:2824032.2824036}
+Y.~He, K.~Ganjam, and X.~Chu.
+\newblock Sema-join: Joining semantically-related tables using big table
+  corpora.
+\newblock {\em Proc. VLDB Endow.}, 8(12):1358--1369, Aug. 2015.
 
 \bibitem{Vernica:MapReduce}
 R.~Vernica, M.~J. Carey, and C.~Li.
@@ -50,5 +30,10 @@ J.~Wang, G.~Li, and J.~Fe.
   similarity join.
 \newblock {\em 2011 IEEE 27th International Conference on Data Engineering},
   2011.
+
+\bibitem{auto-join-joining-tables-leveraging-transformations}
+E.~Zhu, Y.~He, and S.~Chaudhuri.
+\newblock Auto-join: Joining tables by leveraging transformations.
+\newblock International Conference on Very Large Databases (VLDB), May 2017.
 
 \end{thebibliography}
