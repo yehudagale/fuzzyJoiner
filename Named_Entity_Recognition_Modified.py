@@ -32,8 +32,9 @@ from keras.optimizers import RMSprop
 from keras import backend as K
 from keras import regularizers
 from keras.regularizers import L1L2
-
-
+from sqlalchemy.sql import select
+import random
+import argparse
 
 BASE_DIR = './Machine_Learning/'
 
@@ -41,7 +42,7 @@ GLOVE_DIR = BASE_DIR + 'glove/'
 
 TEXT_DATA_DIR = BASE_DIR + 'nerData'
 
-DO_ANN_ON_EMBEDDINGS = True
+DO_ANN_ON_EMBEDDINGS = False
 
 # number of words an entity is allowed to have
 
@@ -86,8 +87,77 @@ def check_for_zeroes(to_check, intro_string):
         else:
                 print(intro_string + ' found this many: '+ str(found))
 
+def get_diff_names_with_overlap(con, aliases):
+    no_match_texts = []
+    texts = []
+    # load a mapping from entity id to names
+    entityid2names = {}
+    for row in aliases:
+        if row[2] in entityid2names:
+            names = entityid2names[row[2]];
+        else:
+            names = []
+            entityid2names[row[2]] = names
+        names.append(row[0])
+        names.append(row[1])
+        texts.append(row[0])
+
+    print(len(aliases))
+
+    print("getting word2entities")
+    # load a mapping from words to entities
+    word2entities = {}
+    rows = con.execute("select word, entities from word2entities;")
+    for row in rows:
+        word2entities[row[0]] = row[1]
+
+   
+    for index in range(len(texts)):
+        name_arr = texts[index].split()
+        new_text = ''
+        for n in name_arr:
+            # a name part may have been filtered out of word2entities
+            if n not in word2entities:
+                continue
+            if new_text:
+                break
+            for e in word2entities[n]:
+                if e == texts[index] or e not in entityid2names:   # if the entity is the same as this anchor's text skip it
+                    continue
+                names = entityid2names[e]
+                for x in names:
+                    if n in x:
+                        new_text = x
+                        break
+        if new_text:
+            no_match_texts.append(new_text)
+        else:
+            no_match_texts.append(texts[index + 1])
+    print("done processing matches with overlap")
+
+    return no_match_texts
+
+def get_diff_names_with_no_overlap(aliases):
+    entitylist = []
+
+    for row in aliases:
+        entitylist.append(row[0])
+ 
+    s = [i for i in range(len(entitylist))]
+    random.shuffle(s)
+
+    ret = []
+    for i in range(len(entitylist)):
+        if s[i] == i :
+            s[i] = s[i+1]
+            s[i+1] = i
+
+        ret.append(entitylist[s[i]])
+    return ret
+
+  
 #this returns a new set of texts to use as similar non-matches for texts1
-def get_no_match_texts(argv, texts1):
+def get_no_match_texts(user, password, db, texts1):
     def get_non_match(name1, bucket_words, matching_set):
         for word in name1.split(" "):
             if word in bucket_words:
@@ -103,7 +173,7 @@ def get_no_match_texts(argv, texts1):
     #this should not be done here and needs to be fixed up before more work is done
     #it should instead be done by a singel function in matcher_functions
     #establish connection to database
-    con, meta = connect(argv[1], argv[2], argv[3])
+    con, meta = connect(user, password, db)
     #load pairs from database
     aliases = get_aliases(con, meta)
     #create dictionaries assigning serial numbers to names and names from serial numbers
@@ -198,6 +268,13 @@ def compute_accuracy(predictions, labels):
     print("Precision computation: same - " + str(same_correct) + " different: " + str(diff_correct) + " from total: " + str(len(labels)))
     return (same_correct + diff_correct) / len(labels)
 
+def get_aliases_with_ids(con, meta):
+    #load pairs from database
+    aliases = con.execute("select alias1, alias2, entityid from aliases;")
+    entities = []
+    for row in aliases:
+        entities.append((row[0], row[1], row[2]))
+    return entities
 
 def f1score(predictions, labels):
     #labels[predictions.ravel() < 0.5].sum()
@@ -228,344 +305,324 @@ def sequence_to_word(sequence, reverse_word_index):
 def sequence_pair_to_word_pair(sequence_pair, reverse_word_index):
     return [sequence_to_word(sequence_pair[0], reverse_word_index), sequence_to_word(sequence_pair[1], reverse_word_index)]
 
+if __name__ == '__main__':
+    print('Processing text dataset')
+
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-u', dest="user", help="username")
+    parser.add_argument('-p', dest="password", help="password")
+    parser.add_argument('-d', dest="db", help="dbname")
+
+    args = parser.parse_args()
+
+    texts1 = []  # list of text samples in part 1
+    texts2 = [] # list of text samples in part 2
+
+    #change to get from sql and not read from file
+    con, meta = connect(args.user, args.password, args.db)
+    aliases= get_aliases_with_ids(con, meta)
+
+    unique_aliases = []
+
+    i  = 0
+    for tuple in aliases:
+        texts1.append(tuple[0])
+        texts2.append(tuple[1])
+        if i % 2 == 0:
+            unique_aliases.append(tuple)
+        i += 1
+
+    print('Found %s texts.' % len(texts1))
 
-print('Processing text dataset')
+    texts3 = []
+    print(len(unique_aliases))
+    print(len(texts1))
+    print(len(texts2))
+ 
+    # get the different pairs
+    texts3.extend(get_diff_names_with_overlap(connect(args.user, args.password, args.db)[0], unique_aliases))
+    texts3.extend(get_diff_names_with_no_overlap(unique_aliases))
+    print(len(texts3))
+ 
+    assert len(texts1) == len(texts2)
+    assert len(texts2) == len(texts3), str(len(texts3))
 
-texts1 = []  # list of text samples in part 1
-texts2 = [] # list of text samples in part 2
+    # vectorize the text samples into a 2D integer tensor
+    tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
 
-labels_index = {}  # dictionary mapping label name to numeric id - here the label name is just the name of the file in the data dir
+    tokenizer.fit_on_texts(texts1 + texts2 + texts3)
+    # this step should get similar but non-matching items to keep for later matching
+    # this step creates a sequence of words ids for each word in each label
+    sequences1 = tokenizer.texts_to_sequences(texts1)
+    for sc in range(len(texts1)):
+            if sum(sequences1[sc]) == 0:
+                    print('here is a problem word :' + texts1[sc] + '::')
+    sequences2 = tokenizer.texts_to_sequences(texts2)
+    no_match_sequences = tokenizer.texts_to_sequences(texts3)
+    word_index = tokenizer.word_index
+    check_for_zeroes(sequences1, " sequences")
+    print('Found %s unique tokens.' % len(word_index))
 
-name_list = sorted(os.listdir(TEXT_DATA_DIR))
-name = name_list[0]
-label_id = len(labels_index)
 
-labels_index[name] = label_id
+    annoy_data1 = pad_sequences(sequences1, maxlen=MAX_SEQUENCE_LENGTH)
+    annoy_data2 = pad_sequences(sequences2, maxlen=MAX_SEQUENCE_LENGTH)
+    no_match_data = pad_sequences(no_match_sequences, maxlen=MAX_SEQUENCE_LENGTH)
 
-fpath = os.path.join(TEXT_DATA_DIR, name)
-
-if os.path.isdir(fpath):
-
-    raise ValueError('bad data directory')
-
-if sys.version_info < (3,):
-
-    f = open(fpath)
-
-else:
-
-    f = open(fpath, encoding='latin-1')
-
-
-#change to get from sql and not read from file
-con, meta = connect(argv[1], argv[2], argv[3])
-#load pairs from database
-aliases = get_aliases(con, meta)
-
-for pair in aliases:
-
-    num_tokens = len(pair[0].strip().split(' ')) + len(pair[1].strip().split(' '))
-
-    if 0 < num_tokens < MAX_SEQUENCE_LENGTH:
-
-        texts1.append(pair[0])
-
-        texts2.append(pair[1])
-
-f.close()
-
-
-
-print('Found %s texts.' % len(texts1))
-
-
-
-# vectorize the text samples into a 2D integer tensor
-tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
-#gets the special no match charectars
-texts3 = get_no_match_texts(argv, texts1)
-
-#this removes all non-ascii charectars from the 3 sets of strings
-texts1 = [str(item) for item in texts1]
-texts2 = [str(item) for item in texts2]
-texts3 = [str(item) for item in texts3]
-
-# for i in range(len(texts1)):
-print ("1 is {}".format(texts1[1]))
-print ("2 is {}".format(texts2[1]))
-print ("3 is {}".format(texts3[1]))
-
-tokenizer.fit_on_texts(texts1 + texts2 + texts3)
-# this step should get similar but non-matching items to keep for later matching
-# this step creates a sequence of words ids for each word in each label
-sequences1 = tokenizer.texts_to_sequences(texts1)
-for sc in range(len(texts1)):
-        if sum(sequences1[sc]) == 0:
-                print('here is a problem word :' + texts1[sc] + '::')
-sequences2 = tokenizer.texts_to_sequences(texts2)
-no_match_sequences = tokenizer.texts_to_sequences(texts3)
-word_index = tokenizer.word_index
-check_for_zeroes(sequences1, " sequences")
-print('Found %s unique tokens.' % len(word_index))
-
-
-annoy_data1 = pad_sequences(sequences1, maxlen=MAX_SEQUENCE_LENGTH)
-annoy_data2 = pad_sequences(sequences2, maxlen=MAX_SEQUENCE_LENGTH)
-no_match_data = pad_sequences(no_match_sequences, maxlen=MAX_SEQUENCE_LENGTH)
-
-print('Shape of data1 tensor:', annoy_data1.shape)
-print('Shape of data2 tensor:', annoy_data2.shape)
-
-# split the data into a training set and a validation set, shuffling items
-indices = np.arange(annoy_data1.shape[0])
-np.random.shuffle(indices)
-
-texts1 = np.array(texts1)
-texts2 = np.array(texts2)
-texts3 = np.array(texts3)
-
-texts1 = texts1[indices]
-texts2 = texts2[indices]
-texts3 = texts3[indices]
-
-for i in range(len(texts1)):
-    print(texts1[i] + " paired with: " + texts2[i])
-    print(texts1[i] + " paired with: " + texts3[i])
-
-
-data1 = annoy_data1[indices]
-data2 = annoy_data2[indices]
-no_match_data = no_match_data[indices]
-num_validation_samples = int(VALIDATION_SPLIT * data1.shape[0])
-
-x_train = data1[:-num_validation_samples]
-y_train = data2[:-num_validation_samples]
-z_train = no_match_data[:-num_validation_samples]
-
-x_test = data1[-num_validation_samples:]
-y_test = data2[-num_validation_samples:]
-z_test = no_match_data[-num_validation_samples:]
-
-print('Preparing embedding matrix.')
-
-# prepare embedding matrix
-num_words = len(word_index) + 1                     # word_index is indexed from 1-N
-
-embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
-kz = KazumaCharEmbedding()
-
-for word, i in word_index.items():
-    if i >= MAX_NB_WORDS:
-        continue
-    embedding_vector = kz.emb(word)
-
-    if embedding_vector is not None:
-        if sum(embedding_vector) == 0:
-            print("failed to find embedding for:" + word)
-        # words not found in embedding index will be all-zeros.
-        embedding_matrix[i] = embedding_vector
-
-# note that we set trainable = False so as to keep the embeddings fixed
-check_for_zeroes(embedding_matrix, "here is the first pass")
-embedding_layer = Embedding(num_words,
-
-                            EMBEDDING_DIM,
-
-                            weights=[embedding_matrix],
-
-                            input_length=MAX_SEQUENCE_LENGTH,
-
-                            trainable=False)
-
-
-print('Training model.')
-
-
-# the data, shuffled and split between train and test sets
-#need to change this not sure how
-
-input_dim = MAX_SEQUENCE_LENGTH
-epochs = 10
-
-# create training+test positive and negative pairs
-# these next lines also need to change
-#digit_indices = [np.where(y_train == i)[0] for i in range(10)]
-print("x_train {} , y_train {} , z_train {} ".format(x_train, y_train, z_train))
-tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
-#digit_indices = [np.where(y_test == i)[0] for i in range(10)]
-te_pairs, te_y = create_pairs(x_test, y_test, z_test)
-print (len(tr_y))
-# network definition
-base_network, final_layer = create_base_network(input_dim, embedding_layer, L1L2(0.0,0.0))
-
-input_a = Input(shape=(input_dim,))
-input_b = Input(shape=(input_dim,))
-
-# because we re-use the same instance `base_network`,
-# the weights of the network
-# will be shared across the two branches
-processed_a = base_network(input_a)
-processed_b = base_network(input_b)
-
-distance = Lambda(euclidean_distance,
-                  output_shape=eucl_dist_output_shape)([processed_a, processed_b])
-
-model = Model([input_a, input_b], distance)
-print(base_network.summary())
-# train
-rms = RMSprop()
-#change the optimizer (adam)
-model.compile(loss=contrastive_loss, optimizer=rms)
-model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
-          batch_size=128,
-          epochs=epochs)
-# compute final accuracy on training and test sets
-#add an LSTM layer (later)
-# testpairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
-#  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
-# matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
-pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
-# out = model.layers[2].get_output_at(0)
-# inp = model.input
-# func = K.function([inp], [out])   # evaluation functions
-# print("here should be a vector")
-# print(func([tr_pairs[:, 0][0], tr_pairs[:, 1][0]]))
-# Testing
-# print (layer_outs)
-tr_acc = compute_accuracy(pred_learning, tr_y)
-tr_f1 = f1score(pred_learning, tr_y)
-pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
-pred_learning = np.append(pred_learning, pred, axis=0)
-te_acc = compute_accuracy(pred, te_y)
-
-te_f1 = f1score(pred, te_y)
-
-x_test_text = texts1[-num_validation_samples:]
-y_test_text = texts2[-num_validation_samples:]
-z_test_text = texts3[-num_validation_samples:]
-
-text_pairs, text_y = create_pairs(x_test_text, y_test_text, z_test_text)
-
-for i in range(len(text_pairs)):
-    print(str(text_pairs[i]))
-    print(pred[i])
-    print(model.predict([np.array([te_pairs[i, 0]]), np.array([te_pairs[i, 1]])]))
-
-# from https://github.com/spotify/annoy
-f = 128
-
-if DO_ANN_ON_EMBEDDINGS:
-    inter_model = embedded_representation(embedding_layer)
-else:
-    inter_model = Model(input_a, processed_a) 
-
-intermediate_output1 = inter_model.predict(x_test)
-intermediate_output2 = inter_model.predict(y_test)
-intermediate_output3 = inter_model.predict(z_test)
-
-mid_predictions = np.concatenate((intermediate_output1, intermediate_output2, intermediate_output3))
-
-
-# print(mid_predictions[0])
-# print (len(mid_predictions[0]))
-
-if DO_ANN_ON_EMBEDDINGS:
-    t = AnnoyIndex(len(mid_predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
-else:
-    t = AnnoyIndex(f, metric='euclidean')  # Length of item vector that will be indexed
-
-for i in range(len(mid_predictions)):
-    v = mid_predictions[i]
-    t.add_item(i, v)
-
-t.build(100) # 100 trees
-t.save('test.ann')
-
-# ...
-
-all_texts = np.concatenate((x_test_text, y_test_text, z_test_text))
-match = 0
-no_match = 0
-
-for index in range(len(x_test_text)):
-    nearest = t.get_nns_by_vector(mid_predictions[index], 3)
-    print(nearest)
-    print("query={} names = {} true_match = {} reject= {}".format(x_test_text[index], [all_texts[i] for i in nearest], y_test_text[index], z_test_text[index]))
-
-    for i in nearest:
-        print(all_texts[i])
-        if i >= len(x_test_text) and (i < len(x_test_text) + len(y_test_text)):
-            arr = np.array([y_test[i - len(x_test_text)]])
-        elif i >= len(x_test_text) + len(y_test_text):
-            arr = np.array([z_test[i - len(x_test_text) - len(y_test_text)]])
-        else:
-            arr = np.array([x_test[i]])
-        print(model.predict([np.array([x_test[index]]), arr]))
-        print(t.get_distance(index, i))
-
-    print("true match prediction:")
-    print(model.predict([np.array([x_test[index]]), np.array([y_test[index]])]))
-    print("true match distance:")
-    print(t.get_distance(index, index + len(x_test_text)))
-
-    print("true reject prediction:")
-    print(model.predict([np.array([x_test[index]]), np.array([z_test[index]])]))
-    print("true reject distance:")
-    print(t.get_distance(index, index + len(x_test_text) + len(y_test_text)))
-
-    if index >= len(x_test_text) and index < len(x_test_text) + len(y_test_text) and index + len(x_test_text) in nearest:
-        match += 1
+    print('Shape of data1 tensor:', annoy_data1.shape)
+    print('Shape of data2 tensor:', annoy_data2.shape)
+
+    # split the data into a training set and a validation set, shuffling items
+    indices = np.arange(annoy_data1.shape[0])
+    np.random.shuffle(indices)
+
+    texts1 = np.array(texts1)
+    texts2 = np.array(texts2)
+    texts3 = np.array(texts3)
+
+    texts1 = texts1[indices]
+    texts2 = texts2[indices]
+    texts3 = texts3[indices]
+
+    for i in range(len(texts1)):
+        print(texts1[i] + " paired with: " + texts2[i])
+        print(texts1[i] + " paired with: " + texts3[i])
+
+
+    data1 = annoy_data1[indices]
+    data2 = annoy_data2[indices]
+    no_match_data = no_match_data[indices]
+    num_validation_samples = int(VALIDATION_SPLIT * data1.shape[0])
+
+    x_train = data1[:-num_validation_samples]
+    y_train = data2[:-num_validation_samples]
+    z_train = no_match_data[:-num_validation_samples]
+
+    x_test = data1[-num_validation_samples:]
+    y_test = data2[-num_validation_samples:]
+    z_test = no_match_data[-num_validation_samples:]
+
+    print('Preparing embedding matrix.')
+
+    # prepare embedding matrix
+    num_words = len(word_index) + 1                     # word_index is indexed from 1-N
+
+    embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
+    kz = KazumaCharEmbedding()
+
+    for word, i in word_index.items():
+        if i >= MAX_NB_WORDS:
+            continue
+        embedding_vector = kz.emb(word)
+
+        if embedding_vector is not None:
+            if sum(embedding_vector) == 0:
+                print("failed to find embedding for:" + word)
+            # words not found in embedding index will be all-zeros.
+            embedding_matrix[i] = embedding_vector
+
+    # note that we set trainable = False so as to keep the embeddings fixed
+    check_for_zeroes(embedding_matrix, "here is the first pass")
+    embedding_layer = Embedding(num_words,
+
+                                EMBEDDING_DIM,
+
+                                weights=[embedding_matrix],
+
+                                input_length=MAX_SEQUENCE_LENGTH,
+
+                                trainable=False)
+
+
+    print('Training model.')
+
+
+    # the data, shuffled and split between train and test sets
+    #need to change this not sure how
+
+    input_dim = MAX_SEQUENCE_LENGTH
+    epochs = 10
+
+    # create training+test positive and negative pairs
+    # these next lines also need to change
+    #digit_indices = [np.where(y_train == i)[0] for i in range(10)]
+    print("x_train {} , y_train {} , z_train {} ".format(x_train, y_train, z_train))
+    tr_pairs, tr_y = create_pairs(x_train, y_train, z_train)
+    #digit_indices = [np.where(y_test == i)[0] for i in range(10)]
+    te_pairs, te_y = create_pairs(x_test, y_test, z_test)
+    print (len(tr_y))
+    # network definition
+    base_network, final_layer = create_base_network(input_dim, embedding_layer, L1L2(0.0,0.0))
+
+    input_a = Input(shape=(input_dim,))
+    input_b = Input(shape=(input_dim,))
+
+    # because we re-use the same instance `base_network`,
+    # the weights of the network
+    # will be shared across the two branches
+    processed_a = base_network(input_a)
+    processed_b = base_network(input_b)
+
+    distance = Lambda(euclidean_distance,
+                      output_shape=eucl_dist_output_shape)([processed_a, processed_b])
+
+    model = Model([input_a, input_b], distance)
+    print(base_network.summary())
+    # train
+    rms = RMSprop()
+    #change the optimizer (adam)
+    model.compile(loss=contrastive_loss, optimizer=rms)
+    model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
+              batch_size=128,
+              epochs=epochs)
+    # compute final accuracy on training and test sets
+    #add an LSTM layer (later)
+    # testpairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
+    #  [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
+    # matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
+    pred_learning = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
+    # out = model.layers[2].get_output_at(0)
+    # inp = model.input
+    # func = K.function([inp], [out])   # evaluation functions
+    # print("here should be a vector")
+    # print(func([tr_pairs[:, 0][0], tr_pairs[:, 1][0]]))
+    # Testing
+    # print (layer_outs)
+    tr_acc = compute_accuracy(pred_learning, tr_y)
+    tr_f1 = f1score(pred_learning, tr_y)
+    pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
+    pred_learning = np.append(pred_learning, pred, axis=0)
+    te_acc = compute_accuracy(pred, te_y)
+
+    te_f1 = f1score(pred, te_y)
+
+    x_test_text = texts1[-num_validation_samples:]
+    y_test_text = texts2[-num_validation_samples:]
+    z_test_text = texts3[-num_validation_samples:]
+
+    text_pairs, text_y = create_pairs(x_test_text, y_test_text, z_test_text)
+
+    for i in range(len(text_pairs)):
+        print(str(text_pairs[i]))
+        print(pred[i])
+        print(model.predict([np.array([te_pairs[i, 0]]), np.array([te_pairs[i, 1]])]))
+
+    # from https://github.com/spotify/annoy
+    f = 128
+
+    if DO_ANN_ON_EMBEDDINGS:
+        inter_model = embedded_representation(embedding_layer)
     else:
-        no_match += 1
+        inter_model = Model(input_a, processed_a) 
 
-print("match: {} no_match: {}".format(match, no_match))
+    intermediate_output1 = inter_model.predict(x_test)
+    intermediate_output2 = inter_model.predict(y_test)
+    intermediate_output3 = inter_model.predict(z_test)
 
-print("Machine Learning Accuracy")
-print(tr_acc)
-print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
-print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
-print('* f1score on the training set: %0.4f' % (tr_f1))
-print('* f1socre on test set: %0.4f' % (te_f1))
+    mid_predictions = np.concatenate((intermediate_output1, intermediate_output2, intermediate_output3))
 
-reverse_word_index = {v: k for k, v in tokenizer.word_index.items()}
-print(tr_pairs)
-print(sequence_to_word(tr_pairs[0][0], reverse_word_index))
-print(sequence_to_word(tr_pairs[1][1], reverse_word_index))
-print(tr_y[0])
 
-test_pairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
- [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
-matcher = matcher(argv[1], argv[2], argv[3], test_pairs, 1)
+    # print(mid_predictions[0])
+    # print (len(mid_predictions[0]))
 
-pred_rules = np.asarray([int(not matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in tr_pairs])
-tr_acc = compute_accuracy(pred_rules, tr_y)
-tr_f1 = f1score(pred_rules, tr_y)
-pred = np.asarray([int(not matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in te_pairs])
-pred_rules = np.append(pred_rules, pred, axis=0)
-te_acc = compute_accuracy(pred, te_y)
-te_f1 = f1score(pred, te_y)
-print("Rule-Based Accuracy")
-print('* Accuracy on training set (rules): %0.2f%%' % (100 * tr_acc))
-print('* Accuracy on test set (rules): %0.2f%%' % (100 * te_acc))
-print('* f1score on the training set: %0.4f' % (tr_f1))
-print('* f1socre on test set: %0.4f' % (te_f1))
-con, meta = connect(argv[1], argv[2], argv[3])
-execute_pairs = []
-if 'predictions' in meta.tables:
-    meta.tables['predictions'].drop(con)
-predictions = Table('predictions', meta, Column('name1', String), Column('name2', String), Column('rule_predict', Integer), Column('learning_predict', Float), Column('true_pair', Integer), Column('te_or_tr', String), extend_existing=True)
-zipping_string = ('name1', 'name2', 'true_pair', 'rule_predict', 'learning_predict', 'te_or_tr')
-print(len(tr_y))
-print(len(tr_pairs))
-print(len(pred_rules))
-print(len(pred_learning))
-print(len(te_y))
-print(len(te_pairs))
-for i in range(len(tr_y)):
-    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), int(tr_y[i]), int(pred_rules[i]), float(pred_learning[i][0].item()), 'tr'))))
-offset = len(tr_y)
-for i in range(len(te_y)):
-    execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), int(te_y[i]), int(pred_rules[offset + i]), float(pred_learning[offset + i][0].item()), 'te'))))
-meta.create_all(con)
-con.execute(predictions.insert(), execute_pairs)
+    if DO_ANN_ON_EMBEDDINGS:
+        t = AnnoyIndex(len(mid_predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
+    else:
+        t = AnnoyIndex(f, metric='euclidean')  # Length of item vector that will be indexed
+
+    for i in range(len(mid_predictions)):
+        v = mid_predictions[i]
+        t.add_item(i, v)
+
+    t.build(100) # 100 trees
+    t.save('test.ann')
+
+    # ...
+
+    all_texts = np.concatenate((x_test_text, y_test_text, z_test_text))
+    match = 0
+    no_match = 0
+
+    for index in range(len(x_test_text)):
+        nearest = t.get_nns_by_vector(mid_predictions[index], 5)
+        print(nearest)
+        nearest_text = [all_texts[i] for i in nearest]
+        print("query={} names = {} true_match = {} reject= {}".format(x_test_text[index], nearest_text, y_test_text[index], z_test_text[index]))
+
+        for i in nearest:
+            print(all_texts[i])
+            if i >= len(x_test_text) and (i < len(x_test_text) + len(y_test_text)):
+                arr = np.array([y_test[i - len(x_test_text)]])
+            elif i >= len(x_test_text) + len(y_test_text):
+                arr = np.array([z_test[i - len(x_test_text) - len(y_test_text)]])
+            else:
+                arr = np.array([x_test[i]])
+            print(model.predict([np.array([x_test[index]]), arr]))
+            print(t.get_distance(index, i))
+
+        print("true match prediction:")
+        print(model.predict([np.array([x_test[index]]), np.array([y_test[index]])]))
+        print("true match distance:")
+        print(t.get_distance(index, index + len(x_test_text)))
+
+        print("true reject prediction:")
+        print(model.predict([np.array([x_test[index]]), np.array([z_test[index]])]))
+        print("true reject distance:")
+        print(t.get_distance(index, index + len(x_test_text) + len(y_test_text)))
+
+        if y_test_text[index] in nearest_text:
+            match += 1
+            print("MATCH FOUND")
+        else:
+            no_match += 1
+
+    print("match: {} no_match: {}".format(match, no_match))
+
+    print("Machine Learning Accuracy")
+    print(tr_acc)
+    print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
+    print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
+    print('* f1score on the training set: %0.4f' % (tr_f1))
+    print('* f1socre on test set: %0.4f' % (te_f1))
+
+    reverse_word_index = {v: k for k, v in tokenizer.word_index.items()}
+    print(tr_pairs)
+    print(sequence_to_word(tr_pairs[0][0], reverse_word_index))
+    print(sequence_to_word(tr_pairs[1][1], reverse_word_index))
+    print(tr_y[0])
+
+    test_pairs = [[lambda x : x.replace(" ", ""), lambda name1, name2 : name1 in name2 or name2 in name1],
+     [lambda x : set(x.split()), lambda name1, name2 : name1.issubset(name2) or name2.issubset(name1)]]
+    matcher = matcher(args.user, args.password, args.db, test_pairs, 1)
+
+    pred_rules = np.asarray([int(not matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in tr_pairs])
+    tr_acc = compute_accuracy(pred_rules, tr_y)
+    tr_f1 = f1score(pred_rules, tr_y)
+    pred = np.asarray([int(not matcher.match(*sequence_pair_to_word_pair(name_pair, reverse_word_index))) for name_pair in te_pairs])
+    pred_rules = np.append(pred_rules, pred, axis=0)
+    te_acc = compute_accuracy(pred, te_y)
+    te_f1 = f1score(pred, te_y)
+    print("Rule-Based Accuracy")
+    print('* Accuracy on training set (rules): %0.2f%%' % (100 * tr_acc))
+    print('* Accuracy on test set (rules): %0.2f%%' % (100 * te_acc))
+    print('* f1score on the training set: %0.4f' % (tr_f1))
+    print('* f1score on test set: %0.4f' % (te_f1))
+    con, meta = connect(args.user, args.password, args.db)
+    execute_pairs = []
+    if 'predictions' in meta.tables:
+        meta.tables['predictions'].drop(con)
+    predictions = Table('predictions', meta, Column('name1', String), Column('name2', String), Column('rule_predict', Integer), Column('learning_predict', Float), Column('true_pair', Integer), Column('te_or_tr', String), extend_existing=True)
+    zipping_string = ('name1', 'name2', 'true_pair', 'rule_predict', 'learning_predict', 'te_or_tr')
+    print(len(tr_y))
+    print(len(tr_pairs))
+    print(len(pred_rules))
+    print(len(pred_learning))
+    print(len(te_y))
+    print(len(te_pairs))
+    for i in range(len(tr_y)):
+        execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(tr_pairs[i][1], reverse_word_index), int(tr_y[i]), int(pred_rules[i]), float(pred_learning[i][0].item()), 'tr'))))
+    offset = len(tr_y)
+    for i in range(len(te_y)):
+        execute_pairs.append(dict(zip(zipping_string, (sequence_to_word(tr_pairs[i][0], reverse_word_index), sequence_to_word(te_pairs[i][1], reverse_word_index), int(te_y[i]), int(pred_rules[offset + i]), float(pred_learning[offset + i][0].item()), 'te'))))
+    meta.create_all(con)
+    con.execute(predictions.insert(), execute_pairs)
 

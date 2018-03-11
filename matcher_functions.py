@@ -15,6 +15,17 @@ def connect(user, password, db, host='localhost', port=5432):
     meta = sqlalchemy.MetaData(bind=con, reflect=True)
 
     return con, meta
+
+# create a set of tuples for the machine learning model where each entity name is matched
+# with at least 2 other names of the same entity, and each entity is paired with 2 other
+# names of a different entity.  The different pairs are chosen based on the fact that the have the 
+# same name part, or are completely different.  If the name is unique then the 2 different pairs
+# are just 2 random pairs.
+def create_tuples_for_siamese_network():
+    aliases_m = meta.tables['aliases']
+    word2entities_m= meta.tables['words2entities']
+
+
 #this should combine several functions and return alisases and bucket lists.
 def condensed_start():
     pass

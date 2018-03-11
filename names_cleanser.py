@@ -104,6 +104,7 @@ class GenericDataCleanser(object):
 				if part not in ret:
 					part = self.remove_bad(part)
 					if part:
+						part = part.replace(',', ' , ').replace('-', ' - ').replace('.', ' . ').replace('  ', ' ')
 						ret.append(part)
 		if len(ret) != self.pairs:
 			return None
@@ -124,7 +125,7 @@ class GenericDataCleanser(object):
 				entity_id += 1
 				newline =''
 				for i in range(1, len(ret)):
-					newline += anchor + '|' + ret[i] + "|" + str(entity_id) + '\n'
+					newline = anchor + '|' + ret[i] + "|" + str(entity_id) + '\n'
 					if self.get:
 						self.number_of_names -= 1
 						if self.number_of_names >= 0:
@@ -163,7 +164,23 @@ class NameDataCleanser(GenericDataCleanser):
 			self.number_of_names = number
 		else:
 			self.get = False
-		self.pairs = 2
+		self.pairs = pairs
+
+
+	def create_new_name(self, name, current_name_set):
+		names = name.split()
+		ret = set([])
+
+		if len(names) <= 2:
+			ret.add(names[1] + ' , ' + names[0])
+			ret.add(names[0][0] + ' . ' + names[1])
+			ret.add(names[1] + ' , ' + names[0][0])
+		elif len(names) > 2:
+			ret.add(names[0] + ' ' + names[1][0] + ' . ' + names[-1])
+			ret.add(names[-1] + ' , ' + names[0] + ' ' + names[1])
+			ret.add(names[-1] + ' , ' + names[0] + ' ' + names[1][0] + ' . ')
+		diff = ret.difference(set(current_name_set))
+		return diff
 
 
 	def cleanse_data(self, line):
@@ -186,6 +203,12 @@ class NameDataCleanser(GenericDataCleanser):
 		line = re.sub('[^\x00-\x7F\x80-\xFF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF]','',line)
 		arr = line.split("|")
 
+		dups = []
+		for name in arr:
+			dups.append(name.replace(',', ' , ').replace('-', ' - ').replace('.', ' . ').replace('  ', ' '))
+
+		if (len(set(dups))) == 1:
+			return
 
 		# remove silly names
 		cleansed_arr = []
@@ -198,6 +221,9 @@ class NameDataCleanser(GenericDataCleanser):
 			# remove all single names
 			if len(name.split(' ')) == 1:
 				continue
+			
+			name = name.replace(',', ' , ').replace('-', ' - ').replace('.', ' . ').replace('  ', ' ')
+
 			cleansed_arr.append(name.replace('\n', '').replace('"',''))
 
 		if len(cleansed_arr) == 0 or len(cleansed_arr[0].strip().split(' ')) == 1:
@@ -214,12 +240,13 @@ class NameDataCleanser(GenericDataCleanser):
 		# the 'canonical' name.  
 		ret = set(cleansed_arr)
 
-		base = cleansed_arr[0].lower().replace(' ', '')
+		base = cleansed_arr[0].lower()
 		# print(cleansed_arr[0])
 		for j in range(1, len(cleansed_arr)):
-			cmp = cleansed_arr[j].lower().replace(' ', '')
+			cmp = cleansed_arr[j].lower()
 			# same name just changed case
-			if base == cmp:	
+			if base == cmp and cleansed_arr[j] in ret:	
+				ret.remove(cleansed_arr[j])
 				continue
 			ratio = Levenshtein.ratio(base, cmp)
 			if (ratio == 0 and cleansed_arr[j] in ret):
@@ -265,33 +292,22 @@ class NameDataCleanser(GenericDataCleanser):
 		ret_val = []
 		ret_val.append(cleansed_arr[0])
 
-		names = cleansed_arr[0].split()
+		# put anchr in first, then add all other elements
+		for n in ret:
+			if n != cleansed_arr[0]:
+				ret_val.append(n)
 
-		if len(ret) < self.pairs and self.pairs <= 4 and len(names) == 2:
-			# augment the data, create a first name initial + name - clearly this data augmentation technique is only valid
-			# for people's names, if we have only 2 name parts
-			if self.pairs == 2:
-				if len(names[1]) > 1: 
-					ret_val.append(names[0][0] + ' . ' + names[1])
-				else:
-					print("Skipping line because of inadequate number of names:" + line)
-			elif self.pairs == 3:
-				ret_val.append(names[1] + ' , ' + names[0])
-			elif self.pairs == 4:
-				ret_val.append(names[1] + ' , ' + names[0][0])
-		if len(ret) < self.pairs and self.pairs <= 4 and len(names) > 2:
-			if self.pairs == 2:
-				ret_val.append(names[0] + ' ' + names[1][0] + ' . ' + names[-1])
-			elif self.pairs == 3:
-				ret_val.append(names[-1] + ' , ' + names[0] + ' ' + names[1])
-			elif self.pairs == 4:
-				ret_val.append(names[-1] + ' , ' + names[0] + ' ' + names[1][0] + ' . ')
-		elif len(ret) >= self.pairs:
-			# put the first guy in first... or else we lose track of the 'anchor'
-			ret.remove(cleansed_arr[0])
-			ret_val.extend(list(ret))
+		anchor = cleansed_arr[0]
+
+		if len(ret_val) < self.pairs:
+			additional_elements = self.create_new_name(anchor, ret_val)
+			ret_val.extend(additional_elements)
+			if len(ret_val) < self.pairs:
+				return
+		if len(ret_val) > self.pairs:
 			ret_val = ret_val[0:self.pairs]
 
+		assert len(set(ret_val)) == self.pairs
 		return ret_val
 
 
@@ -306,6 +322,7 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 	assert args.num_pairs <= 4
+	print(args.num_pairs)
 
 	if args.entity_type == 'names':
 		cleaner = NameDataCleanser(args.number, args.num_pairs)
