@@ -56,7 +56,7 @@ else
 		$temp_psql $db_name -U $user -f ./process_data.sql
 	fi
 	if [ "$machine" = "1" ]; then
-		$temp_python ./Named_Entity_Recognition_Modified.py -u $user -p $passsword -d $db_name
+		$temp_python ./Named_Entity_Recognition_Modified.py -u $user -p $passsword -d $db_name -a $temp_pairs
 	else
 		$temp_python ./matcher.py $user $passsword $db_name
 	fi

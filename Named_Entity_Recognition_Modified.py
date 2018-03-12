@@ -270,7 +270,7 @@ def compute_accuracy(predictions, labels):
 
 def get_aliases_with_ids(con, meta):
     #load pairs from database
-    aliases = con.execute("select alias1, alias2, entityid from aliases;")
+    aliases = con.execute("select alias1, alias2, entityid from aliases order by entityid;")
     entities = []
     for row in aliases:
         entities.append((row[0], row[1], row[2]))
@@ -312,6 +312,7 @@ if __name__ == '__main__':
     parser.add_argument('-u', dest="user", help="username")
     parser.add_argument('-p', dest="password", help="password")
     parser.add_argument('-d', dest="db", help="dbname")
+    parser.add_argument('-a', dest="num_pairs", help="number of same pairs in db", nargs='?', default=2, type=int)
 
     args = parser.parse_args()
 
@@ -324,13 +325,15 @@ if __name__ == '__main__':
 
     unique_aliases = []
 
-    i  = 0
+    # collect up all the anchors that are unique (anchors will get repeated if num_pairs > 2)
+    prev = int(aliases[0][2])
+    unique_aliases.append(aliases[0])
     for tuple in aliases:
         texts1.append(tuple[0])
         texts2.append(tuple[1])
-        if i % 2 == 0:
+        if int(tuple[2]) != prev:
             unique_aliases.append(tuple)
-        i += 1
+            prev = int(tuple[2])
 
     print('Found %s texts.' % len(texts1))
 
@@ -340,8 +343,19 @@ if __name__ == '__main__':
     print(len(texts2))
  
     # get the different pairs
-    texts3.extend(get_diff_names_with_overlap(connect(args.user, args.password, args.db)[0], unique_aliases))
-    texts3.extend(get_diff_names_with_no_overlap(unique_aliases))
+    if args.num_pairs == 2:
+        print("args num pairs is 2")
+        texts3.extend(get_diff_names_with_overlap(connect(args.user, args.password, args.db)[0], unique_aliases))
+    elif args.num_pairs == 3:
+        print("args num pairs is 3")
+        texts3.extend(get_diff_names_with_overlap(connect(args.user, args.password, args.db)[0], unique_aliases))
+        texts3.extend(get_diff_names_with_no_overlap(unique_aliases))
+    elif args.num_pairs == 4:
+        print("args num pairs is 4")
+        texts3.extend(get_diff_names_with_overlap(connect(args.user, args.password, args.db)[0], unique_aliases))
+        texts3.extend(get_diff_names_with_no_overlap(unique_aliases))
+        texts3.extend(get_diff_names_with_no_overlap(unique_aliases))
+ 
     print(len(texts3))
  
     assert len(texts1) == len(texts2)
