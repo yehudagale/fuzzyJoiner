@@ -1,5 +1,10 @@
 \begin{thebibliography}{1}
 
+\bibitem{annoy_impl}
+E.~Bernhardsson.
+\newblock Nearest neighbors and vector models – part 2 – algorithms and
+  data structures, Oct 2015.
+
 \bibitem{Cohen2003}
 W.~W. Cohen, P.~Ravikumar, and S.~E. Fienberg.
 \newblock A comparison of string distance metrics for name-matching tasks.
@@ -17,6 +22,12 @@ Y.~He, K.~Ganjam, and X.~Chu.
 \newblock Sema-join: Joining semantically-related tables using big table
   corpora.
 \newblock {\em Proc. VLDB Endow.}, 8(12):1358--1369, Aug. 2015.
+
+\bibitem{ann_paper}
+M.~Muja and D.~G. Lowe.
+\newblock Scalable nearest neighbor algorithms for high dimensional data.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  36(11):2227–2240, Jan 2014.
 
 \bibitem{Vernica:MapReduce}
 R.~Vernica, M.~J. Carey, and C.~Li.
