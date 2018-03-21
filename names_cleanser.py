@@ -172,13 +172,17 @@ class NameDataCleanser(GenericDataCleanser):
 		ret = set([])
 
 		if len(names) <= 2:
-			ret.add(names[1] + ' , ' + names[0])
-			ret.add(names[0][0] + ' . ' + names[1])
-			ret.add(names[1] + ' , ' + names[0][0])
+			ret.add(names[1] + ' , ' + names[0])		# last_name, first_name
+			ret.add(names[0][0] + ' . ' + names[1])		# first_initial. lastname
+			ret.add(names[1] + ' , ' + names[0][0])		# last_name, first_initial.
 		elif len(names) > 2:
-			ret.add(names[0] + ' ' + names[1][0] + ' . ' + names[-1])
-			ret.add(names[-1] + ' , ' + names[0] + ' ' + names[1])
-			ret.add(names[-1] + ' , ' + names[0] + ' ' + names[1][0] + ' . ')
+			ret.add(names[0] + ' ' + names[1][0] + ' . ' + names[-1]) # first_name middle initial last_name
+			ret.add(names[-1] + ' , ' + names[0] + ' ' + names[1])		# last_name, first name, middle name
+			ret.add(names[-1] + ' , ' + names[0] + ' ' + names[1][0] + ' . ') # last_name, first name, middle initial
+			ret.add(names[-1] + " " + names[0])		# drop all middle names
+			ret.add(names[0][0] + ' . ' + names[-1])	# first initial. lastname
+			ret.add(names[-1] + ' , ' + names[0][0])		# last_name, first_initial.
+			
 		diff = ret.difference(set(current_name_set))
 		return diff
 

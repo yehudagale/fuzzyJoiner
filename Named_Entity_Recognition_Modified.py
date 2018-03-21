@@ -321,7 +321,7 @@ if __name__ == '__main__':
 
     #change to get from sql and not read from file
     con, meta = connect(args.user, args.password, args.db)
-    aliases= get_aliases_with_ids(con, meta)
+    aliases = get_aliases_with_ids(con, meta)
 
     unique_aliases = []
 
