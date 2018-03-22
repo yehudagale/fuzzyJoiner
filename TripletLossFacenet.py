@@ -14,10 +14,16 @@ from keras.models import Model, model_from_json, Sequential
 import numpy as np
 
 from embeddings import KazumaCharEmbedding
+
+from annoy import AnnoyIndex
+
 #must fix
 MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
+
+DEBUG = False
+DEBUG_DATA_LENGTH = 100
 
 def get_random_image(img_groups, group_names, gid):
     gname = group_names[gid]
@@ -78,14 +84,18 @@ def get_sequences(texts, tokenizer):
 def read_file(file_path):
     texts = {'anchor':[], 'negative':[], 'positive':[]}
     fl = open(file_path, 'r')
+    i = 0
     for line in fl:
         line_array = line.split("|")
         texts['anchor'].append(line_array[0])
         texts['positive'].append(line_array[1])
         texts['negative'].append(line_array[2])
+        i += 1
+        if i > DEBUG_DATA_LENGTH and DEBUG:
+            break
     return texts
 def triplet_loss(y_true, y_pred):
-        margin = K.constant(0.2)
+        margin = K.constant(1)
         return K.mean(K.maximum(K.constant(0), K.square(y_pred[:,0,0]) - K.square(y_pred[:,1,0]) + margin))
 
 def accuracy(y_true, y_pred):
@@ -98,6 +108,54 @@ def euclidean_distance(vects):
     x, y = vects
     return K.sqrt(K.maximum(K.sum(K.square(x - y), axis=1, keepdims=True), K.epsilon()))
 
+def do_annoy(model, texts, tokenizer):
+    unique_text = []
+    entity_idx = []
+    entity2same = {}
+
+    for i in range(len(texts['anchor'])):
+        if not texts['anchor'][i] in entity2same:
+            entity2same[texts['anchor'][i]] = []
+            entity_idx.append(len(unique_text))
+            unique_text.append(texts['anchor'][i])
+        l = entity2same[texts['anchor'][i]]
+        if texts['positive'][i] not in l:
+            entity2same[texts['anchor'][i]].append(texts['positive'][i])
+            unique_text.append(texts['positive'][i])
+
+    print(entity2same)
+    print(unique_text)
+
+    sequences = tokenizer.texts_to_sequences(unique_text)
+    sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    predictions = inter_model.predict(sequences)
+ 
+
+    t = AnnoyIndex(len(predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
+    for i in range(len(predictions)):
+        v = predictions[i]
+        t.add_item(i, v)
+
+    t.build(100) # 100 trees
+
+    match = 0
+    no_match = 0
+
+    for index in entity_idx:
+        nearest = t.get_nns_by_vector(predictions[index], 5)
+        print(nearest)
+        nearest_text = set([unique_text[i] for i in nearest])
+        expected_text = set(entity2same[unique_text[index]])
+        nearest_text.remove(unique_text[index])
+        print("query={} names = {} true_match = {}".format(unique_text[index], nearest_text, expected_text))
+        overlap = expected_text.intersection(nearest_text)
+        print(overlap)
+        m = len(overlap)
+        match += m
+        no_match += len(expected_text) - m
+
+    print("match: {} no_match: {}".format(match, no_match))
+
 # triples_data = create_triples(IMAGE_DIR)
 texts = read_file(argv[1])
 print("anchor: {} positive: {} negative: {}".format(texts['anchor'][0], texts['positive'][0], texts['negative'][0]))
@@ -106,45 +164,8 @@ print('got tokenizer')
 sequences = get_sequences(texts, tokenizer)
 number_of_names = len(texts['anchor'])
 print('sequenced words')
-# dim = 1500
-# h = 299
-# w= 299
-# anchor =np.zeros((dim,h,w,3))
-# positive =np.zeros((dim,h,w,3))
-# negative =np.zeros((dim,h,w,3))
-
-
-# for n,val in enumerate(triples_data[0:1500]):
-#     image_anchor = plt.imread(os.path.join(IMAGE_DIR, val[0]))
-#     image_anchor = imresize(image_anchor, (h, w))    
-#     image_anchor = image_anchor.astype("float32")
-#     #image_anchor = image_anchor/255.
-#     image_anchor = keras.applications.resnet50.preprocess_input(image_anchor, data_format='channels_last')
-#     anchor[n] = image_anchor
-
-#     image_positive = plt.imread(os.path.join(IMAGE_DIR, val[1]))
-#     image_positive = imresize(image_positive, (h, w))
-#     image_positive = image_positive.astype("float32")
-#     #image_positive = image_positive/255.
-#     image_positive = keras.applications.resnet50.preprocess_input(image_positive, data_format='channels_last')
-#     positive[n] = image_positive
-
-#     image_negative = plt.imread(os.path.join(IMAGE_DIR, val[2]))
-#     image_negative = imresize(image_negative, (h, w))
-#     image_negative = image_negative.astype("float32")
-#     #image_negative = image_negative/255.
-#     image_negative = keras.applications.resnet50.preprocess_input(image_negative, data_format='channels_last')
-#     negative[n] = image_negative
-
 Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
 
-
-# resnet_input = Input(shape=(h,w,3))
-# resnet_model = ResNet50(weights='imagenet', include_top = False, input_tensor=resnet_input)
-
-
-# for layer in resnet_model.layers:
-#     layer.trainable = False  
 
 embedder = get_embedding_layer(tokenizer)
 print('got embeddings')
@@ -180,6 +201,13 @@ model = Model([input_anchor, input_positive, input_negative], stacked_dists, nam
 
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 
-model.fit([sequences['anchor'], sequences['positive'], sequences['negative']], Y_train, epochs=50,  batch_size=15, validation_split=0.2)
+model.fit([sequences['anchor'], sequences['positive'], sequences['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
 
-model.save('triplet_loss_resnet50.h5')
+# model.save('triplet_loss_resnet50.h5')
+
+inter_model = Model(input_anchor, net_anchor)
+do_annoy(inter_model, texts, tokenizer)
+
+
+
+
