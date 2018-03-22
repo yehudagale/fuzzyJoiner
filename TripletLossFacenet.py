@@ -1,29 +1,79 @@
+from sys import argv
+
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+
+import numpy as np
+
+from embeddings import KazumaCharEmbedding
+
+MAX_NB_WORDS = 140000
+EMBEDDING_DIM = 100
+MAX_SEQUENCE_LENGTH = 10
+
 def get_random_image(img_groups, group_names, gid):
     gname = group_names[gid]
     photos = img_groups[gname]
     pid = np.random.choice(np.arange(len(photos)), size=1)[0]
     pname = photos[pid]
     return gname + pname + ".jpg"
+def get_embedding_layer(tokenizer):
+    word_index = tokenizer.word_index
+    num_words = len(word_index) + 1
+    embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
+    kz = KazumaCharEmbedding()
 
-def create_triples(image_dir):
-    img_groups = {}
-    for img_file in os.listdir(image_dir):
-        prefix, suffix = img_file.split(".")
-        gid, pid = prefix[0:4], prefix[4:]
+    for word, i in word_index.items():
 
-        if gid in img_groups.keys():
-            img_groups[gid].append(pid)
-        else:
-            img_groups[gid] = [pid]
-    pos_triples, neg_triples = [], []
+        if i >= MAX_NB_WORDS:
 
-    for key in img_groups.keys():
-        triples = [(key + x[0] + ".jpg", key + x[1] + ".jpg", str(int(key)+3 if int(key)<1495 else int(key)-3)+'01'+'.jpg')
-                 for x in itertools.combinations(img_groups[key], 2)]
-        pos_triples.extend(triples)
+            continue
+        embedding_vector = kz.emb(word)
 
-    return pos_triples
+        # i = 0
+        # while sum(embedding_vector) == 0 and i <= 1000:
+        #     embedding_vector = k.emb(word)
+        #     i++;
+        #     if i == 1000:
+        #         print("fail")
+        if embedding_vector is not None:
+            if sum(embedding_vector) == 0:
+                print("failed to find embedding for:" + word)
+            # words not found in embedding index will be all-zeros.
 
+            embedding_matrix[i] = embedding_vector
+    embedding_layer = Embedding(num_words,
+
+                                EMBEDDING_DIM,
+
+                                weights=[embedding_matrix],
+
+                                input_length=MAX_SEQUENCE_LENGTH,
+
+                                trainable=False)
+def get_tokenizer(texts):
+    tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
+    tokenizer.fit_on_texts(texts['anchor'] + texts['negative'] + texts['positive'])
+    return tokenizer
+
+def get_sequences(texts, tokenizer):
+    sequences = {}
+    sequences['anchor'] = tokenizer.texts_to_sequences(texts['anchor'])
+    sequences['anchor'] = pad_sequences(sequences['anchor'], maxlen=MAX_SEQUENCE_LENGTH)
+    sequences['negative'] = tokenizer.texts_to_sequences(texts['negative'])
+    sequences['negative'] = pad_sequences(sequences['negative'], maxlen=MAX_SEQUENCE_LENGTH)
+    sequences['positive'] = tokenizer.texts_to_sequences(texts['positive'])
+    sequences['positive'] = pad_sequences(sequences['positive'], maxlen=MAX_SEQUENCE_LENGTH)
+    return sequences
+def read_file(file_path):
+    texts = {'anchor':[], 'negative':[], 'positive':[]}
+    fl = open(file_path, 'r')
+    for line in fl:
+        line_array = line.split("|")
+        texts['anchor'].append(line_array[0])
+        texts['positive'].append(line_array[1])
+        texts['negative'].append(line_array[2])
+    return texts
 def triplet_loss(y_true, y_pred):
         margin = K.constant(0.2)
         return K.mean(K.maximum(K.constant(0), K.square(y_pred[:,0,0]) - K.square(y_pred[:,1,0]) + margin))
@@ -38,60 +88,63 @@ def euclidean_distance(vects):
     x, y = vects
     return K.sqrt(K.maximum(K.sum(K.square(x - y), axis=1, keepdims=True), K.epsilon()))
 
-triples_data = create_triples(IMAGE_DIR)
+# triples_data = create_triples(IMAGE_DIR)
+texts = read_file(argv[1])
+print("anchor: {} positive: {} negative: {}".format(texts['anchor'][0], texts['positive'][0], texts['negative'][0]))
+tokenizer = get_tokenizer(texts)
+sequences = get_sequences(texts, tokenizer)
+number_of_names = len(texts['anchor'])
+# dim = 1500
+# h = 299
+# w= 299
+# anchor =np.zeros((dim,h,w,3))
+# positive =np.zeros((dim,h,w,3))
+# negative =np.zeros((dim,h,w,3))
 
 
-dim = 1500
-h = 299
-w= 299
-anchor =np.zeros((dim,h,w,3))
-positive =np.zeros((dim,h,w,3))
-negative =np.zeros((dim,h,w,3))
+# for n,val in enumerate(triples_data[0:1500]):
+#     image_anchor = plt.imread(os.path.join(IMAGE_DIR, val[0]))
+#     image_anchor = imresize(image_anchor, (h, w))    
+#     image_anchor = image_anchor.astype("float32")
+#     #image_anchor = image_anchor/255.
+#     image_anchor = keras.applications.resnet50.preprocess_input(image_anchor, data_format='channels_last')
+#     anchor[n] = image_anchor
+
+#     image_positive = plt.imread(os.path.join(IMAGE_DIR, val[1]))
+#     image_positive = imresize(image_positive, (h, w))
+#     image_positive = image_positive.astype("float32")
+#     #image_positive = image_positive/255.
+#     image_positive = keras.applications.resnet50.preprocess_input(image_positive, data_format='channels_last')
+#     positive[n] = image_positive
+
+#     image_negative = plt.imread(os.path.join(IMAGE_DIR, val[2]))
+#     image_negative = imresize(image_negative, (h, w))
+#     image_negative = image_negative.astype("float32")
+#     #image_negative = image_negative/255.
+#     image_negative = keras.applications.resnet50.preprocess_input(image_negative, data_format='channels_last')
+#     negative[n] = image_negative
+
+Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
 
 
-for n,val in enumerate(triples_data[0:1500]):
-    image_anchor = plt.imread(os.path.join(IMAGE_DIR, val[0]))
-    image_anchor = imresize(image_anchor, (h, w))    
-    image_anchor = image_anchor.astype("float32")
-    #image_anchor = image_anchor/255.
-    image_anchor = keras.applications.resnet50.preprocess_input(image_anchor, data_format='channels_last')
-    anchor[n] = image_anchor
-
-    image_positive = plt.imread(os.path.join(IMAGE_DIR, val[1]))
-    image_positive = imresize(image_positive, (h, w))
-    image_positive = image_positive.astype("float32")
-    #image_positive = image_positive/255.
-    image_positive = keras.applications.resnet50.preprocess_input(image_positive, data_format='channels_last')
-    positive[n] = image_positive
-
-    image_negative = plt.imread(os.path.join(IMAGE_DIR, val[2]))
-    image_negative = imresize(image_negative, (h, w))
-    image_negative = image_negative.astype("float32")
-    #image_negative = image_negative/255.
-    image_negative = keras.applications.resnet50.preprocess_input(image_negative, data_format='channels_last')
-    negative[n] = image_negative
-
-Y_train = np.random.randint(2, size=(1,2,dim)).T
+# resnet_input = Input(shape=(h,w,3))
+# resnet_model = ResNet50(weights='imagenet', include_top = False, input_tensor=resnet_input)
 
 
-resnet_input = Input(shape=(h,w,3))
-resnet_model = ResNet50(weights='imagenet', include_top = False, input_tensor=resnet_input)
+# for layer in resnet_model.layers:
+#     layer.trainable = False  
 
-
-for layer in resnet_model.layers:
-    layer.trainable = False  
-
-
-net = resnet_model.output
+embedder = get_embedding_layer(tokenizer)
+net = embedder.output
 net = Flatten(name='flatten')(net) 
 net = Dense(128, activation='relu', name='embed')(net)
 net = Dense(128, activation='relu', name='embed2')(net)
 net = Dense(128, activation='relu', name='embed3')(net)
 net = Lambda(l2Norm, output_shape=[128])(net)
 
-base_model = Model(resnet_model.input, net, name='resnet_model')
+base_model = Model(embedder.input, net, name='triplet_model')
 
-input_shape=(h,w,3)
+input_shape=(MAX_SEQUENCE_LENGTH)
 input_anchor = Input(shape=input_shape, name='input_anchor')
 input_positive = Input(shape=input_shape, name='input_pos')
 input_negative = Input(shape=input_shape, name='input_neg')
@@ -113,6 +166,6 @@ model = Model([input_anchor, input_positive, input_negative], stacked_dists, nam
 
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 
-model.fit([anchor, positive, negative], Y_train, epochs=50,  batch_size=15, validation_split=0.2)
+model.fit([sequences['anchor'], sequences['positive'], sequences['negative']], Y_train, epochs=50,  batch_size=15, validation_split=0.2)
 
 model.save('triplet_loss_resnet50.h5')
