@@ -15,7 +15,7 @@ import numpy as np
 
 from embeddings import KazumaCharEmbedding
 #must fix
-MAX_NB_WORDS = 100
+MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
 
