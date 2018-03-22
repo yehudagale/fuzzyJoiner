@@ -1,13 +1,21 @@
 from sys import argv
 
+from keras import backend as K
+
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+
+from keras.layers import Dense, Input, Flatten, Dropout, Lambda
+
+from keras.layers import Conv1D, MaxPooling1D, Embedding
+
+from keras.models import Model, model_from_json, Sequential
 
 import numpy as np
 
 from embeddings import KazumaCharEmbedding
-
-MAX_NB_WORDS = 140000
+#must fix
+MAX_NB_WORDS = 100
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
 
@@ -21,8 +29,9 @@ def get_embedding_layer(tokenizer):
     word_index = tokenizer.word_index
     num_words = len(word_index) + 1
     embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
+    print('about to get kz')
     kz = KazumaCharEmbedding()
-
+    print('got kz')
     for word, i in word_index.items():
 
         if i >= MAX_NB_WORDS:
@@ -51,6 +60,7 @@ def get_embedding_layer(tokenizer):
                                 input_length=MAX_SEQUENCE_LENGTH,
 
                                 trainable=False)
+    return embedding_layer
 def get_tokenizer(texts):
     tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
     tokenizer.fit_on_texts(texts['anchor'] + texts['negative'] + texts['positive'])
@@ -92,8 +102,10 @@ def euclidean_distance(vects):
 texts = read_file(argv[1])
 print("anchor: {} positive: {} negative: {}".format(texts['anchor'][0], texts['positive'][0], texts['negative'][0]))
 tokenizer = get_tokenizer(texts)
+print('got tokenizer')
 sequences = get_sequences(texts, tokenizer)
 number_of_names = len(texts['anchor'])
+print('sequenced words')
 # dim = 1500
 # h = 299
 # w= 299
@@ -135,7 +147,9 @@ Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
 #     layer.trainable = False  
 
 embedder = get_embedding_layer(tokenizer)
-net = embedder.output
+print('got embeddings')
+main_input = Input(shape=(MAX_SEQUENCE_LENGTH,))
+net = embedder(main_input)
 net = Flatten(name='flatten')(net) 
 net = Dense(128, activation='relu', name='embed')(net)
 net = Dense(128, activation='relu', name='embed2')(net)
@@ -144,7 +158,7 @@ net = Lambda(l2Norm, output_shape=[128])(net)
 
 base_model = Model(embedder.input, net, name='triplet_model')
 
-input_shape=(MAX_SEQUENCE_LENGTH)
+input_shape=(MAX_SEQUENCE_LENGTH,)
 input_anchor = Input(shape=input_shape, name='input_anchor')
 input_positive = Input(shape=input_shape, name='input_pos')
 input_negative = Input(shape=input_shape, name='input_neg')
