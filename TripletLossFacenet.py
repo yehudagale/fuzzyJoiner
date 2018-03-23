@@ -125,7 +125,7 @@ def get_test(texts, sequences, percent):
     ret_texts['positive'] = texts['positive'][indices]
     ret_texts['negative'] = texts['negative'][indices]
     return ret_train, ret_test, ret_texts
-}
+
 def triplet_loss(y_true, y_pred):
         margin = K.constant(1)
         return K.mean(K.maximum(K.constant(0), K.square(y_pred[:,0,0]) - K.square(y_pred[:,1,0]) + margin))
