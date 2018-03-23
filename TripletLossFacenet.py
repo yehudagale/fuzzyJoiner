@@ -94,6 +94,38 @@ def read_file(file_path):
         if i > DEBUG_DATA_LENGTH and DEBUG:
             break
     return texts
+def get_test(texts, sequences, percent):
+    indices = np.arange(sequences['anchor'].shape[0])
+    np.random.shuffle(indices)
+    ret_sequence = {}
+    ret_sequence['anchor'] = sequences['anchor'][indices]
+    ret_sequence['positive'] = sequences['positive'][indices]
+    ret_sequence['negative'] = sequences['negative'][indices]
+    num_validation_samples = int(percent * sequences['anchor'].shape[0])
+
+
+    ret_train = {}
+    ret_train['anchor'] = ret_sequence['anchor'][:-num_validation_samples]
+    ret_train['positive'] = ret_sequence['positive'][:-num_validation_samples]
+    ret_train['negative'] = ret_sequence['negative'][:-num_validation_samples]
+
+    ret_test = {}
+    ret_test['anchor']= ret_test['anchor'][-num_validation_samples:]
+
+    ret_test['positive']= ret_test['positive'][-num_validation_samples:]
+
+    ret_test['negative'] = ret_test['negative'][-num_validation_samples:]
+
+    ret_texts = {}
+    texts['anchor'] = np.array(texts['anchor'])
+    texts['positive'] = np.array(texts['positive'])
+    texts['negative'] = np.array(texts['negative'])
+
+    ret_texts['anchor'] = texts['anchor'][indices]
+    ret_texts['positive'] = texts['positive'][indices]
+    ret_texts['negative'] = texts['negative'][indices]
+    return ret_train, ret_test, ret_texts
+}
 def triplet_loss(y_true, y_pred):
         margin = K.constant(1)
         return K.mean(K.maximum(K.constant(0), K.square(y_pred[:,0,0]) - K.square(y_pred[:,1,0]) + margin))
@@ -162,6 +194,7 @@ print("anchor: {} positive: {} negative: {}".format(texts['anchor'][0], texts['p
 tokenizer = get_tokenizer(texts)
 print('got tokenizer')
 sequences = get_sequences(texts, tokenizer)
+test_data, train_data, reordered_text = get_test(texts, sequences, 0.05)
 number_of_names = len(texts['anchor'])
 print('sequenced words')
 Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
@@ -201,7 +234,7 @@ model = Model([input_anchor, input_positive, input_negative], stacked_dists, nam
 
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 
-model.fit([sequences['anchor'], sequences['positive'], sequences['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
+model.fit([test_data['anchor'], test_data['positive'], test_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
 
 # model.save('triplet_loss_resnet50.h5')
 
