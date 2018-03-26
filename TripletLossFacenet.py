@@ -110,11 +110,11 @@ def get_test(texts, sequences, percent):
     ret_train['negative'] = ret_sequence['negative'][:-num_validation_samples]
 
     ret_test = {}
-    ret_test['anchor']= ret_test['anchor'][-num_validation_samples:]
+    ret_test['anchor']= ret_sequence['anchor'][-num_validation_samples:]
 
-    ret_test['positive']= ret_test['positive'][-num_validation_samples:]
+    ret_test['positive']= ret_sequence['positive'][-num_validation_samples:]
 
-    ret_test['negative'] = ret_test['negative'][-num_validation_samples:]
+    ret_test['negative'] = ret_sequence['negative'][-num_validation_samples:]
 
     ret_texts = {}
     texts['anchor'] = np.array(texts['anchor'])
