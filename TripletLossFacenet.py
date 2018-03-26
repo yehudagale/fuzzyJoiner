@@ -25,6 +25,25 @@ MAX_SEQUENCE_LENGTH = 10
 DEBUG = False
 DEBUG_DATA_LENGTH = 100
 
+def f1score(positive, negative):
+    #labels[predictions.ravel() < 0.5].sum()
+    predictions = predictions.ravel()
+    fsocre = 0.0
+    true_positive = 0.0
+    false_positive = 0
+    false_negitive = 0
+    for i in range(len(positive)):
+        if positive[i] <= negative[i]:
+            true_positive += 1
+        else:
+            false_negitive += 1
+            false_positive += 1
+    print('tp' + str(true_positive))
+    print('fp' + str(false_positive))
+    print('fn' + str(false_negitive))
+    fscore = (2 * true_positive) / ((2 * true_positive) + false_negitive + false_positive)
+    return fscore 
+
 def get_random_image(img_groups, group_names, gid):
     gname = group_names[gid]
     photos = img_groups[gname]
@@ -235,10 +254,19 @@ model = Model([input_anchor, input_positive, input_negative], stacked_dists, nam
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 
 model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
-test_positive = Model([input_anchor, input_positive, input_negative], positive_dist)
-test_negative = Model([input_anchor, input_positive, input_negative], negative_dist)
-print(test_positive.predict([test_data['anchor'], test_data['positive'], test_data['negative']]))
-print(test_negative.predict([train_data['anchor'], train_data['positive'], train_data['negative']]))
+test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
+test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
+print(test_positive.predict())
+print(test_negative.predict())
+
+print("training data predictions")
+positives = test_positive_model.predict([train_data['anchor'], train_data['positive'], train_data['negative']])
+negatives = test_negative_model.predict([train_data['anchor'], train_data['positive'], train_data['negative']])
+print("f1score is: {}".format(f1score(positives, negatives)))
+print("test data predictions")
+positives = test_positive_model.predict([test_data['anchor'], test_data['positive'], test_data['negative']])
+negatives = test_negative_model.predict([test_data['anchor'], test_data['positive'], test_data['negative']])
+print("f1score is: {}".format(f1score(positives, negatives)))
 
 # model.save('triplet_loss_resnet50.h5')
 
