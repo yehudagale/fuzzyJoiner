@@ -238,7 +238,7 @@ model.fit([train_data['anchor'], train_data['positive'], train_data['negative']]
 test_positive = Model([input_anchor, input_positive, input_negative], positive_dist)
 test_negative = Model([input_anchor, input_positive, input_negative], negative_dist)
 print(test_positive.predict([test_data['anchor'], test_data['positive'], test_data['negative']]))
-print(test_positive.predict([train_data['anchor'], train_data['positive'], train_data['negative']]))
+print(test_negative.predict([train_data['anchor'], train_data['positive'], train_data['negative']]))
 
 # model.save('triplet_loss_resnet50.h5')
 
