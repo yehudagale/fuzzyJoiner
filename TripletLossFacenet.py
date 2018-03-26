@@ -27,7 +27,6 @@ DEBUG_DATA_LENGTH = 100
 
 def f1score(positive, negative):
     #labels[predictions.ravel() < 0.5].sum()
-    predictions = predictions.ravel()
     fsocre = 0.0
     true_positive = 0.0
     false_positive = 0
