@@ -194,7 +194,7 @@ print("anchor: {} positive: {} negative: {}".format(texts['anchor'][0], texts['p
 tokenizer = get_tokenizer(texts)
 print('got tokenizer')
 sequences = get_sequences(texts, tokenizer)
-test_data, train_data, reordered_text = get_test(texts, sequences, 0.05)
+train_data, test_data, reordered_text = get_test(texts, sequences, 0.05)
 number_of_names = len(texts['anchor'])
 print('sequenced words')
 Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
@@ -234,7 +234,11 @@ model = Model([input_anchor, input_positive, input_negative], stacked_dists, nam
 
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 
-model.fit([test_data['anchor'], test_data['positive'], test_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
+model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
+test_positive = Model([input_anchor, input_positive, input_negative], positive_dist)
+test_negative = Model([input_anchor, input_positive, input_negative], negative_dist)
+print(test_positive.predict([test_data['anchor'], test_data['positive'], test_data['negative']])
+print(test_positive.predict([train_data['anchor'], train_data['positive'], train_data['negative']])
 
 # model.save('triplet_loss_resnet50.h5')
 
