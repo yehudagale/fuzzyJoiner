@@ -195,7 +195,7 @@ tokenizer = get_tokenizer(texts)
 print('got tokenizer')
 sequences = get_sequences(texts, tokenizer)
 train_data, test_data, reordered_text = get_test(texts, sequences, 0.05)
-number_of_names = len(texts['anchor'])
+number_of_names = len(train_data['anchor'])
 print('sequenced words')
 Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
 
