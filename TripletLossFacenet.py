@@ -256,8 +256,6 @@ model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
 test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
 test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
-print(test_positive.predict())
-print(test_negative.predict())
 
 print("training data predictions")
 positives = test_positive_model.predict([train_data['anchor'], train_data['positive'], train_data['negative']])
