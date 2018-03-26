@@ -237,8 +237,8 @@ model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
 test_positive = Model([input_anchor, input_positive, input_negative], positive_dist)
 test_negative = Model([input_anchor, input_positive, input_negative], negative_dist)
-print(test_positive.predict([test_data['anchor'], test_data['positive'], test_data['negative']])
-print(test_positive.predict([train_data['anchor'], train_data['positive'], train_data['negative']])
+print(test_positive.predict([test_data['anchor'], test_data['positive'], test_data['negative']]))
+print(test_positive.predict([train_data['anchor'], train_data['positive'], train_data['negative']]))
 
 # model.save('triplet_loss_resnet50.h5')
 
