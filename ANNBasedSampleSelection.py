@@ -9,9 +9,9 @@ import numpy as np
 from keras.layers import Embedding
 from keras.models import Model
 import names_cleanser
+from random import randint
 
-
-
+MARGIN = 2
 
 def process_aliases(con, meta):
 	aliases = Named_Entity_Recognition_Modified.get_aliases_with_ids(con, meta)
@@ -121,9 +121,10 @@ if __name__ == '__main__':
 	    for e, v in entity2names.items():
 	    	index_for_same = entity2names[e]
 	    	anchor_index = index_for_same[0]
-	    	nearest = t.get_nns_by_vector(embedded_output[anchor_index], 5)
+	    	nearest = t.get_nns_by_vector(embedded_output[anchor_index], 3)
 	    	maximum_diff = -1
 	    	minimum_same = 100000
+	    	maximum_same = -1
 	    	for i in nearest:
 	    		if i == anchor_index:
 	    			continue
@@ -141,10 +142,19 @@ if __name__ == '__main__':
 	    		dist = t.get_distance(anchor_index,  index_for_same[i])
 	    		print("same pair:" + entities[anchor_index] + "-" + entities[index_for_same[i]] + " distance:" + str(dist))
 	    		minimum_same = min(dist, minimum_same)
+	    		maximum_same = max(dist, maximum_same)
 
 	    	if (maximum_diff < minimum_same):
 	    		print("hard entity because maximum different is less than minimum same")
 
+	    	# write a set of different completely items now
+	    	j = 0
+	    	while j <= 20:
+	    		k = randint(0, len(entities) - 1)
+	    		if t.get_distance(anchor_index,  k) > maximum_same + MARGIN:
+	    			f.write((entities[anchor_index] + "|" + entities[index_for_same[randint(1, len(index_for_same) - 1)]] + "|" + entities[k] + "\n"))
+	    			k += 1
+	    		j += 1
 
 
     print(len(entity2names))

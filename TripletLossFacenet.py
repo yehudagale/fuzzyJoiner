@@ -139,9 +139,9 @@ def get_test(texts, sequences, percent):
     texts['positive'] = np.array(texts['positive'])
     texts['negative'] = np.array(texts['negative'])
 
-    ret_texts['anchor'] = texts['anchor'][indices]
-    ret_texts['positive'] = texts['positive'][indices]
-    ret_texts['negative'] = texts['negative'][indices]
+    ret_texts['anchor'] = texts['anchor'][indices][-num_validation_samples:]
+    ret_texts['positive'] = texts['positive'][indices][-num_validation_samples:]
+    ret_texts['negative'] = texts['negative'][indices][-num_validation_samples:]
     return ret_train, ret_test, ret_texts
 
 def triplet_loss(y_true, y_pred):
@@ -196,7 +196,8 @@ def do_annoy(model, texts, tokenizer):
         print(nearest)
         nearest_text = set([unique_text[i] for i in nearest])
         expected_text = set(entity2same[unique_text[index]])
-        nearest_text.remove(unique_text[index])
+        if unique_text[index] in nearest_text:
+            nearest_text.remove(unique_text[index])
         print("query={} names = {} true_match = {}".format(unique_text[index], nearest_text, expected_text))
         overlap = expected_text.intersection(nearest_text)
         print(overlap)
@@ -268,7 +269,8 @@ print("f1score is: {}".format(f1score(positives, negatives)))
 # model.save('triplet_loss_resnet50.h5')
 
 inter_model = Model(input_anchor, net_anchor)
-do_annoy(inter_model, texts, tokenizer)
+#do_annoy(inter_model, texts, tokenizer)
+do_annoy(inter_model, reordered_text, tokenizer)
 
 
 
