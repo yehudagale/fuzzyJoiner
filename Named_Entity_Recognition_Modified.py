@@ -397,9 +397,9 @@ if __name__ == '__main__':
     texts2 = texts2[indices]
     texts3 = texts3[indices]
 
-    for i in range(len(texts1)):
-        print(texts1[i] + " paired with: " + texts2[i])
-        print(texts1[i] + " paired with: " + texts3[i])
+    # for i in range(len(texts1)):
+    #     print(texts1[i] + " paired with: " + texts2[i])
+    #     print(texts1[i] + " paired with: " + texts3[i])
 
 
     data1 = annoy_data1[indices]
