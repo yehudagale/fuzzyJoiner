@@ -515,10 +515,10 @@ if __name__ == '__main__':
 
     text_pairs, text_y = create_pairs(x_test_text, y_test_text, z_test_text)
 
-    for i in range(len(text_pairs)):
-        print(str(text_pairs[i]))
-        print(pred[i])
-        print(model.predict([np.array([te_pairs[i, 0]]), np.array([te_pairs[i, 1]])]))
+    # for i in range(len(text_pairs)):
+    #     print(str(text_pairs[i]))
+    #     print(pred[i])
+    #     print(model.predict([np.array([te_pairs[i, 0]]), np.array([te_pairs[i, 1]])]))
 
     # from https://github.com/spotify/annoy
     f = 128
