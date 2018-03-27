@@ -397,9 +397,9 @@ if __name__ == '__main__':
     texts2 = texts2[indices]
     texts3 = texts3[indices]
 
-    for i in range(len(texts1)):
-        print(texts1[i] + " paired with: " + texts2[i])
-        print(texts1[i] + " paired with: " + texts3[i])
+    # for i in range(len(texts1)):
+    #     print(texts1[i] + " paired with: " + texts2[i])
+    #     print(texts1[i] + " paired with: " + texts3[i])
 
 
     data1 = annoy_data1[indices]
@@ -515,10 +515,10 @@ if __name__ == '__main__':
 
     text_pairs, text_y = create_pairs(x_test_text, y_test_text, z_test_text)
 
-    for i in range(len(text_pairs)):
-        print(str(text_pairs[i]))
-        print(pred[i])
-        print(model.predict([np.array([te_pairs[i, 0]]), np.array([te_pairs[i, 1]])]))
+    # for i in range(len(text_pairs)):
+    #     print(str(text_pairs[i]))
+    #     print(pred[i])
+    #     print(model.predict([np.array([te_pairs[i, 0]]), np.array([te_pairs[i, 1]])]))
 
     # from https://github.com/spotify/annoy
     f = 128
@@ -558,34 +558,34 @@ if __name__ == '__main__':
 
     for index in range(len(x_test_text)):
         nearest = t.get_nns_by_vector(mid_predictions[index], 5)
-        print(nearest)
+        # print(nearest)
         nearest_text = [all_texts[i] for i in nearest]
-        print("query={} names = {} true_match = {} reject= {}".format(x_test_text[index], nearest_text, y_test_text[index], z_test_text[index]))
+        # print("query={} names = {} true_match = {} reject= {}".format(x_test_text[index], nearest_text, y_test_text[index], z_test_text[index]))
 
         for i in nearest:
-            print(all_texts[i])
+            # print(all_texts[i])
             if i >= len(x_test_text) and (i < len(x_test_text) + len(y_test_text)):
                 arr = np.array([y_test[i - len(x_test_text)]])
             elif i >= len(x_test_text) + len(y_test_text):
                 arr = np.array([z_test[i - len(x_test_text) - len(y_test_text)]])
             else:
                 arr = np.array([x_test[i]])
-            print(model.predict([np.array([x_test[index]]), arr]))
-            print(t.get_distance(index, i))
+            # print(model.predict([np.array([x_test[index]]), arr]))
+            # print(t.get_distance(index, i))
 
-        print("true match prediction:")
-        print(model.predict([np.array([x_test[index]]), np.array([y_test[index]])]))
-        print("true match distance:")
-        print(t.get_distance(index, index + len(x_test_text)))
+        # print("true match prediction:")
+        # print(model.predict([np.array([x_test[index]]), np.array([y_test[index]])]))
+        # print("true match distance:")
+        # print(t.get_distance(index, index + len(x_test_text)))
 
-        print("true reject prediction:")
-        print(model.predict([np.array([x_test[index]]), np.array([z_test[index]])]))
-        print("true reject distance:")
-        print(t.get_distance(index, index + len(x_test_text) + len(y_test_text)))
+        # print("true reject prediction:")
+        # print(model.predict([np.array([x_test[index]]), np.array([z_test[index]])]))
+        # print("true reject distance:")
+        # print(t.get_distance(index, index + len(x_test_text) + len(y_test_text)))
 
         if y_test_text[index] in nearest_text:
             match += 1
-            print("MATCH FOUND")
+            # print("MATCH FOUND")
         else:
             no_match += 1
 
