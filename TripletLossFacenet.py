@@ -208,7 +208,7 @@ def do_annoy(model, texts, tokenizer):
 def print_deb_data(debbuging_data):
     for i in range(debbuging_data['number']):
         print('anch: --{}-- pos:--{}-- neg:--{}--'.format(debbuging_data['texts']['anchor'][i], debbuging_data['texts']['positive'][i], debbuging_data['texts']['negative']))
-        print('sequences: anch: --{}-- pos:--{}-- neg:--{}--'.format(debbuging_data['sequences']['anchor'][i], debbuging_data['sequences']['positive'][i], debbuging_data['sequences']['negative'])))
+        print('sequences: anch: --{}-- pos:--{}-- neg:--{}--'.format(debbuging_data['sequences']['anchor'][i], debbuging_data['sequences']['positive'][i], debbuging_data['sequences']['negative']))
 
 def debugging_text_and_sequences(reordered_text, training_data, number):
     debbuging_data = {}
@@ -297,4 +297,4 @@ print("f1score is: {}".format(f1score(positives, negatives)))
 
 inter_model = Model(input_anchor, net_anchor)
 do_annoy(inter_model, texts, tokenizer)
-print(debbuging_data)
+print_deb_data(debbuging_data)
