@@ -202,7 +202,7 @@ def do_annoy(model, texts, tokenizer, verbose):
         nearest_text.remove(unique_text[index])
         print("query={} names = {} true_match = {}".format(unique_text[index], nearest_text, expected_text))
         if verbose:
-            print([euclidean_distance((predictions[index],predictions[i])) for i in nearest])
+            print([t.get_distance(index, i) for i in nearest])
         overlap = expected_text.intersection(nearest_text)
         print(overlap)
         m = len(overlap)
