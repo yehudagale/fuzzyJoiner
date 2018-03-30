@@ -12,6 +12,7 @@ import names_cleanser
 from random import randint
 
 MARGIN = 2
+DEBUG = False
 
 def process_aliases(con, meta):
 	aliases = Named_Entity_Recognition_Modified.get_aliases_with_ids(con, meta)
@@ -29,6 +30,9 @@ def process_aliases(con, meta):
 
 	i = 0
 	for row in aliases:
+		i += 1
+		if DEBUG and i > 100:
+			break
 		entityid = row[2]
 		# filter out names that are associated with multiple ids, this will confuse the model trying to learn the distance function
 		if has_difft_id(row[0], entityid) or has_difft_id(row[1], entityid) or has_difft_id(row[2], entityid):
@@ -118,10 +122,10 @@ if __name__ == '__main__':
     t.build(100) # 100 trees
 
     with open(args.output_file, 'w') as f:
-	    for e, v in entity2names.items():
+    	for e, v in entity2names.items():
 	    	index_for_same = entity2names[e]
 	    	anchor_index = index_for_same[0]
-	    	nearest = t.get_nns_by_vector(embedded_output[anchor_index], 3)
+	    	nearest = t.get_nns_by_vector(embedded_output[anchor_index], 10)
 	    	maximum_diff = -1
 	    	minimum_same = 100000
 	    	maximum_same = -1
@@ -135,8 +139,7 @@ if __name__ == '__main__':
 	    			print("same pair is in NN set" + entities[anchor_index] + "-" + entities[i])
 	    		else:
 	    			maximum_diff = max(dist, maximum_diff)
-	    			for j in range(1, len(index_for_same)):
-	    				f.write(entities[anchor_index] + "|" + entities[index_for_same[j]] + "|" + entities[i] + "\n")
+	    			f.write(entities[anchor_index] + "|" + entities[index_for_same[randint(1, len(index_for_same) - 1)]] + "|" + entities[i] + "\n")
 	 
 	    	for i in range(1, len(index_for_same)):
 	    		dist = t.get_distance(anchor_index,  index_for_same[i])
@@ -148,13 +151,16 @@ if __name__ == '__main__':
 	    		print("hard entity because maximum different is less than minimum same")
 
 	    	# write a set of different completely items now
+	    	
+	    	print(maximum_same)
 	    	j = 0
-	    	while j <= 20:
+	    	while j <= 30:
 	    		k = randint(0, len(entities) - 1)
-	    		if t.get_distance(anchor_index,  k) > maximum_same + MARGIN:
+	    		if t.get_distance(anchor_index,  k) > maximum_diff + MARGIN:
 	    			f.write((entities[anchor_index] + "|" + entities[index_for_same[randint(1, len(index_for_same) - 1)]] + "|" + entities[k] + "\n"))
 	    			k += 1
 	    		j += 1
+	    	
 
 
     print(len(entity2names))
