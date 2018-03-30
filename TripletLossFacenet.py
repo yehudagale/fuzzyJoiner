@@ -161,7 +161,7 @@ def euclidean_distance(vects):
     x, y = vects
     return K.sqrt(K.maximum(K.sum(K.square(x - y), axis=1, keepdims=True), K.epsilon()))
 
-def do_annoy(model, texts, tokenizer):
+def do_annoy(model, texts, tokenizer, verbose):
     unique_text = []
     entity_idx = []
     entity2same = {}
@@ -201,6 +201,8 @@ def do_annoy(model, texts, tokenizer):
         expected_text = set(entity2same[unique_text[index]])
         nearest_text.remove(unique_text[index])
         print("query={} names = {} true_match = {}".format(unique_text[index], nearest_text, expected_text))
+        if verbose:
+            print([euclidean_distance((predictions[index],predictions[i])) for i in nearest])
         overlap = expected_text.intersection(nearest_text)
         print(overlap)
         m = len(overlap)
@@ -299,9 +301,9 @@ print("f1score is: {}".format(f1score(positives, negatives)))
 # model.save('triplet_loss_resnet50.h5')
 
 inter_model = Model(input_anchor, net_anchor)
-do_annoy(inter_model, texts, tokenizer)
+do_annoy(inter_model, texts, tokenizer, False)
 print('annoy on embeddings for debbuging_data')
-do_annoy(Named_Entity_Recognition_Modified.embedded_representation(embedder), debbuging_data['texts'], tokenizer)
+do_annoy(Named_Entity_Recognition_Modified.embedded_representation(embedder), debbuging_data['texts'], tokenizer, True)
 print('annoy on full model for debbuging_data')
-do_annoy(inter_model, debbuging_data['texts'], tokenizer)
+do_annoy(inter_model, debbuging_data['texts'], tokenizer, True)
 print_deb_data(debbuging_data)
