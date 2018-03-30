@@ -17,6 +17,8 @@ from embeddings import KazumaCharEmbedding
 
 from annoy import AnnoyIndex
 
+import Named_Entity_Recognition_Modified
+
 #must fix
 MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
