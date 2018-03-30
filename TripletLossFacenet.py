@@ -208,11 +208,22 @@ def do_annoy(model, texts, tokenizer):
 def debugging_text_and_sequences(reordered_text, training_data, number):
     debbuging_data = {}
     debbuging_data['number'] = number
-    debbuging_data['sequences'] = []
-    debbuging_data['texts'] = []
+    debbuging_data['sequences'] = {}
+    debbuging_data['texts'] = {}
+    debbuging_data['sequences']['anchor'] = []
+    debbuging_data['sequences']['positive'] = []
+    debbuging_data['sequences']['negative'] = []
+    debbuging_data['texts']['anchor'] = []
+    debbuging_data['texts']['positive'] = []
+    debbuging_data['texts']['negative'] = []
+
     for i in range(number):
-        debbuging_data['texts'].append(reordered_text[i])
-        debbuging_data['sequences'].append(train_data[i])
+        debbuging_data['texts']['anchor'].append(reordered_text['anchor'][i])
+        debbuging_data['texts']['positive'].append(reordered_text['positive'][i])
+        debbuging_data['texts']['negative'].append(reordered_text['negative'][i])
+        debbuging_data['sequences']['anchor'].append(training_data['anchor'][i])
+        debbuging_data['sequences']['positive'].append(training_data['positive'][i])
+        debbuging_data['sequences']['negative'].append(training_data['negative'][i])
     return debbuging_data
 # triples_data = create_triples(IMAGE_DIR)
 texts = read_file(argv[1])
