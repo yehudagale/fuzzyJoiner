@@ -17,6 +17,8 @@ from embeddings import KazumaCharEmbedding
 
 from annoy import AnnoyIndex
 
+import Named_Entity_Recognition_Modified
+
 #must fix
 MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
@@ -107,7 +109,8 @@ def read_file(file_path):
         line_array = line.split("|")
         texts['anchor'].append(line_array[0])
         texts['positive'].append(line_array[1])
-        texts['negative'].append(line_array[2])
+        #removes the new line charecter at the end
+        texts['negative'].append(line_array[2][:-1])
         i += 1
         if i > DEBUG_DATA_LENGTH and DEBUG:
             break
@@ -139,9 +142,9 @@ def get_test(texts, sequences, percent):
     texts['positive'] = np.array(texts['positive'])
     texts['negative'] = np.array(texts['negative'])
 
-    ret_texts['anchor'] = texts['anchor'][indices][-num_validation_samples:]
-    ret_texts['positive'] = texts['positive'][indices][-num_validation_samples:]
-    ret_texts['negative'] = texts['negative'][indices][-num_validation_samples:]
+    ret_texts['anchor'] = texts['anchor'][indices]
+    ret_texts['positive'] = texts['positive'][indices]
+    ret_texts['negative'] = texts['negative'][indices]
     return ret_train, ret_test, ret_texts
 
 def triplet_loss(y_true, y_pred):
@@ -158,7 +161,7 @@ def euclidean_distance(vects):
     x, y = vects
     return K.sqrt(K.maximum(K.sum(K.square(x - y), axis=1, keepdims=True), K.epsilon()))
 
-def do_annoy(model, texts, tokenizer):
+def do_annoy(model, texts, tokenizer, verbose):
     unique_text = []
     entity_idx = []
     entity2same = {}
@@ -196,9 +199,10 @@ def do_annoy(model, texts, tokenizer):
         print(nearest)
         nearest_text = set([unique_text[i] for i in nearest])
         expected_text = set(entity2same[unique_text[index]])
-        if unique_text[index] in nearest_text:
-            nearest_text.remove(unique_text[index])
+        nearest_text.remove(unique_text[index])
         print("query={} names = {} true_match = {}".format(unique_text[index], nearest_text, expected_text))
+        if verbose:
+            print([t.get_distance(index, i) for i in nearest])
         overlap = expected_text.intersection(nearest_text)
         print(overlap)
         m = len(overlap)
@@ -206,7 +210,31 @@ def do_annoy(model, texts, tokenizer):
         no_match += len(expected_text) - m
 
     print("match: {} no_match: {}".format(match, no_match))
+def print_deb_data(debbuging_data):
+    for i in range(debbuging_data['number']):
+        print('anch: --{}-- pos:--{}-- neg:--{}--'.format(debbuging_data['texts']['anchor'][i], debbuging_data['texts']['positive'][i], debbuging_data['texts']['negative'][i]))
+        print('sequences: anch: --{}-- pos:--{}-- neg:--{}--'.format(debbuging_data['sequences']['anchor'][i], debbuging_data['sequences']['positive'][i], debbuging_data['sequences']['negative'][i]))
 
+def debugging_text_and_sequences(reordered_text, training_data, number):
+    debbuging_data = {}
+    debbuging_data['number'] = number
+    debbuging_data['sequences'] = {}
+    debbuging_data['texts'] = {}
+    debbuging_data['sequences']['anchor'] = []
+    debbuging_data['sequences']['positive'] = []
+    debbuging_data['sequences']['negative'] = []
+    debbuging_data['texts']['anchor'] = []
+    debbuging_data['texts']['positive'] = []
+    debbuging_data['texts']['negative'] = []
+
+    for i in range(number):
+        debbuging_data['texts']['anchor'].append(reordered_text['anchor'][i])
+        debbuging_data['texts']['positive'].append(reordered_text['positive'][i])
+        debbuging_data['texts']['negative'].append(reordered_text['negative'][i])
+        debbuging_data['sequences']['anchor'].append(training_data['anchor'][i])
+        debbuging_data['sequences']['positive'].append(training_data['positive'][i])
+        debbuging_data['sequences']['negative'].append(training_data['negative'][i])
+    return debbuging_data
 # triples_data = create_triples(IMAGE_DIR)
 texts = read_file(argv[1])
 print("anchor: {} positive: {} negative: {}".format(texts['anchor'][0], texts['positive'][0], texts['negative'][0]))
@@ -214,6 +242,10 @@ tokenizer = get_tokenizer(texts)
 print('got tokenizer')
 sequences = get_sequences(texts, tokenizer)
 train_data, test_data, reordered_text = get_test(texts, sequences, 0.05)
+
+debbuging_data = debugging_text_and_sequences(reordered_text, train_data, 20)
+
+
 number_of_names = len(train_data['anchor'])
 print('sequenced words')
 Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
@@ -270,9 +302,9 @@ print("f1score is: {}".format(f1score(positives, negatives)))
 # model.save('triplet_loss_resnet50.h5')
 
 inter_model = Model(input_anchor, net_anchor)
-#do_annoy(inter_model, texts, tokenizer)
-do_annoy(inter_model, reordered_text, tokenizer)
-
-
-
-
+do_annoy(inter_model, texts, tokenizer, False)
+print('annoy on embeddings for debbuging_data')
+do_annoy(Named_Entity_Recognition_Modified.embedded_representation(embedder), debbuging_data['texts'], tokenizer, True)
+print('annoy on full model for debbuging_data')
+do_annoy(inter_model, debbuging_data['texts'], tokenizer, True)
+print_deb_data(debbuging_data)
