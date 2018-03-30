@@ -292,7 +292,4 @@ print("f1score is: {}".format(f1score(positives, negatives)))
 
 inter_model = Model(input_anchor, net_anchor)
 do_annoy(inter_model, texts, tokenizer)
-
-
-
-
+print(debbuging_data)
