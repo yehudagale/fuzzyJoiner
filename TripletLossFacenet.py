@@ -107,7 +107,7 @@ def read_file(file_path):
         line_array = line.split("|")
         texts['anchor'].append(line_array[0])
         texts['positive'].append(line_array[1])
-        texts['negative'].append(line_array[2])
+        texts['negative'].append(line_array[2][:-1])
         i += 1
         if i > DEBUG_DATA_LENGTH and DEBUG:
             break
