@@ -107,6 +107,7 @@ def read_file(file_path):
         line_array = line.split("|")
         texts['anchor'].append(line_array[0])
         texts['positive'].append(line_array[1])
+        #removes the new line charecter at the end
         texts['negative'].append(line_array[2][:-1])
         i += 1
         if i > DEBUG_DATA_LENGTH and DEBUG:
@@ -178,7 +179,7 @@ def do_annoy(model, texts, tokenizer):
 
     sequences = tokenizer.texts_to_sequences(unique_text)
     sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
-    predictions = inter_model.predict(sequences)
+    predictions = model.predict(sequences)
  
 
     t = AnnoyIndex(len(predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
@@ -297,4 +298,6 @@ print("f1score is: {}".format(f1score(positives, negatives)))
 
 inter_model = Model(input_anchor, net_anchor)
 do_annoy(inter_model, texts, tokenizer)
+print('annoy on embeddings for debbuging_data')
+do_annoy(embedder, debbuging_data['texts'], tokenizer)
 print_deb_data(debbuging_data)
