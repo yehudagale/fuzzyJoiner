@@ -167,11 +167,13 @@ def assign_triplets(data, model):
     unique_set = set([])
     for item in data['anchor']:
         print(item)
+        item = tuple(item)
         if item not in unique_set:
             anchor_place[item] = len(unique_sequence)
             unique_sequence.append(item)
             unique_set.add(item)
     for item in sequences:
+        item = tuple(item)
         if item not in unique_set:
             unique_sequence.append(item)
             unique_set.add(item)
