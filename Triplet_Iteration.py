@@ -202,7 +202,7 @@ def assign_triplets(data, model):
         if hash_name in anchor_to_nearest:
             if anchor_to_nearest[hash_name]:
                 new_data['anchor'].append(name)
-                new_data['negative'].append(anchor_to_nearest[name].pop())
+                new_data['negative'].append(anchor_to_nearest[hash_name].pop())
                 new_data['positive'].append(data['positive'][index])
             index += 1
         else:
