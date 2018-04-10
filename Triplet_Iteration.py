@@ -161,7 +161,7 @@ def euclidean_distance(vects):
     x, y = vects
     return K.sqrt(K.maximum(K.sum(K.square(x - y), axis=1, keepdims=True), K.epsilon()))
 def assign_triplets(data, model):
-    sequences = np.concatenate(data['positive'], data['negative'])
+    sequences = np.concatenate((data['positive'], data['negative']))
     unique_sequence = []
     anchor_place = {}
     unique_set = set([])
