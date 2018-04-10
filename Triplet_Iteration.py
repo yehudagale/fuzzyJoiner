@@ -198,14 +198,15 @@ def assign_triplets(data, model):
     index = 0
     while index < len(data['anchor']):
         name = data['anchor'][index]
-        if name in anchor_to_nearest:
-            if anchor_to_nearest[name]:
+        hash_name = tuple(name)
+        if hash_name in anchor_to_nearest:
+            if anchor_to_nearest[hash_name]:
                 new_data['anchor'].append(name)
                 new_data['negative'].append(anchor_to_nearest[name].pop())
                 new_data['positive'].append(data['positive'][index])
             index += 1
         else:
-            anchor_to_nearest[name] = t.get_nns_by_item(anchor_place[name], 5)
+            anchor_to_nearest[hash_name] = t.get_nns_by_item(anchor_place[name], 5)
     new_data['anchor'] = np.array(new_data['anchor'])
     new_data['positive'] = np.array(new_data['positive'])
     new_data['negative'] = np.array(new_data['negative'])
