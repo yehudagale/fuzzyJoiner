@@ -164,19 +164,22 @@ def assign_triplets(data, model):
     sequences = np.concatenate((data['positive'], data['negative']))
     unique_sequence = []
     anchor_place = {}
+    place_to_item = {}
     unique_set = set([])
     for item in data['anchor']:
         print(item)
-        item = tuple(item)
-        if item not in unique_set:
-            anchor_place[item] = len(unique_sequence)
+        item2 = tuple(item)
+        if item2 not in unique_set:
+            anchor_place[item2] = len(unique_sequence)
+            place_to_item[len(unique_sequence)] = item
             unique_sequence.append(item)
-            unique_set.add(item)
+            unique_set.add(item2)
     for item in sequences:
-        item = tuple(item)
-        if item not in unique_set:
+        item2 = tuple(item)
+        if item2 not in unique_set:
+            place_to_item[len(unique_sequence)] = item
             unique_sequence.append(item)
-            unique_set.add(item)
+            unique_set.add(item2)
 
     #make annoy index
     unique_sequence = np.array(unique_sequence)
@@ -202,7 +205,7 @@ def assign_triplets(data, model):
         if hash_name in anchor_to_nearest:
             if anchor_to_nearest[hash_name]:
                 new_data['anchor'].append(name)
-                new_data['negative'].append(anchor_to_nearest[hash_name].pop())
+                new_data['negative'].append(place_to_item[anchor_to_nearest[hash_name].pop()])
                 new_data['positive'].append(data['positive'][index])
             index += 1
         else:
