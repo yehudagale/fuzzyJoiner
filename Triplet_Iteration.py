@@ -289,8 +289,7 @@ print("anchor: {} positive: {} negative: {}".format(texts['anchor'][0], texts['p
 tokenizer = get_tokenizer(texts)
 print('got tokenizer')
 sequences = get_sequences(texts, tokenizer)
-train_data, test_data, reordered_text = get_test(texts, sequences, 0.05)
-
+train_data, test_data, reordered_text = get_test(texts, sequences, 0.2)
 debbuging_data = debugging_text_and_sequences(reordered_text, train_data, 20)
 
 
@@ -332,8 +331,10 @@ stacked_dists = Lambda(
 model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
 
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
+for x in range(3):
+    train_data = assign_triplets(train_data, base_model)
+    model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.25)
 
-model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
 test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
 test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
 
