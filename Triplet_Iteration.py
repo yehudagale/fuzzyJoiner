@@ -337,6 +337,7 @@ model = Model([input_anchor, input_positive, input_negative], stacked_dists, nam
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 for x in range(3):
     train_data = assign_triplets(train_data, base_model)
+    print(train_data)
     model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.25)
 
 test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
