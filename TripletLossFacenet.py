@@ -24,8 +24,8 @@ MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
 
-DEBUG = True
-DEBUG_DATA_LENGTH = 100000
+DEBUG = False
+DEBUG_DATA_LENGTH = 1000000
 
 def f1score(positive, negative):
     #labels[predictions.ravel() < 0.5].sum()
@@ -199,7 +199,8 @@ def do_annoy(model, texts, tokenizer, verbose):
         print(nearest)
         nearest_text = set([unique_text[i] for i in nearest])
         expected_text = set(entity2same[unique_text[index]])
-        nearest_text.remove(unique_text[index])
+        if unique_text[index] in nearest_text:
+            nearest_text.remove(unique_text[index])
         print("query={} names = {} true_match = {}".format(unique_text[index], nearest_text, expected_text))
         if verbose:
             print([t.get_distance(index, i) for i in nearest])
@@ -286,7 +287,7 @@ model = Model([input_anchor, input_positive, input_negative], stacked_dists, nam
 
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
 
-model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=5,  batch_size=15, validation_split=0.2)
+model.fit([train_data['anchor'], train_data['positive'], train_data['negative']], Y_train, epochs=10,  batch_size=15, validation_split=0.2)
 test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
 test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
 

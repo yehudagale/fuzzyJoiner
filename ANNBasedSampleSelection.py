@@ -6,10 +6,12 @@ from annoy import AnnoyIndex
 from matcher_functions import connect
 import argparse
 import numpy as np
-from keras.layers import Embedding
+from keras.layers import Embedding, Concatenate
 from keras.models import Model
 import names_cleanser
 from random import randint
+import keras.backend as K
+import sys
 
 MARGIN = 2
 DEBUG = False
@@ -52,7 +54,6 @@ def process_aliases(con, meta):
 		entity2names[e] = [len(entities) + i for i in range(0, len(v))]
 		entities.extend(v)
 	
-
 	print(entities)
 	print(entity2names)
 	return entities, entity2names
@@ -79,6 +80,8 @@ if __name__ == '__main__':
     tokenizer = Tokenizer(num_words=Named_Entity_Recognition_Modified.MAX_NB_WORDS)
     tokenizer.fit_on_texts(entities)
     sequences = tokenizer.texts_to_sequences(entities)
+    print(sequences)
+ 
     sequences = pad_sequences(sequences, maxlen=Named_Entity_Recognition_Modified.MAX_SEQUENCE_LENGTH)
  
     word_index = tokenizer.word_index
@@ -112,6 +115,8 @@ if __name__ == '__main__':
     model = Named_Entity_Recognition_Modified.embedded_representation(embedding_layer)
 
     embedded_output = model.predict(sequences)
+    print(np.shape(embedded_output))
+    sys.exit(0)
 
     t = AnnoyIndex(len(embedded_output[0]), metric='euclidean')
 
@@ -122,6 +127,7 @@ if __name__ == '__main__':
     t.build(100) # 100 trees
 
     with open(args.output_file, 'w') as f:
+    	
     	for e, v in entity2names.items():
 	    	index_for_same = entity2names[e]
 	    	anchor_index = index_for_same[0]
@@ -129,6 +135,14 @@ if __name__ == '__main__':
 	    	maximum_diff = -1
 	    	minimum_same = 100000
 	    	maximum_same = -1
+	    	same_pair_in_NN_set = False
+
+	    	for i in range(1, len(index_for_same)):
+	    		dist = t.get_distance(anchor_index,  index_for_same[i])
+	    		print("same pair:" + entities[anchor_index] + "-" + entities[index_for_same[i]] + " distance:" + str(dist))
+	    		minimum_same = min(dist, minimum_same)
+	    		maximum_same = max(dist, maximum_same)
+
 	    	for i in nearest:
 	    		if i == anchor_index:
 	    			continue
@@ -136,19 +150,19 @@ if __name__ == '__main__':
 	    		print(entities[anchor_index] + "-" + entities[i] + " distance:" + str(dist))
 	  
 	    		if i in index_for_same:
-	    			print("same pair is in NN set" + entities[anchor_index] + "-" + entities[i])
+	    			same_pair_in_NN_set = True
 	    		else:
 	    			maximum_diff = max(dist, maximum_diff)
-	    			f.write(entities[anchor_index] + "|" + entities[index_for_same[randint(1, len(index_for_same) - 1)]] + "|" + entities[i] + "\n")
-	 
-	    	for i in range(1, len(index_for_same)):
-	    		dist = t.get_distance(anchor_index,  index_for_same[i])
-	    		print("same pair:" + entities[anchor_index] + "-" + entities[index_for_same[i]] + " distance:" + str(dist))
-	    		minimum_same = min(dist, minimum_same)
-	    		maximum_same = max(dist, maximum_same)
+	    			if dist > minimum_same:
+	    				f.write(entities[anchor_index] + "|" + entities[index_for_same[randint(1, len(index_for_same) - 1)]] + "|" + entities[i] + "\n")
 
 	    	if (maximum_diff < minimum_same):
 	    		print("hard entity because maximum different is less than minimum same")
+	    		continue
+	    	elif same_pair_in_NN_set:
+	    		print("easy entity - same pair is in NN set")
+	    	else:
+	    		print("~hard entity" + entities[anchor_index])
 
 	    	# write a set of different completely items now
 	    	

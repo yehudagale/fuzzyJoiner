@@ -158,13 +158,14 @@ class GenericDataCleanser(object):
 
 class NameDataCleanser(GenericDataCleanser):
 
-	def __init__(self, number=0, pairs = 2):
-		if number:
+	def __init__(self, number=0, pairs = 2, limit_pairs = True):
+		if number > 0:
 			self.get=True
 			self.number_of_names = number
 		else:
 			self.get = False
 		self.pairs = pairs
+		self.limit_pairs = limit_pairs
 
 
 	def create_new_name(self, name, current_name_set):
@@ -209,7 +210,7 @@ class NameDataCleanser(GenericDataCleanser):
 
 		dups = []
 		for name in arr:
-			dups.append(name.replace(',', ' , ').replace('-', ' - ').replace('.', ' . ').replace('  ', ' '))
+			dups.append(name.replace(',', ' , ').replace('-', ' - ').replace('.', ' . ').replace('  ', ' ').strip())
 
 		if (len(set(dups))) == 1:
 			return
@@ -226,7 +227,7 @@ class NameDataCleanser(GenericDataCleanser):
 			if len(name.split(' ')) == 1:
 				continue
 			
-			name = name.replace(',', ' , ').replace('-', ' - ').replace('.', ' . ').replace('  ', ' ')
+			name = name.replace(',', ' , ').replace('-', ' - ').replace('.', ' . ').replace('  ', ' ').strip()
 
 			cleansed_arr.append(name.replace('\n', '').replace('"',''))
 
@@ -308,10 +309,10 @@ class NameDataCleanser(GenericDataCleanser):
 			ret_val.extend(additional_elements)
 			if len(ret_val) < self.pairs:
 				return
-		if len(ret_val) > self.pairs:
+		if self.limit_pairs and len(ret_val) > self.pairs:
 			ret_val = ret_val[0:self.pairs]
 
-		assert len(set(ret_val)) == self.pairs
+		assert len(set(ret_val)) >= self.pairs
 		return ret_val
 
 

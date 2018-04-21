@@ -160,6 +160,7 @@ def l2Norm(x):
 def euclidean_distance(vects):
     x, y = vects
     return K.sqrt(K.maximum(K.sum(K.square(x - y), axis=1, keepdims=True), K.epsilon()))
+
 def assign_triplets(data, model):
     sequences = np.concatenate((data['positive'], data['negative']))
     unique_sequence = []
@@ -338,6 +339,7 @@ stacked_dists = Lambda(
 model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
 
 model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
+
 for x in range(3):
     train_data = assign_triplets(train_data, base_model)
     print(train_data)
