@@ -178,10 +178,10 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
     triplets['anchor'] = []
     triplets['positive'] = []
     triplets['negative'] = []
-
+    NNlen = 20
     for key in entity2same:
         index = entity2unique[key]
-        nearest = t.get_nns_by_vector(predictions[index], 10)
+        nearest = t.get_nns_by_vector(predictions[index], NNlen)
         nearest_text = set([unique_text[i] for i in nearest])
         expected_text = set(entity2same[key])
         # annoy has this annoying habit of returning the queried item back as a nearest neighbor.  Remove it.
@@ -194,7 +194,7 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
         match += m
         # since we asked for only 10 nearest neighbors, and we get at most 9 neighbors that are not the same as key (!)
         # make sure we adjust our estimate of no match appropriately
-        no_match += min(len(expected_text), 9) - m
+        no_match += min(len(expected_text), NNlen - 1) - m
 
         # sample only the negatives that are true negatives
         # that is, they are not in the expected set - sampling only 'semi-hard negatives is not defined here'
@@ -325,7 +325,7 @@ while test_match_stats < .9 and counter < num_iter:
     train_seq = get_sequences(train_data, tokenizer)
 
     # check just for 5 epochs because this gets called many times
-    model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=1,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
+    model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=3,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
     current_model = inter_model
     # print some statistics on this epoch
     print("training data predictions")
