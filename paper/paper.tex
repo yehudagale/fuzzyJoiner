@@ -145,7 +145,7 @@ Even using these three rules in combination resulted in too many false negatives
 \input{LSTM}
 \section{Experiments}
 \subsection{Rule Based}
-If we treat it as a success if there is a correct match in any of the first three slots, we get an F\textsubscript{1} score of 0.7. Since the issue is mostly false negatives, and therefore even some of the first three slots were often empty, so even if we accept any of the top 1000 as a success, we get FSCORE2, not much better.
+To test the rule based matcher we ran the blocker followed by the matcher and calculated F-scores based on how many correct matches were in the top 3. We got an F-score of 0.6. Since the issue is mostly false negatives, and therefore even some of the first three slots were often empty, so even if we accept any of the top 1000 as a success, we get an F-score of 0.63, not much better.
 \input{siamese_exper}
 \section{Conclusions}
 While we have a very good machine learning based matcher, that does not appear to translate into very good blocking. We still need to explore why we only getting around 69\% of the matches in the top 40 items, when we have the positive closer than the negative in 97\% of cases.  
