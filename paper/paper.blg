@@ -1,14 +1,13 @@
 This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: paper.aux
-A level-1 auxiliary file: introduction.aux
 The style file: abbrv.bst
 Database file #1: paper.bib
 Warning--empty year in Hasdell:Siamese
 Warning--empty booktitle in auto-join-joining-tables-leveraging-transformations
 You've used 10 entries,
             2118 wiz_defined-function locations,
-            560 strings with 5629 characters,
+            559 strings with 5613 characters,
 and the built_in function-call counts, 3399 in all, are:
 = -- 321
 > -- 164

@@ -29,7 +29,7 @@ However, our observation is that one can actually exploit what the siamese netwo
 
 Our key contributions to the join problem are as follows:
 \begin{itemize}
-\item We demonstrate that we can use siamese networks to learn a distance function that successfully discriminates same pairs from distance pairs with an F score of .9.  Our results suggest that deep learning models can be used successfully as another mechanism for data driven joins, assuming some sort of filtering approach has been applied to the data.
-\item We explore whether it is possible to extend this further, which is to see if the output of the function can in fact be used in an approximate nearest neighbor algorithm to identify neighbors to match with, without any filtering.  
+\item We demonstrate that we can use a triplet loss network to learn a distance function that successfully discriminates same pairs from different pairs with an accuracy of 97\%.  Our results suggest that deep learning models can be used successfully as another mechanism for data driven joins, assuming some sort of filtering approach has been applied to the data.
+\item We try to extend this further; to see if the output of the function can in fact be used in an approximate nearest neighbor algorithm to identify neighbors to match with, without any filtering. 
 \end{itemize}
 

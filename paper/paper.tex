@@ -17,7 +17,7 @@
 
 % ****************** TITLE ****************************************
 
-\title{Using Machine Learning to Preform Single Column Fuzzy Joins}
+\title{Using Deep Learning to Perform Fuzzy Joins}
 
 % possible, but not really needed or used for PVLDB:
 %\subtitle{[Extended Abstract]
@@ -65,11 +65,10 @@
 % e-mail address with \email.
 %
 % 1st. author
-\alignauthor
-Abraham Judah Gale \\
+\alignauthor Abraham Judah Gale \\
 % \titlenote{Dr.~Trovato insisted his name be first.}\\
+       \affaddr{Thesis Submitted to}\\
        \affaddr{Yeshiva University}\\
- %      \affaddr{1932 Wallamaloo Lane}\\
   %     \affaddr{Wallamaloo, New Zealand}\\
        \email{yehuda.gale@gmail.com}
 % 2nd. author
@@ -77,26 +76,24 @@ Abraham Judah Gale \\
 Kavitha Srinivas \\
 % \titlenote{The secretary disavows
 % any knowledge of this author's actions.}\\
+     \affaddr{Advisor}\\
        \affaddr{Rivet Labs}\\
-%       \affaddr{P.O. Box 1212}\\
  %      \affaddr{Dublin, Ohio 43017-6221}\\
        \email{Kavitha@rivetlabs.io}
 % 3rd. author
-\alignauthor Lars Th{\Large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld\titlenote{This author is the
-one who did all the really hard work.}\\
-       \affaddr{The Th{\large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld Group}\\
-       \affaddr{1 Th{\large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld Circle}\\
-       \affaddr{Hekla, Iceland}\\
-       \email{larst@affiliation.org}
+\alignauthor Judah Diament\\
+       \affaddr{Advisor}\\
+       \affaddr{Yeshiva University }\\
+       \email{diament@yu.edu}
 }
 % There's nothing stopping you putting the seventh, eighth, etc.
 % author on the opening page (as the 'third row') but we ask,
 % for aesthetic reasons that you place these 'additional authors'
 % in the \additional authors block, viz.
-\additionalauthors{Additional authors: John Smith (The Th{\o}rv\"{a}ld Group,
-email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
-(The Kumquat Consortium, email: {\small \texttt{jpkumquat@consortium.net}})}
-\date{30 July 1999}
+% \additionalauthors{Additional authors: John Smith (The Th{\o}rv\"{a}ld Group,
+% email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
+% (The Kumquat Consortium, email: {\small \texttt{jpkumquat@consortium.net}})}
+% \date{30 July 1999}
 % Just remember to make sure that the TOTAL number of authors
 % is the number that will appear on the first page PLUS the
 % number that will appear in the \additionalauthors section.
@@ -104,29 +101,14 @@ email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
 
 \maketitle
 
-\begin{abstract}
-The abstract for your paper for the PVLDB Journal submission.
-The template and the example document are based on the ACM SIG Proceedings  templates. This file is part of a package for preparing the submissions for review. These files are in the camera-ready format, but they do not contain the full copyright note.
-Note that after the notification of acceptance, there will be an updated style file for the camera-ready submission containing the copyright note.
-\end{abstract}
 
 
-\include{introduction}
+\input{introduction}
 \input{previos_work}
 \section{Algorithm}
+\subsection{Rule Based}
 We started our process with a simple rule based method for matching and another one for blocking. 
 
-\subsection{Rule-based Matching}
-\begin{table}
-\centering
-\caption{Table 1}
-\begin{tabular}{|c|c|} \hline
-Name&Match\\ \hline
-Douglas Adams&Douglas Noel Adams\\ \hline
-Andreas Capellanus&Andrea Cappellano \\ \hline
-John Adams Whipple&John A. Whipple \\
-\hline\end{tabular}
-\end{table}
 
 \begin{table*}
 \centering
@@ -143,10 +125,12 @@ Douglas&\{Douglas Adams, Douglas Noel Adams\} \\ \hline
 John&\{John Adams Whipple, John A. Whipple\} \\ \hline
 Noel&\{Douglas Noel Adams\} \\ \hline
 Whipple&\{John Adams Whipple, John A. Whipple\} \\
-\hline\end{tabular}
+\hline
+\label{word_table}
+\end{tabular}
 \end{table*}
 
-In the rule-based method, we block based on items that have one word in common. This is the simplest reasonable blocking strategy. Table 2 illustrates what the blocking of the three names from Table 1 would look like. Out of NUMBER1 pairs, NUMBER2 ended up in the same bucket as all their correct matches. NUMBER3 had at least one correct match in the same bucket. To perform the actual matching, we used three simple rules see Table 3:
+In the rule-based method, we block based on items that have one word in common. This is the simplest reasonable blocking strategy. Table \ref{word_table} illustrates what the blocking of the three names from Figure \ref{table-example} would look like. To perform the actual matching, we used three simple rules see Table 3:
 \begin{enumerate}
 
 \item If a word is unique to two items, we match them. (`John Adams Whipple' matches `John A. Whipple' since `Whipple' only apears in those two names)
@@ -154,21 +138,23 @@ In the rule-based method, we block based on items that have one word in common. 
 \item If we treat each name as a set of words, and one set is a subset of the other set, we match them. (`Douglas Adams' matches `Douglas Noel Adams' since \{`Douglas', `Adams'\} $\subseteq$ \{`Douglas', `Noel', `Adams'\})
 
 \end{enumerate} 
-Even using these three rules in combination resulted in too many false negatives. Therefore we decided to treat all matches resulting from any of the three rules as valid. If we treat it as a success if there is a correct match in any of the first three slots, we get an F\textsubscript{1} of FSCORE1. Since the issue is mostly false negatives, and therefore even some of the first three slots were often empty, so even if we accept any of the top 1000 as a success, we get FSCORE2, not much better.
+Even using these three rules in combination resulted in too many false negatives. Therefore we decided to treat all matches resulting from any of the three rules as valid.
 \input{drlim}
 \input{Aproximate_Nearest_Neighbors}
 \input{Triplet_loss}
+\input{LSTM}
 \section{Experiments}
+\subsection{Rule Based}
+If we treat it as a success if there is a correct match in any of the first three slots, we get an F\textsubscript{1} score of 0.7. Since the issue is mostly false negatives, and therefore even some of the first three slots were often empty, so even if we accept any of the top 1000 as a success, we get FSCORE2, not much better.
 \input{siamese_exper}
 \section{Conclusions}
+While we have a very good machine learning based matcher, that does not appear to translate into very good blocking. We still need to explore why we only getting around 69\% of the matches in the top 40 items, when we have the positive closer than the negative in 97\% of cases.  
 %\end{document}  % This is where a 'short' article might terminate
 
 % ensure same length columns on last page (might need two sub-sequent latex runs)
 \balance
 
 %ACKNOWLEDGMENTS are optional
-\section{Acknowledgments}
-
 
 % The following two commands are all you need in the
 % initial runs of your .tex file to
@@ -180,23 +166,10 @@ Even using these three rules in combination resulted in too many false negatives
 % latex bibtex latex latex
 % to resolve all references
 
-\subsection{References}
-Generated by bibtex from your ~.bib file.  Run latex,
-then bibtex, then latex twice (to resolve references)
-to create the ~.bbl file.  Insert that ~.bbl file into
-the .tex source file and comment out
-the command \texttt{{\char'134}thebibliography}.
-
-
 % ****************** APPENDIX **************************************
 
 % Example of an appendix; typically would start on a new page
 %pagebreak
-
-\begin{appendix}
-
-\end{appendix}
-
 
 
 \end{document}
