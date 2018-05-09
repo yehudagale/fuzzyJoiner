@@ -17,8 +17,7 @@
 
 % ****************** TITLE ****************************************
 
-\title{A Sample {\ttlit Proceedings of the VLDB Endowment} Paper in LaTeX
-Format\titlenote{for use with vldb.cls}}
+\title{Using Machine Learning to Preform Single Column Fuzzy Joins}
 
 % possible, but not really needed or used for PVLDB:
 %\subtitle{[Extended Abstract]
@@ -50,7 +49,7 @@ Format\titlenote{for use with vldb.cls}}
 % without further effort on your part as the last section in
 % the body of your article BEFORE References or any Appendices.
 
-\numberofauthors{8} %  in this sample file, there are a *total*
+\numberofauthors{3} %  in this sample file, there are a *total*
 % of EIGHT authors. SIX appear on the 'first-page' (for formatting
 % reasons) and the remaining two appear in the \additionalauthors section.
 
@@ -67,19 +66,21 @@ Format\titlenote{for use with vldb.cls}}
 %
 % 1st. author
 \alignauthor
-Ben Trovato\titlenote{Dr.~Trovato insisted his name be first.}\\
-       \affaddr{Institute for Clarity in Documentation}\\
-       \affaddr{1932 Wallamaloo Lane}\\
-       \affaddr{Wallamaloo, New Zealand}\\
-       \email{trovato@corporation.com}
+Abraham Judah Gale \\
+% \titlenote{Dr.~Trovato insisted his name be first.}\\
+       \affaddr{Yeshiva University}\\
+ %      \affaddr{1932 Wallamaloo Lane}\\
+  %     \affaddr{Wallamaloo, New Zealand}\\
+       \email{yehuda.gale@gmail.com}
 % 2nd. author
 \alignauthor
-G.K.M. Tobin\titlenote{The secretary disavows
-any knowledge of this author's actions.}\\
-       \affaddr{Institute for Clarity in Documentation}\\
-       \affaddr{P.O. Box 1212}\\
-       \affaddr{Dublin, Ohio 43017-6221}\\
-       \email{webmaster@marysville-ohio.com}
+Kavitha Srinivas \\
+% \titlenote{The secretary disavows
+% any knowledge of this author's actions.}\\
+       \affaddr{Rivet Labs}\\
+%       \affaddr{P.O. Box 1212}\\
+ %      \affaddr{Dublin, Ohio 43017-6221}\\
+       \email{Kavitha@rivetlabs.io}
 % 3rd. author
 \alignauthor Lars Th{\Large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld\titlenote{This author is the
 one who did all the really hard work.}\\
@@ -87,25 +88,6 @@ one who did all the really hard work.}\\
        \affaddr{1 Th{\large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld Circle}\\
        \affaddr{Hekla, Iceland}\\
        \email{larst@affiliation.org}
-\and  % use '\and' if you need 'another row' of author names
-% 4th. author
-\alignauthor Lawrence P. Leipuner\\
-       \affaddr{Brookhaven Laboratories}\\
-       \affaddr{Brookhaven National Lab}\\
-       \affaddr{P.O. Box 5000}\\
-       \email{lleipuner@researchlabs.org}
-% 5th. author
-\alignauthor Sean Fogarty\\
-       \affaddr{NASA Ames Research Center}\\
-       \affaddr{Moffett Field}\\
-       \affaddr{California 94035}\\
-       \email{fogartys@amesres.org}
-% 6th. author
-\alignauthor Charles Palmer\\
-       \affaddr{Palmer Research Laboratories}\\
-       \affaddr{8600 Datapoint Drive}\\
-       \affaddr{San Antonio, Texas 78229}\\
-       \email{cpalmer@prl.com}
 }
 % There's nothing stopping you putting the seventh, eighth, etc.
 % author on the opening page (as the 'third row') but we ask,
@@ -130,11 +112,9 @@ Note that after the notification of acceptance, there will be an updated style f
 
 
 \include{introduction}
+\input{previos_work}
 \section{Algorithm}
-\input{drlim}
-\input{Aproximate_Nearest_Neighbors}
-\section{Algorithm}
-We started our process with a simple rule based method for matching and another one for blocking. We then replaced individual pieces with a machine learning method and compared the performance. In the final product we have an elegant completely machine learning based method.
+We started our process with a simple rule based method for matching and another one for blocking. 
 
 \subsection{Rule-based Matching}
 \begin{table}
@@ -175,14 +155,11 @@ In the rule-based method, we block based on items that have one word in common. 
 
 \end{enumerate} 
 Even using these three rules in combination resulted in too many false negatives. Therefore we decided to treat all matches resulting from any of the three rules as valid. If we treat it as a success if there is a correct match in any of the first three slots, we get an F\textsubscript{1} of FSCORE1. Since the issue is mostly false negatives, and therefore even some of the first three slots were often empty, so even if we accept any of the top 1000 as a success, we get FSCORE2, not much better.
-\subsection{Siamese Netwok}
-The first part we replaced was the matcher. To compare the two matchers we created a rule-based matcher using the rules from the rule-based system. To replace it we created a siamese network (figure 1) INSERT FIGURE 1. A Siamese network is two deep neural networks that share weights. One entity is fed into each of the two networks. The output of the two networks is fed into a final layer which determines the distance between the two outputs and accepts or rejects. Siamese networks have been shown to work well for image matching.\cite{Hasdell:Siamese} Before feeding the entities into the networks, we used Kazuma charecter embeddings to encode each entity as a vector. We trained the network on our NUMBER1*0.95 pairs and withheld NUMBER1*0.05 for testing. We chose an equal number of negitive pairs to train the model on. We chose negitive pairs that had at least one word in common with the positive ones. We found that the fscore on the training data was FSCORE3 and FSCORE4 on the test date. This was better than the rule-based matcher which had an f-score of FSCORE5.
-
-We next approached the blocking problem with machine learning. Since the hidden layer of the siamese network is optimized for matching, it should output an embedding of the entity which has its essential qualities with regaurds to matching (figure 2). We then used an aproximate nearest neighbors algorithm to find the nearest neighbors. EXPLAIN MORE Using these techniques we can find the most similar items without needing to block at all. The problem we ran into is only PERCENT1 of the correct matches were in the 10 nearest neighbors. The problem seems to be that since we trained the model using negative pairs that have at least one word in common, it did not learn that names that are completly different should be mapped seperatly (figure 3). We could try to fix this by feeding the model better negative pairs, but we found a more elegant solution. Instead of trying to aproximate the correct location using a siamese network trained for matching, we can use a triplet loss function and teach it to maximize the distance to the closest false pair and minimize the distance to the true matches. To find these closest entities we use our charecter embedings. This allowed us to get an f-score of FSCORE6 on the training set and FSCORE7 on the test set reading the 10 closest entities. Notice that at this point we can do away with the matching algorithm alltogether. We simply use the closest entiies as our matches.
-\section{Related Works}
-There have been a number of attemts to solve the fuzzy join problem. Many of the attemts use varios string matching algorithms for example \cite{Wang:String}. The main issue with using string matching comparisons is that they do not work across a wide variaty of enties ASK DR. SRINIVAS. To our knowledge no serios machine learning aproach has been used for this problem. The problem of blocking has also been dealt with using MapReduce \cite{Vernica:MapReduce}. This approach requires alot of computing power and, since they use a string matching approach in the end, is hard to generalize accross many types of entities. 
-
-
+\input{drlim}
+\input{Aproximate_Nearest_Neighbors}
+\input{Triplet_loss}
+\section{Experiments}
+\input{siamese_exper}
 \section{Conclusions}
 %\end{document}  % This is where a 'short' article might terminate
 
