@@ -2,10 +2,12 @@ from sys import argv
 
 from keras import backend as K
 
+import tensorflow as tf
+
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
-from keras.layers import Dense, Input, Flatten, Dropout, Lambda, GRU
+from keras.layers import Dense, Input, Flatten, Dropout, Lambda, GRU, Activation
 from keras.layers.wrappers import Bidirectional
 
 from keras.layers import Conv1D, MaxPooling1D, Embedding
@@ -24,14 +26,22 @@ from names_cleanser import NameDataCleanser
 
 import random
 
+import sys
+
+import statistics 
+
 #must fix
 MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
 MARGIN=1
+ALPHA=30
 
 DEBUG = False
-DEBUG_DATA_LENGTH = 10000
+DEBUG_DATA_LENGTH = 1000
+DEBUG_ANN = False
+
+USE_ANGULAR_LOSS=False
 
 
 def f1score(positive, negative):
@@ -131,19 +141,70 @@ def split(entities, test_split = 0.2):
     num_validation_samples = int(test_split * len(entities))
     return entities[:-num_validation_samples], entities[-num_validation_samples:]
 
-def triplet_loss(y_true, y_pred):
+"""
+  define a single objective function based on angular loss instead of triplet loss
+"""
+def angular_loss(y_true, y_pred):
+    alpha = K.constant(ALPHA)
+    a_p = y_pred[:,0,0]
+    n_c = y_pred[:,1,0]
+    return K.mean(K.maximum(K.constant(0), K.square(a_p) - K.constant(4) * K.square(tf.tan(alpha)) * K.square(n_c)))
+ 
+
+"""
+    Facenet triplet loss function: https://arxiv.org/pdf/1503.03832.pdf
+"""
+def schroff_triplet_loss(y_true, y_pred):
     margin = K.constant(MARGIN)
     return K.mean(K.maximum(K.constant(0), K.square(y_pred[:,0,0]) - K.square(y_pred[:,1,0]) + margin))
+
+def triplet_loss(y_true, y_pred):
+
+    # margin = K.constant(MARGIN)
+    # return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]))
+    margin = K.constant(MARGIN)
+    return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]))
+
+    # return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]) + K.square(margin - y_pred[:,2,0]))
+
+# the following triplet loss function is from: Deep Metric Learning with Improved Triplet Loss for 
+# Face clustering in Videos 
+def improved_loss(y_true, y_pred):
+    margin = K.constant(MARGIN)
+    lambda_p = 0.02
+    threshold = 0.1
+    a_p_distance = y_pred[:,0,0]
+    a_n_distance = y_pred[:,1,0]
+    p_n_distance = y_pred[:,2,0]
+    phi = a_p_distance - ((a_n_distance + p_n_distance) / 2) + margin
+    psi = a_p_distance - threshold 
+
+    return K.maximum(K.constant(0), phi) + lambda_p * K.maximum(K.constant(0), psi) 
 
 def accuracy(y_true, y_pred):
     return K.mean(y_pred[:,0,0]  < y_pred[:,1,0])
 
 def l2Norm(x):
-    return  K.l2_normalize(x, axis=-1)
+    return K.l2_normalize(x, axis=-1)
+
+def tanhNorm(x):
+    square_sum = K.sum(K.square(x), axis=-1, keepdims=True)
+    dist = K.sqrt(K.maximum(square_sum,  K.epsilon()))
+    tanh = K.tanh(dist)
+    scale = tanh / dist
+    return x * scale
 
 def euclidean_distance(vects):
     x, y = vects
     return K.sqrt(K.maximum(K.sum(K.square(x - y), axis=1, keepdims=True), K.epsilon()))
+
+def n_c_angular_distance(vects):
+    x_a, x_p, x_n = vects
+    return K.sqrt(K.maximum(K.sum(K.square(x_n - ((x_a + x_p) / K.constant(2))), axis=1, keepdims=True), K.epsilon()))
+
+def a_p_angular_distance(vects):
+    x_a, x_p, x_n = vects
+    return K.sqrt(K.maximum(K.sum(K.square(x_a - x_p), axis=1, keepdims=True), K.epsilon()))
 
 def build_unique_entities(entity2same):
     unique_text = []
@@ -160,7 +221,7 @@ def build_unique_entities(entity2same):
     return unique_text, entity2index
 
 
-def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, unique_text, generate_triplets=True):
+def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, unique_text, generate_triplets=True, compute_stats=True):
     predictions = model.predict(sequences)
     t = AnnoyIndex(len(predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
     for i in range(len(predictions)):
@@ -172,12 +233,18 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
 
     match = 0
     no_match = 0
+    accuracy = 0
+    total = 0
+
     triplets = {}
 
+    pos_distances = []
+    neg_distances = []
 
     triplets['anchor'] = []
     triplets['positive'] = []
     triplets['negative'] = []
+
     NNlen = 20
     for key in entity2same:
         index = entity2unique[key]
@@ -206,14 +273,30 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
         for i in negatives:
             for j in positives:
                 dist_pos = t.get_distance(index, entity2unique[j])
+                pos_distances.append(dist_pos)
                 dist_neg = t.get_distance(index, entity2unique[i])
+                neg_distances.append(dist_neg)
+                if dist_pos < dist_neg:
+                    accuracy += 1
+                total += 1
                 print(key + "|" +  j + "|" + i)
                 print(dist_pos)
                 print(dist_neg)               
                 triplets['anchor'].append(key)
                 triplets['positive'].append(j)
                 triplets['negative'].append(i)
-    if generate_triplets:
+
+    if compute_stats:
+        print("mean positive distance:" + str(statistics.mean(pos_distances)))
+        print("stdev positive distance:" + str(statistics.stdev(pos_distances)))
+        print("max positive distance:" + str(max(pos_distances)))
+        print("mean neg distance:" + str(statistics.mean(neg_distances)))
+        print("stdev neg distance:" + str(statistics.stdev(neg_distances)))
+        print("max neg distance:" + str(max(neg_distances)))
+
+    if not generate_triplets:
+        print("Accuracy in the ANN for triplets that obey the distance func:" + str(accuracy / total))
+    else:
         return triplets, match/(match + no_match)
     return match/(match + no_match)
 
@@ -240,7 +323,8 @@ def build_model(embedder):
     net = GRU(128, return_sequences=True, activation='relu', name='embed2')(net)
     net = GRU(128, return_sequences=True, activation='relu', name='embed2a')(net)
     net = GRU(128, activation='relu', name='embed3')(net)
-    net = Lambda(l2Norm, output_shape=[128])(net)
+    # net = Lambda(l2Norm, output_shape=[128])(net)
+    # net = Lambda(tanhNorm, output_shape=[128])(net)
 
     base_model = Model(embedder.input, net, name='triplet_model')
 
@@ -253,12 +337,25 @@ def build_model(embedder):
     net_negative = base_model(input_negative)
     positive_dist = Lambda(euclidean_distance, name='pos_dist')([net_anchor, net_positive])
     negative_dist = Lambda(euclidean_distance, name='neg_dist')([net_anchor, net_negative])
-    stacked_dists = Lambda( 
-                lambda vects: K.stack(vects, axis=1),
-                name='stacked_dists'
-    )([positive_dist, negative_dist])
-    model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
-    model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
+ 
+    if USE_ANGULAR_LOSS:
+        n_c = Lambda(n_c_angular_distance, name='nc_angular_dist')([net_anchor, net_positive, net_negative])
+        a_p = Lambda(a_p_angular_distance, name='ap_angular_dist')([net_anchor, net_positive, net_negative])
+        stacked_dists = Lambda( 
+                    lambda vects: K.stack(vects, axis=1),
+                    name='stacked_dists'
+                    )([a_p, n_c])
+        model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
+        model.compile(optimizer="rmsprop", loss=angular_loss, metrics=[accuracy])
+    else:
+        exemplar_negative_dist = Lambda(euclidean_distance, name='exemplar_neg_dist')([net_positive, net_negative])
+        stacked_dists = Lambda( 
+                    lambda vects: K.stack(vects, axis=1),
+                    name='stacked_dists'
+                    )([positive_dist, negative_dist, exemplar_negative_dist])
+
+        model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
+        model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
     test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
     test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
     inter_model = Model(input_anchor, net_anchor)
@@ -273,7 +370,9 @@ entity2same_train = generate_names(train)
 entity2same_test = generate_names(test, limit_pairs=True)
 print(entity2same_train)
 print(entity2same_test)
-tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, split=" ")   
+# change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
+# clues for entity names
+tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
 
 # build a set of data structures useful for annoy, the set of unique entities (unique_text), 
 # a mapping of entities in texts to an index in unique_text, a mapping of entities to other same entities, and the actual
@@ -295,12 +394,17 @@ model, test_positive_model, test_negative_model, inter_model = build_model(embed
 embedder_model = embedded_representation_model(embedder)
 
 
+if DEBUG_ANN:
+    generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, False, True)
+    sys.exit()
+
 test_data, test_match_stats = generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test)
 test_seq = get_sequences(test_data, tokenizer)
 print("Test stats:" + str(test_match_stats))
 
 match_stats = 0
-num_iter = 100
+# num_iter = 100
+num_iter = 1
 counter = 0
 current_model = embedder_model
 prev_match_stats = 0
@@ -325,7 +429,7 @@ while test_match_stats < .9 and counter < num_iter:
     train_seq = get_sequences(train_data, tokenizer)
 
     # check just for 5 epochs because this gets called many times
-    model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=3,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
+    model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=1,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
     current_model = inter_model
     # print some statistics on this epoch
     print("training data predictions")
