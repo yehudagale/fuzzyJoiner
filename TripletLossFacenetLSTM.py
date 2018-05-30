@@ -1,8 +1,43 @@
-from sys import argv
+import numpy as np
+import tensorflow as tf
+import random as rn
+
+# The below is necessary in Python 3.2.3 onwards to
+# have reproducible behavior for certain hash-based operations.
+# See these references for further details:
+# https://docs.python.org/3.4/using/cmdline.html#envvar-PYTHONHASHSEED
+# https://github.com/keras-team/keras/issues/2280#issuecomment-306959926
+
+import os
+os.environ['PYTHONHASHSEED'] = '0'
+
+# The below is necessary for starting Numpy generated random numbers
+# in a well-defined initial state.
+
+np.random.seed(42)
+
+# The below is necessary for starting core Python generated random numbers
+# in a well-defined state.
+
+rn.seed(12345)
+
+# Force TensorFlow to use single thread.
+# Multiple threads are a potential source of
+# non-reproducible results.
+# For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
+
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 
 from keras import backend as K
 
-import tensorflow as tf
+# The below tf.set_random_seed() will make random number generation
+# in the TensorFlow backend have a well-defined initial state.
+# For further details, see: https://www.tensorflow.org/api_docs/python/tf/set_random_seed
+
+tf.set_random_seed(1234)
+
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -14,8 +49,6 @@ from keras.layers import Conv1D, MaxPooling1D, Embedding
 
 from keras.models import Model, model_from_json, Sequential
 
-import numpy as np
-
 from embeddings import KazumaCharEmbedding
 
 from annoy import AnnoyIndex
@@ -23,8 +56,6 @@ from annoy import AnnoyIndex
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 from names_cleanser import NameDataCleanser
-
-import random
 
 import sys
 
@@ -36,11 +67,12 @@ import argparse
 MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
-MARGIN=30
+MARGIN=10
 ALPHA=30
+USE_GRU=True
 
 DEBUG = True
-DEBUG_DATA_LENGTH = 1000
+DEBUG_DATA_LENGTH = 100
 DEBUG_ANN = False
 
 USE_ANGULAR_LOSS=False
@@ -49,6 +81,7 @@ TRAIN_NEIGHBOR_LEN=20
 TEST_NEIGHBOR_LEN=20
 EMBEDDING_TYPE = 'Kazuma'
 NUM_LAYERS = 3
+USE_L2_NORM = False
 
 
 def f1score(positive, negative):
@@ -80,22 +113,16 @@ def get_embedding_layer(tokenizer):
     for word, i in word_index.items():
 
         if i >= MAX_NB_WORDS:
-
             continue
         embedding_vector = kz.emb(word)
 
-        # i = 0
-        # while sum(embedding_vector) == 0 and i <= 1000:
-        #     embedding_vector = k.emb(word)
-        #     i++;
-        #     if i == 1000:
-        #         print("fail")
         if embedding_vector is not None:
             if sum(embedding_vector) == 0:
                 print("failed to find embedding for:" + word)
             # words not found in embedding index will be all-zeros.
-
             embedding_matrix[i] = embedding_vector
+    print("Number of words:" + str(num_words))
+
     embedding_layer = Embedding(num_words,
 
                                 EMBEDDING_DIM,
@@ -141,10 +168,10 @@ def read_file(file_path):
     return texts
 
 def split(entities, test_split = 0.2):
-    random.shuffle(entities)
     if DEBUG:
         ents = entities[0:DEBUG_DATA_LENGTH]
     else:
+        random.shuffle(entities)
         ents = entities
     num_validation_samples = int(test_split * len(ents))
     return ents[:-num_validation_samples], ents[-num_validation_samples:]
@@ -340,6 +367,12 @@ def build_model(embedder):
     main_input = Input(shape=(MAX_SEQUENCE_LENGTH,))
     net = embedder(main_input)
 
+    net = GRU(128, return_sequences=True, activation='relu', name='embed')(net)
+    net = GRU(128, return_sequences=True, activation='relu', name='embed2')(net)
+    net = GRU(128, return_sequences=True, activation='relu', name='embed2a')(net)
+    net = GRU(128, activation='relu', name='embed3')(net)
+
+    """
     for i in range(0, NUM_LAYERS):
         net = get_hidden_layer('embed' + str(i), net, False)
 
@@ -347,6 +380,8 @@ def build_model(embedder):
     
     if USE_L2_NORM:
         net = Lambda(l2Norm, output_shape=[128])(net)
+    """
+
 
     base_model = Model(embedder.input, net, name='triplet_model')
 
@@ -379,7 +414,7 @@ def build_model(embedder):
                     )([positive_dist, negative_dist, exemplar_negative_dist])
 
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
-        model.compile(optimizer="rmsprop", loss=LOSS_FUNCTION, metrics=[accuracy])
+        model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
     test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
     test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
     inter_model = Model(input_anchor, net_anchor)
@@ -409,14 +444,8 @@ parser.add_argument('--input', type=str, help='Input file')
 
 
 args = parser.parse_args()
-if args.debug_sample_size:
-    DEBUG=True
-    DEBUG_DATA_LENGTH=args.debug_sample_size
-    print('Debug data length:' + str(DEBUG_DATA_LENGTH))
 
-MARGIN = args.margin
-print('Margin:' + str(MARGIN))
-
+"""
 LOSS_FUNCTION = None
 if args.loss_function == 'triplet-loss':
     LOSS_FUNCTION=schroff_triplet_loss
@@ -428,6 +457,14 @@ elif args.loss_function == 'angular-loss':
     USE_ANGULAR_LOSS = true
     LOSS_FUNCTION = angular_loss
 print('Loss function: ' + args.loss_function)
+
+if args.debug_sample_size:
+    DEBUG=True
+    DEBUG_DATA_LENGTH=args.debug_sample_size
+    print('Debug data length:' + str(DEBUG_DATA_LENGTH))
+
+MARGIN = args.margin
+print('Margin:' + str(MARGIN))
 
 TRAIN_NEIGHBOR_LEN = args.train_neighbor_len
 TEST_NEIGHBOR_LEN = args.test_neighbor_len
@@ -445,10 +482,15 @@ print('Use GRU: ' + str(args.use_GRU))
 
 NUM_LAYERS = args.num_layers - 1
 print('Num layers: ' + str(NUM_LAYERS))
+"""
 
 # read all entities and create positive parts of a triplet
 entities = read_entities(args.input)
 train, test = split(entities, test_split = .20)
+print("TRAIN")
+print(train)
+print("TEST")
+print(test)
 
 entity2same_train = generate_names(train)
 entity2same_test = generate_names(test, limit_pairs=True)
@@ -464,6 +506,9 @@ tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;
 # so we need to create them once for re-use
 unique_text, entity2unique = build_unique_entities(entity2same_train)
 unique_text_test, entity2unique_test = build_unique_entities(entity2same_test)
+
+print("train text len:" + str(len(unique_text)))
+print("test text len:" + str(len(unique_text_test)))
 
 tokenizer.fit_on_texts(unique_text + unique_text_test)
 
