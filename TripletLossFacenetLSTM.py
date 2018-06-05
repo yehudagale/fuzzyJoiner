@@ -1,7 +1,9 @@
+
 import numpy as np
 import tensorflow as tf
-import random as rn
+import random as random
 
+"""
 # The below is necessary in Python 3.2.3 onwards to
 # have reproducible behavior for certain hash-based operations.
 # See these references for further details:
@@ -38,7 +40,8 @@ tf.set_random_seed(1234)
 
 sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
 K.set_session(sess)
-
+"""
+from keras import backend as K
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
@@ -71,7 +74,7 @@ MARGIN=10
 ALPHA=30
 USE_GRU=True
 
-DEBUG = True
+DEBUG = False
 DEBUG_DATA_LENGTH = 100
 DEBUG_ANN = False
 
@@ -558,7 +561,7 @@ while test_match_stats < .9 and counter < num_iter:
     train_seq = get_sequences(train_data, tokenizer)
 
     # check just for 5 epochs because this gets called many times
-    model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=1,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
+    model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
     current_model = inter_model
     # print some statistics on this epoch
     
