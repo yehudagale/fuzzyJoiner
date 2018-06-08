@@ -1,7 +1,8 @@
 
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 import random as random
+import cntk as C
 
 """
 # The below is necessary in Python 3.2.3 onwards to
@@ -74,7 +75,7 @@ MARGIN=10
 ALPHA=30
 USE_GRU=True
 
-DEBUG = False
+DEBUG = True
 DEBUG_DATA_LENGTH = 100
 DEBUG_ANN = False
 
@@ -186,7 +187,7 @@ def angular_loss(y_true, y_pred):
     alpha = K.constant(ALPHA)
     a_p = y_pred[:,0,0]
     n_c = y_pred[:,1,0]
-    return K.mean(K.maximum(K.constant(0), K.square(a_p) - K.constant(4) * K.square(tf.tan(alpha)) * K.square(n_c)))
+    return K.mean(K.maximum(K.constant(0), K.square(a_p) - K.constant(4) * K.square(C.sin(alpha)/C.cos(alpha)) * K.square(n_c)))
  
 
 """
@@ -231,6 +232,13 @@ def tanhNorm(x):
     tanh = K.tanh(dist)
     scale = tanh / dist
     return x * scale
+def stacked_distance_3(vects):
+    a, b, c = vects
+    a_in = C.input_variable(a)
+    b_in = C.input_variable(b)
+    c_in = C.input_variable(c)
+    print(a.shape())
+    return C.splice(a_in,b_in,c_in, axis=1)
 
 def euclidean_distance(vects):
     x, y = vects
@@ -404,7 +412,7 @@ def build_model(embedder):
         n_c = Lambda(n_c_angular_distance, name='nc_angular_dist')([net_anchor, net_positive, net_negative])
         a_p = Lambda(a_p_angular_distance, name='ap_angular_dist')([net_anchor, net_positive, net_negative])
         stacked_dists = Lambda( 
-                    lambda vects: K.stack(vects, axis=1),
+                    lambda vects: C.splice(*vects, axis=1),
                     name='stacked_dists'
                     )([a_p, n_c])
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
@@ -412,7 +420,7 @@ def build_model(embedder):
     else:
         exemplar_negative_dist = Lambda(euclidean_distance, name='exemplar_neg_dist')([net_positive, net_negative])
         stacked_dists = Lambda( 
-                    lambda vects: K.stack(vects, axis=1),
+                   stacked_distance_3,
                     name='stacked_dists'
                     )([positive_dist, negative_dist, exemplar_negative_dist])
 
