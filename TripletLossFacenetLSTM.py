@@ -1,47 +1,36 @@
-
 import numpy as np
 # import tensorflow as tf
 import random as random
-import cntk as C
-
-"""
+# import cntk as C
+# """
 # The below is necessary in Python 3.2.3 onwards to
 # have reproducible behavior for certain hash-based operations.
 # See these references for further details:
 # https://docs.python.org/3.4/using/cmdline.html#envvar-PYTHONHASHSEED
 # https://github.com/keras-team/keras/issues/2280#issuecomment-306959926
-
 import os
 os.environ['PYTHONHASHSEED'] = '0'
-
 # The below is necessary for starting Numpy generated random numbers
 # in a well-defined initial state.
-
 np.random.seed(42)
-
 # The below is necessary for starting core Python generated random numbers
 # in a well-defined state.
-
-rn.seed(12345)
-
+random.seed(12345)
 # Force TensorFlow to use single thread.
 # Multiple threads are a potential source of
 # non-reproducible results.
 # For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
+# session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+import theano as T
 
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-
-from keras import backend as K
-
+# from keras import backend as K
 # The below tf.set_random_seed() will make random number generation
 # in the TensorFlow backend have a well-defined initial state.
 # For further details, see: https://www.tensorflow.org/api_docs/python/tf/set_random_seed
-
-tf.set_random_seed(1234)
-
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-K.set_session(sess)
-"""
+# tf.set_random_seed(1234)
+# sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+# K.set_session(sess)
+# """
 from keras import backend as K
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -187,7 +176,7 @@ def angular_loss(y_true, y_pred):
     alpha = K.constant(ALPHA)
     a_p = y_pred[:,0,0]
     n_c = y_pred[:,1,0]
-    return K.mean(K.maximum(K.constant(0), K.square(a_p) - K.constant(4) * K.square(C.sin(alpha)/C.cos(alpha)) * K.square(n_c)))
+    return K.mean(K.maximum(K.constant(0), K.square(a_p) - K.constant(4) * K.square(T.tensor.tan(alpha)) * K.square(n_c)))
  
 
 """
@@ -232,13 +221,6 @@ def tanhNorm(x):
     tanh = K.tanh(dist)
     scale = tanh / dist
     return x * scale
-def stacked_distance_3(vects):
-    a, b, c = vects
-    a_in = C.input_variable(a)
-    b_in = C.input_variable(b)
-    c_in = C.input_variable(c)
-    print(a.shape())
-    return C.splice(a_in,b_in,c_in, axis=1)
 
 def euclidean_distance(vects):
     x, y = vects
@@ -270,6 +252,7 @@ def build_unique_entities(entity2same):
 def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, unique_text, test):
     predictions = model.predict(sequences)
     t = AnnoyIndex(len(predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
+    t.set_seed(123)
     for i in range(len(predictions)):
         # print(predictions[i])
         v = predictions[i]
@@ -319,7 +302,7 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
         positives = expected_text
         negatives = nearest_text - expected_text
 
-        print(key + str(expected_text) + str(nearest_text))
+        # print(key + str(expected_text) + str(nearest_text))
         for i in negatives:
             for j in positives:
                 dist_pos = t.get_distance(index, entity2unique[j])
@@ -329,9 +312,9 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
                 if dist_pos < dist_neg:
                     accuracy += 1
                 total += 1
-                print(key + "|" +  j + "|" + i)
-                print(dist_pos)
-                print(dist_neg)               
+                # print(key + "|" +  j + "|" + i)
+                # print(dist_pos)
+                # print(dist_neg)               
                 triplets['anchor'].append(key)
                 triplets['positive'].append(j)
                 triplets['negative'].append(i)
@@ -386,7 +369,6 @@ def build_model(embedder):
     """
     for i in range(0, NUM_LAYERS):
         net = get_hidden_layer('embed' + str(i), net, False)
-
     net = get_hidden_layer('embed_last', net, True)
     
     if USE_L2_NORM:
@@ -405,23 +387,24 @@ def build_model(embedder):
     net_anchor = base_model(input_anchor)
     net_positive = base_model(input_positive)
     net_negative = base_model(input_negative)
-    positive_dist = Lambda(euclidean_distance, name='pos_dist')([net_anchor, net_positive])
-    negative_dist = Lambda(euclidean_distance, name='neg_dist')([net_anchor, net_negative])
+    positive_dist = Lambda(euclidean_distance, name='pos_dist', output_shape=(1,))([net_anchor, net_positive])
+    negative_dist = Lambda(euclidean_distance, name='neg_dist', output_shape=(1,))([net_anchor, net_negative])
  
     if USE_ANGULAR_LOSS:
         n_c = Lambda(n_c_angular_distance, name='nc_angular_dist')([net_anchor, net_positive, net_negative])
         a_p = Lambda(a_p_angular_distance, name='ap_angular_dist')([net_anchor, net_positive, net_negative])
         stacked_dists = Lambda( 
-                    lambda vects: C.splice(*vects, axis=1),
-                    name='stacked_dists'
+                    lambda vects: K.stack(vects, axis=1),
+                    name='stacked_dists', output_shape=(3, 1)
                     )([a_p, n_c])
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
         model.compile(optimizer="rmsprop", loss=angular_loss, metrics=[accuracy])
     else:
-        exemplar_negative_dist = Lambda(euclidean_distance, name='exemplar_neg_dist')([net_positive, net_negative])
+        exemplar_negative_dist = Lambda(euclidean_distance, name='exemplar_neg_dist', output_shape=(1,))([net_positive, net_negative])
         stacked_dists = Lambda( 
-                   stacked_distance_3,
-                    name='stacked_dists'
+                   # lambda vects: C.splice(*vects, axis=C.Axis.new_leading_axis()).eval(vects),
+                    lambda vects: K.stack(vects, axis=1),
+                    name='stacked_dists', output_shape=(3, 1)
                     )([positive_dist, negative_dist, exemplar_negative_dist])
 
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
@@ -429,6 +412,12 @@ def build_model(embedder):
     test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
     test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
     inter_model = Model(input_anchor, net_anchor)
+    print("output_shapes")
+    model.summary()
+    # print(positive_dist.output_shape)
+    # print(negative_dist.output_shape)
+    # print(exemplar_negative_dist)
+    # print(neg_dist.output_shape)
 
     return model, test_positive_model, test_negative_model, inter_model
 
@@ -468,29 +457,22 @@ elif args.loss_function == 'angular-loss':
     USE_ANGULAR_LOSS = true
     LOSS_FUNCTION = angular_loss
 print('Loss function: ' + args.loss_function)
-
 if args.debug_sample_size:
     DEBUG=True
     DEBUG_DATA_LENGTH=args.debug_sample_size
     print('Debug data length:' + str(DEBUG_DATA_LENGTH))
-
 MARGIN = args.margin
 print('Margin:' + str(MARGIN))
-
 TRAIN_NEIGHBOR_LEN = args.train_neighbor_len
 TEST_NEIGHBOR_LEN = args.test_neighbor_len
 print('Train neighbor length: ' + str(TRAIN_NEIGHBOR_LEN))
 print('Test neighbor length: ' + str(TEST_NEIGHBOR_LEN))
-
 USE_L2_NORM = args.use_l2_norm
 print('Use L2Norm: ' + str(USE_L2_NORM)) 
-
 EMBEDDING_TYPE = args.embedding_type
 print('Embedding type: ' + EMBEDDING_TYPE)
-
 USE_GRU = args.use_GRU
 print('Use GRU: ' + str(args.use_GRU))
-
 NUM_LAYERS = args.num_layers - 1
 print('Num layers: ' + str(NUM_LAYERS))
 """
@@ -585,6 +567,3 @@ while test_match_stats < .9 and counter < num_iter:
 
     test_match_stats = generate_triplets_from_ANN(current_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
     print("Test stats:" + str(test_match_stats))
-
-
-
