@@ -1,5 +1,5 @@
 import numpy as np
-# import tensorflow as tf
+import tensorflow as tf
 import random as random
 # import cntk as C
 # """
@@ -21,17 +21,17 @@ random.seed(12345)
 # non-reproducible results.
 # For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
 # session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-import theano as T
+# import theano as T
 
-# from keras import backend as K
+from keras import backend as K
 # The below tf.set_random_seed() will make random number generation
 # in the TensorFlow backend have a well-defined initial state.
 # For further details, see: https://www.tensorflow.org/api_docs/python/tf/set_random_seed
-# tf.set_random_seed(1234)
-# sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-# K.set_session(sess)
-# """
-from keras import backend as K
+tf.set_random_seed(1234)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
+
+# from keras import backend as K
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
