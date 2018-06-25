@@ -20,7 +20,7 @@ random.seed(12345)
 # Multiple threads are a potential source of
 # non-reproducible results.
 # For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
-# session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 # import theano as T
 
 from keras import backend as K
