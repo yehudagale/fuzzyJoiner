@@ -1,0 +1,38 @@
+{
+  "hyper_parameters_optimization": {
+    "method": {
+      "name": "rbfopt",
+      "parameters": [
+        {
+          "name": "filename",
+          "string_value": "val_dict_list.json"
+        },
+        {
+          "name": "time_interval",
+          "string_value": "steps"
+        },
+        {
+          "name": "objective",
+          "string_value": "accuracy"
+        },
+        {
+          "name": "maximize_or_minimize",
+          "string_value": "maximize"
+        },
+        {
+          "name":"num_optimizer_steps",
+          "int_value": 10
+        }
+      ]
+    },
+    "hyper_parameters": [
+      {
+        "name": "margin",
+        "int_range": {
+          "min_value": 1,
+          "max_value": 20
+        }
+      }
+    ]
+  }
+}

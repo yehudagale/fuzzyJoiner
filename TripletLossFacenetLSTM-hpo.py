@@ -36,8 +36,8 @@ MAX_SEQUENCE_LENGTH = 10
 MARGIN=10
 ALPHA=30
 
-DEBUG = False
-DEBUG_DATA_LENGTH = 100
+DEBUG = True
+DEBUG_DATA_LENGTH = 1000
 DEBUG_ANN = False
 
 USE_ANGULAR_LOSS=False
@@ -47,6 +47,8 @@ TEST_NEIGHBOR_LEN=20
 EMBEDDING_TYPE = 'Kazuma'
 NUM_LAYERS = 3
 USE_L2_NORM = False
+
+output_file_name_for_hpo = "val_dict_list.json"
 
 def f1score(positive, negative):
     #labels[predictions.ravel() < 0.5].sum()
@@ -297,6 +299,12 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
     print("stdev neg distance:" + str(statistics.stdev(neg_distances)))
     print("max neg distance:" + str(max(neg_distances)))
     print("Accuracy in the ANN for triplets that obey the distance func:" + str(accuracy / total))
+
+    obj = {}
+    obj['accuracy'] = accuracy / total
+    obj['timesteps'] = 1
+    with open(output_file_name_for_hpo, 'w') as out:
+        json.dump(obj)
 
     if test:
         return match/(match + no_match)
