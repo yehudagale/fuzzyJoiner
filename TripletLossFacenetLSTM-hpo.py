@@ -302,7 +302,7 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
 
     obj = {}
     obj['accuracy'] = accuracy / total
-    obj['timesteps'] = 1
+    obj['steps'] = 1
     with open(output_file_name_for_hpo, 'w') as out:
         json.dump(obj, out)
 
