@@ -324,7 +324,7 @@ def build_model(embedder):
 
     for i in range(0, NUM_LAYERS):
         net = GRU(128, return_sequences=True, activation='relu', name='embed' + str(i))(net)
-    net = GRU(128, activation='relu', name='embed' + str(i))(net)
+    net = GRU(128, activation='relu', name='embed' + str(i+1))(net)
     
     if USE_L2_NORM:
         net = Lambda(l2Norm, output_shape=[128])(net)
@@ -395,11 +395,11 @@ LOSS_FUNCTION = None
 if args.loss_function == 'schroff-loss':
     LOSS_FUNCTION=schroff_triplet_loss
 elif args.loss_function == 'improved-loss':
-    LOSS_FUNCTION=improved_triplet_loss
+    LOSS_FUNCTION=improved_loss
 elif args.loss_function == 'our-loss':
     LOSS_FUNCTION=triplet_loss
 elif args.loss_function == 'angular-loss':
-    USE_ANGULAR_LOSS = true
+    USE_ANGULAR_LOSS = True
     LOSS_FUNCTION = angular_loss
 print('Loss function: ' + args.loss_function)
 
