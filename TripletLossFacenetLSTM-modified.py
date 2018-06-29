@@ -60,7 +60,7 @@ import argparse
 MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
-MARGIN=10
+MARGIN=1
 ALPHA=30
 USE_GRU=True
 
@@ -74,7 +74,7 @@ TRAIN_NEIGHBOR_LEN=20
 TEST_NEIGHBOR_LEN=20
 EMBEDDING_TYPE = 'Kazuma'
 NUM_LAYERS = 3
-USE_L2_NORM = False
+USE_L2_NORM = True
 
 
 def f1score(positive, negative):
@@ -370,10 +370,10 @@ def build_model(embedder):
     for i in range(0, NUM_LAYERS):
         net = get_hidden_layer('embed' + str(i), net, False)
     net = get_hidden_layer('embed_last', net, True)
-    
+    """
     if USE_L2_NORM:
         net = Lambda(l2Norm, output_shape=[128])(net)
-    """
+
 
 
     base_model = Model(embedder.input, net, name='triplet_model')
