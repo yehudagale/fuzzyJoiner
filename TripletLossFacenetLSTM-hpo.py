@@ -5,6 +5,30 @@ import json
 
 from keras import backend as K
 
+########################## FIX SEEDS ################################################
+import os
+os.environ['PYTHONHASHSEED'] = '0'
+# The below is necessary for starting Numpy generated random numbers
+# in a well-defined initial state.
+np.random.seed(42)
+# The below is necessary for starting core Python generated random numbers
+# in a well-defined state.
+random.seed(12345)
+# Force TensorFlow to use single thread.
+# Multiple threads are a potential source of
+# non-reproducible results.
+# For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+#
+# The below tf.set_random_seed() will make random number generation
+# in the TensorFlow backend have a well-defined initial state.
+# For further details, see: https://www.tensorflow.org/api_docs/python/tf/set_random_seed
+tf.set_random_seed(1234)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
+
+#########################################################################
+
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
@@ -36,8 +60,8 @@ MAX_SEQUENCE_LENGTH = 10
 MARGIN=10
 ALPHA=30
 
-DEBUG = False
-DEBUG_DATA_LENGTH = 1000
+DEBUG = True
+DEBUG_DATA_LENGTH = 100
 DEBUG_ANN = False
 
 USE_ANGULAR_LOSS=False
