@@ -60,7 +60,7 @@ MAX_SEQUENCE_LENGTH = 10
 MARGIN=10
 ALPHA=30
 
-DEBUG = True
+DEBUG = False
 DEBUG_DATA_LENGTH = 100
 DEBUG_ANN = False
 
@@ -190,7 +190,10 @@ def triplet_loss(y_true, y_pred):
     margin = K.constant(MARGIN)
     return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]))
 
-    # return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]) + K.square(margin - y_pred[:,2,0]))
+
+def triplet_tanh_loss(y_true, y_pred):
+    return K.mean(K.tanh(y_pred[:,0,0]) + (K.constant(1) - K.tanh(y_pred[:,1,0])))
+
 
 # the following triplet loss function is from: Deep Metric Learning with Improved Triplet Loss for 
 # Face clustering in Videos 
@@ -212,7 +215,7 @@ def accuracy(y_true, y_pred):
 def l2Norm(x):
     return K.l2_normalize(x, axis=-1)
 
-def tanhNorm(x):
+def oldTanhNorm(x):
     square_sum = K.sum(K.square(x), axis=-1, keepdims=True)
     dist = K.sqrt(K.maximum(square_sum,  K.epsilon()))
     tanh = K.tanh(dist)
@@ -439,6 +442,8 @@ elif args.loss_function == 'improved-loss':
     LOSS_FUNCTION=improved_loss
 elif args.loss_function == 'our-loss':
     LOSS_FUNCTION=triplet_loss
+elif args.loss_function == 'tanh-loss':
+    LOSS_FUNCTION=triplet_tanh_loss
 elif args.loss_function == 'angular-loss':
     USE_ANGULAR_LOSS = True
     LOSS_FUNCTION = angular_loss
