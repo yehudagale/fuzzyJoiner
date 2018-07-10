@@ -45,7 +45,7 @@ from annoy import AnnoyIndex
 
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
-from names_cleanser import NameDataCleanser
+from names_cleanser import NameDataCleanser, CompanyDataCleanser
 
 import sys
 
@@ -335,15 +335,21 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
     else:
         return triplets, match/(match + no_match)
 
-def generate_names(entities, limit_pairs=False):
+
+def generate_names(entities, people, limit_pairs=False):
     num_names = 4
-    names_generator = NameDataCleanser(0, num_names, limit_pairs=limit_pairs)
+    if people:
+        generator = NameDataCleanser(0, num_names, limit_pairs=limit_pairs)
+    else:
+        generator = CompanyDataCleanser(limit_pairs)
+
     entity2same = {}
     for entity in entities:
-        ret = names_generator.cleanse_data(entity)
+        ret = generator.cleanse_data(entity)
         if ret and len(ret) >= num_names:
             entity2same[ret[0]] = ret[1:]
     return entity2same
+
 
 def embedded_representation_model(embedding_layer):
     seq = Sequential()
@@ -421,6 +427,8 @@ parser.add_argument('--num_layers', type=int,
                    help='num_layers to use.  Minimum is 2')
 parser.add_argument('--input', type=str, help='Input file')
 
+parser.add_argument('--entity_type', type=str, help='people or companies')
+
 
 args = parser.parse_args()
 
@@ -459,6 +467,8 @@ print('Use L2Norm: ' + str(args.use_l2_norm))
 NUM_LAYERS = args.num_layers - 1
 print('Num layers: ' + str(NUM_LAYERS))
 
+people = 'people' in args.entity_type
+
 # read all entities and create positive parts of a triplet
 entities = read_entities(args.input)
 train, test = split(entities, test_split = .20)
@@ -467,10 +477,11 @@ print(train)
 print("TEST")
 print(test)
 
-entity2same_train = generate_names(train)
-entity2same_test = generate_names(test, limit_pairs=True)
+entity2same_train = generate_names(train, people)
+entity2same_test = generate_names(test, people, limit_pairs=True)
 print(entity2same_train)
 print(entity2same_test)
+
 # change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
 # clues for entity names
 tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
