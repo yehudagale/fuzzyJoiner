@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetEncoder;
@@ -30,14 +29,14 @@ public class CompanyNamesCleaner {
 				}
 				
 				// filter anything not in ISO-88589-1
-					CharsetEncoder x = StandardCharsets.ISO_8859_1.newEncoder();
-					for(String s : names) {
-						try {
-							x.encode(CharBuffer.wrap(s));
-						} catch (CharacterCodingException e) {
-							continue lines;
-						}
+				CharsetEncoder x = StandardCharsets.ISO_8859_1.newEncoder();
+				for(String s : names) {
+					try {
+						x.encode(CharBuffer.wrap(s));
+					} catch (CharacterCodingException e) {
+						continue lines;
 					}
+				}
 
 				System.out.println(names.stream().reduce((String lh, String rh) -> { return lh + "|" + rh; }).get());
 			}
