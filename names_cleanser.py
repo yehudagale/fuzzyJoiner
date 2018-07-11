@@ -4,6 +4,7 @@ import Levenshtein
 from nltk import bigrams
 from os import listdir
 from os.path import isfile, join
+from difflib import SequenceMatcher
 from sklearn.metrics import jaccard_similarity_score
 
 
@@ -113,34 +114,25 @@ class GenericDataCleanser(object):
         lines = input_file.readlines()
         entity_id = 0
         print('in parse file')
-        print(self.pairs)
+        count = 0
         for line in lines:
             ret = self.cleanse_data(line)
             if ret and len(ret) >= self.pairs:
+                count += 1
                 # all these entity names are in the exact same set
                 # we can create the number of pairs that we were asked to create
                 # for now, create it with the 'anchor' (first element of the list)
                 # and all other names
-                anchor = ret[0]
+
                 entity_id += 1
-                newline =''
-                for i in range(1, len(ret)):
-                    newline = anchor + '|' + ret[i] + "|" + str(entity_id) + '\n'
-                    if self.get:
-                        self.number_of_names -= 1
-                        if self.number_of_names >= 0:
-                            output_file.write(newline)
-                        else:
-                            self.get = False;
-                            break
-                    else:
-                        output_file.write(newline)
-                    if i > self.pairs:
-                        break
+                newline = '|'.join(ret) + '\n'
+                output_file.write(newline)
+
             else:
                 output_rejects_file.write(line)
         if self.get:
             print("ran out of names, proceeding with as many as were available")
+        print('total number of names:' + str(count))
 
     def clean_file(self, filename, output):
         onlyfiles = [f for f in listdir(filename) if isfile(join(filename, f))]
@@ -153,6 +145,76 @@ class GenericDataCleanser(object):
         output_rejects_file.close()
         input_file.close()
         output_file.close()
+
+class CompanyDataCleanser(GenericDataCleanser):
+
+    def __init__(self, limit_pairs=False):
+        self.limit_pairs = False
+        self.pairs = 2
+        self.get = False
+
+    def is_acronym(self, name):
+        p = re.compile('[A-Z0-9]+')
+        if len(name) < 6 and p.match(name):
+            return True
+        return False
+
+    def has_cyrillic(self, text):
+        return bool(re.search('[а-яА-Я]', text))
+
+    def cleanse_data(self, line):
+        if self.has_cyrillic(line):
+            return None
+
+        # Wikipedia has URLs for the company name first remove trailing '>' and remove disambiguation of type by (company)
+        line = line.replace('(company)', '')
+        line = line.replace('\n', '')
+
+        arr = line.split('|')
+        url = arr[0].split('/')
+        company_name = url[-1].replace('>', '')
+
+        # SEC filings have some odd company names, filter these out
+        if re.match('T[0-9]+', company_name):
+            return None
+
+        if re.match('[0-9 ]+', company_name):
+            return None
+
+        company_name = company_name.replace('_', ' ')
+        company_name_no_spaces = re.sub('[ .,]', '', company_name).lower().strip()
+
+
+        ret_val = []
+        ret_val.append(company_name)
+
+        for i in range(1, len(arr)):
+            arr[i] = arr[i].replace('\n', '')
+
+            name = arr[i].replace(' ', '')
+            name = name.lower().strip()
+            name = re.sub('[,.]', '', name)
+
+            if name == company_name:
+                continue
+
+            # check to see if this is an acronym
+            if self.is_acronym(arr[i]):
+                ret_val.append(arr[i])
+            else:
+                # find longest substring
+                seqMatch = SequenceMatcher(None, company_name_no_spaces, name)
+                # find match of longest sub-string
+                match = seqMatch.find_longest_match(0, len(company_name_no_spaces), 0, len(name))
+
+                # ensure that we match the company name somewhere early in the string
+                if match.size > 1 and match.a < 1:
+                    ret_val.append(arr[i])
+                else:
+                    print('removing name:' + arr[i] + ' for ' + company_name)
+
+
+        return ret_val
 
 
 class NameDataCleanser(GenericDataCleanser):
@@ -338,8 +400,8 @@ if __name__ == '__main__':
 
     if args.entity_type == 'names':
         cleaner = NameDataCleanser(args.number, args.num_pairs)
-    else:
-        cleaner = GenericDataCleanser(args.entity_type, args.function, args.number, args.num_pairs)
+    elif args.entity_type == 'companies':
+        cleaner = CompanyDataCleanser()
 
     # Uncomment next line to test old code
     # cleaner = GenericDataCleanser(args.entity_type, args.function, args.number, args.num_pairs)

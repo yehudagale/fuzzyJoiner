@@ -1,4 +1,5 @@
 import numpy as np
+import pandas
 import tensorflow as tf
 import random as random
 import json
@@ -340,11 +341,12 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
 
 
 def generate_names(entities, people, limit_pairs=False):
-    num_names = 4
     if people:
+        num_names = 4
         generator = NameDataCleanser(0, num_names, limit_pairs=limit_pairs)
     else:
         generator = CompanyDataCleanser(limit_pairs)
+        num_names = 2
 
     entity2same = {}
     for entity in entities:
@@ -522,46 +524,41 @@ test_data, test_match_stats = generate_triplets_from_ANN(embedder_model, sequenc
 test_seq = get_sequences(test_data, tokenizer)
 print("Test stats:" + str(test_match_stats))
 
-match_stats = 0
-# num_iter = 100
-num_iter = 1
 counter = 0
 current_model = embedder_model
 prev_match_stats = 0
 
-while test_match_stats < .9 and counter < num_iter:
-    counter += 1
-    train_data, match_stats = generate_triplets_from_ANN(current_model, sequences, entity2unique, entity2same_train, unique_text, False)
-    print("Match stats:" + str(match_stats))
- 
-    number_of_names = len(train_data['anchor'])
-    # print(train_data['anchor'])
-    print("number of names" + str(number_of_names))
-    Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
+train_data, match_stats = generate_triplets_from_ANN(current_model, sequences, entity2unique, entity2same_train, unique_text, False)
+print("Match stats:" + str(match_stats))
 
-    filepath="weights.best.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+number_of_names = len(train_data['anchor'])
+# print(train_data['anchor'])
+print("number of names" + str(number_of_names))
+Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
 
-    early_stop = EarlyStopping(monitor='val_accuracy', patience=1, mode='max') 
+filepath="weights.best.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 
-    callbacks_list = [checkpoint, early_stop]
+early_stop = EarlyStopping(monitor='val_accuracy', patience=1, mode='max')
 
-    train_seq = get_sequences(train_data, tokenizer)
+callbacks_list = [checkpoint, early_stop]
 
-    # check just for 5 epochs because this gets called many times
-    model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
-    current_model = inter_model
-    # print some statistics on this epoch
-    
-    print("training data predictions")
-    positives = test_positive_model.predict([train_seq['anchor'], train_seq['positive'], train_seq['negative']])
-    negatives = test_negative_model.predict([train_seq['anchor'], train_seq['positive'], train_seq['negative']])
-    print("f1score for train is: {}".format(f1score(positives, negatives)))
-    print("test data predictions")
-    positives = test_positive_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-    negatives = test_negative_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-    print("f1score for test is: {}".format(f1score(positives, negatives)))
-    
+train_seq = get_sequences(train_data, tokenizer)
 
-    test_match_stats = generate_triplets_from_ANN(current_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
-    print("Test stats:" + str(test_match_stats))
+# check just for 5 epochs because this gets called many times
+model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
+current_model = inter_model
+# print some statistics on this epoch
+
+print("training data predictions")
+positives = test_positive_model.predict([train_seq['anchor'], train_seq['positive'], train_seq['negative']])
+negatives = test_negative_model.predict([train_seq['anchor'], train_seq['positive'], train_seq['negative']])
+print("f1score for train is: {}".format(f1score(positives, negatives)))
+print("test data predictions")
+positives = test_positive_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
+negatives = test_negative_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
+print("f1score for test is: {}".format(f1score(positives, negatives)))
+
+
+test_match_stats = generate_triplets_from_ANN(current_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
+print("Test stats:" + str(test_match_stats))

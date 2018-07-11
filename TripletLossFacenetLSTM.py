@@ -1,7 +1,5 @@
 import numpy as np
-#import tensorflow as tf
 import random as random
-# import cntk as C
 # """
 # The below is necessary in Python 3.2.3 onwards to
 # have reproducible behavior for certain hash-based operations.
@@ -15,13 +13,12 @@ os.environ['PYTHONHASHSEED'] = '0'
 np.random.seed(42)
 # The below is necessary for starting core Python generated random numbers
 # in a well-defined state.
-random.seed(12345)
+# random.seed(12345)
 # Force TensorFlow to use single thread.
 # Multiple threads are a potential source of
 # non-reproducible results.
 # For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
 # session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-#import theano as T
 import tensorflow as tf
 # from keras import backend as K
 # The below tf.set_random_seed() will make random number generation
@@ -36,12 +33,11 @@ K.set_session(sess)
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
-from keras.layers import Dense, Input, Flatten, Dropout, Lambda, GRU, Activation
-from keras.layers.wrappers import Bidirectional
+from keras.layers import Dense, Input, Flatten, Lambda, GRU, Activation
 
-from keras.layers import Conv1D, MaxPooling1D, Embedding
+from keras.layers import Embedding
 
-from keras.models import Model, model_from_json, Sequential
+from keras.models import Model, Sequential
 
 from embeddings import KazumaCharEmbedding
 
@@ -65,7 +61,7 @@ MARGIN=10
 ALPHA=30
 USE_GRU=True
 
-DEBUG = False
+DEBUG = True
 DEBUG_DATA_LENGTH = 100
 DEBUG_ANN = False
 
@@ -362,9 +358,9 @@ def build_model(embedder):
     main_input = Input(shape=(MAX_SEQUENCE_LENGTH,))
     net = embedder(main_input)
 
-    net = GRU(128, return_sequences=True, activation='relu', name='embed')(net)
-    net = GRU(128, return_sequences=True, activation='relu', name='embed2')(net)
-    net = GRU(128, return_sequences=True, activation='relu', name='embed2a')(net)
+   # net = GRU(128, return_sequences=True, activation='relu', name='embed')(net)
+    #net = GRU(128, return_sequences=True, activation='relu', name='embed2')(net)
+    #net = GRU(128, return_sequences=True, activation='relu', name='embed2a')(net)
     net = GRU(128, activation='relu', name='embed3')(net)
 
     """
@@ -568,3 +564,4 @@ while test_match_stats < .9 and counter < num_iter:
 
     test_match_stats = generate_triplets_from_ANN(current_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
     print("Test stats:" + str(test_match_stats))
+K.clear_session()
