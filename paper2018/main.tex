@@ -1,0 +1,45 @@
+\def\year{2018}\relax
+%File: formatting-instruction.tex
+\documentclass[letterpaper]{article} %DO NOT CHANGE THIS
+\usepackage{aaai18}  %Required
+\usepackage{times}  %Required
+\usepackage{helvet}  %Required
+\usepackage{courier}  %Required
+\usepackage{url}  %Required
+\usepackage{graphicx}  %Required
+\usepackage{subcaption}
+
+\frenchspacing  %Required
+\setlength{\pdfpagewidth}{8.5in}  %Required
+\setlength{\pdfpageheight}{11in}  %Required
+%PDF Info Is Required:
+  \pdfinfo{
+/Title (Fuzzy joins through deep learning)
+/Author (Kavitha Srinivas, Yehuda Gale, Julian Dolby)}
+\setcounter{secnumdepth}{0}  
+ \begin{document}
+% The file aaai.sty is the style file for AAAI Press 
+% proceedings, working notes, and technical reports.
+%
+\title{Fuzzy joins through deep learning}
+
+
+\author{Kavitha Srinivas \\ IBM Research
+\And Yehuda Gale \\ Yeshiva University
+\And Julian Dolby \\ IBM Research}
+
+
+\maketitle
+\begin{abstract}
+AAAI creates proceedings, working notes, and technical reports directly from electronic source furnished by the authors. To ensure that all papers in the publication have a uniform appearance, authors must adhere to the following instructions. 
+\end{abstract}
+
+\input{introduction}
+\input{siamese_networks}
+
+%References and End of Paper
+  %These lines must be placed at the end of your paper
+  \bibliography{paper}
+  \bibliographystyle{aaai}
+  \end{document}
+
