@@ -34,18 +34,26 @@ h_t = (1- z_t) * h_{t-1} + z_t * \tilde{h_t}
 \label{eq_4}
 \end{equation}
 
-The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark gray layer produces a vector embedding for the inputs.  These are fed to two layers which compute a euclidean distance between the \textit{anchor} and the \textit{positive} elements of a triplet (\textit{positive distance}), and the \textit{anchor} and the \textit{negative} elements of a triplet (\textit{negative distance}).  Conceptually, there are two dual objects in metric learning, one to minimize \textit{positive distances}, and the other to maximize \textit{negative distances}.  As described below, this dual objective is achieved by different loss functions in the literature.
+The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark gray layer produces a vector embedding for the inputs.  These are fed to two layers which compute a euclidean distance between the \textit{anchor} and the \textit{positive} elements of a triplet (\textit{positive distance}), and the \textit{anchor} and the \textit{negative} elements of a triplet (\textit{negative distance}).  Conceptually, there are two objectives in metric learning, one to minimize \textit{positive distances}, and the other to maximize \textit{negative distances}.  As described below, this dual objective is achieved by different loss functions in the literature.
 
 \subsection{Loss functions}
 \label{loss_functions}
-Let $f(x)$ represent an embedding for an entity name, $f(x_i^a)$,$f(x_i^p)$, $f(x_i^n)$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions to explore their effectiveness for the entity metric learning problem.
+Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions to explore their effectiveness for the entity metric learning problem.
 \subsubsection{Triplet loss}
-For face recognition, Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15} propose a triplet loss function where the squared \textit{positive distances} for each triplet $i$ in the set of $N$ triplets is separated from the squared \textit{negative distances} by a margin of $\alpha$:
+For face recognition, Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15} propose a triplet loss function where the \textit{positive distances} for each triplet $i$ in the set of $N$ triplets is separated from \textit{negative distances} by a margin of $\alpha$.  For each of $N$ triples, $l_{triple}$ reflects the loss for a given triple as follows:
 \begin{equation}
-  L = \sum_{i}^N(\left[\|f(x_i^a) - f(x_i^p)\|_{2}^2 - \|f(x_i^a)- f(x_i^n)\|_{2}^2 + \alpha \right]
+  l_{triple} =  \left[\|\bf{x_a} - \bf{x_p}\|^2 - \|\bf{x_a} -\bf{x_n}\|^2 + \alpha \right]_+
 \label{schroff}
 \end{equation}
-Note that in this formulation, it is assumed that embedding is normalized so $\| f(x) \|_2 = 1$.  In other words, the vector embeddings are normalized using the L2 norm.  The value of $\alpha$ in the original work \cite{DBLP:conf/cvpr/SchroffKP15} is also set to 0.2.
+where
+\begin{equation}
+ \left[.\right]_{+} = max(0, .)
+\end{equation}
+and the loss function that is minimized across all $N$ triples is given by
+\begin{equation}
+ L = \sum_{i}^{N} l_{triple}
+\end{equation}
+Note that in this formulation, it is assumed that embedding is normalized so $\|\bf{x} \| = 1$ because this normalization is robust across variations in illumination and contrast.  The value of $\alpha$ in the original work is a hyper-parameter that \cite{DBLP:conf/cvpr/SchroffKP15} was set to 0.2.
 
 \subsubsection{Improved Loss}
  An improvement over the triplet loss function is proposed by \cite{DBLP:conf/cvpr/SchroffKP15} for the recognition of faces in videos \cite{Zhang:2016:DML:3088616.3088665}.  Conceptually, this function that we refer to as `improved loss' in the paper considers the distances from the \textit{positive} element of the triplet to the \textit{negative} element as well, and tries to maximize that difference as well as the distance from \textit{anchor} to the \textit{negative}.  In addition, they try to correct that  original triplet loss function has no constraints on how close the positive distance should be.  For instance, it is possible for the \textit{anchor} and \textit{positive} form a large cluster with a large intra-class distance. The equations that achieve these constraints are described below.  Equation~\ref{psi} tries to reduce intra-class distance by ensuring it is less than $\hat{\alpha}$.  Equation~\ref{phi} tries to maximize inter-class distance by ensuring that the distance from the \textit{anchor} and \textit{positive} to the negative are both taken into account.  Equation~\ref{improved_loss} balances inter-class constraints with intra-class constraints with the parameter $\lambda$.
