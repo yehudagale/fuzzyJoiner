@@ -87,6 +87,13 @@ Note that in this formulation, it is assumed that embedding is normalized so $\|
 The parameter $\hat{\alpha}$ for equation~\ref{psi} is set to 0.1, and $\lambda$ is set to .02 in equation~\ref{improved_loss}, and $\alpha$ was set to 1 in the paper \cite{Zhang:2016:DML:3088616.3088665}.  As in Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}, the embeddings are normalized to 1.
 
 \subsubsection{Angular Loss}
+
+\begin{figure}
+\includegraphics[width=1\linewidth]{angular_loss}
+\caption{Angular loss}
+\label{angular_loss}
+\end{figure}
+
 Wang et al. \cite{DBLP:journals/corr/abs-1708-01682} define a novel angular loss function which is not based on pairwise distances, but rather is based on the angles of the triangle formed by the \textit{anchor}, \textit{positive} and the \textit{negative} triplet.  Conceptually, they point out that since the \textit{anchor} and the \textit{positive} pairs belong to the same class, the angle formed by the \textit{anchor}, \textit{negative}, and \textit{positive} elements should be as small as possible within that triangle.  Their loss function is an attempt to minimize this angle, as defined in the equation below.
 \begin{equation}
 \bf{x_{c}} = (\bf{x_{a}} + \bf{x_{c}}) / 2
