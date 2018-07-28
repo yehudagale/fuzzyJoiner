@@ -1,7 +1,7 @@
 \section{Siamese networks}
 \label{siamese networks}
 
-Section~\ref{acrhitecture} describes our overall network architecture for entity matching. Section~\ref{loss_functions} enumerates the different loss functions which have been used in prior work, and a new loss function which appears to do better in metric learning for entities.  Section~\ref{triplet_selection} describes a novel triplet selection mechanisms for entity matching.
+Section~\ref{architecture} describes our overall network architecture for entity matching.  Section~\ref{loss_functions} enumerates the different loss functions which have been used in prior work, and a new loss function which appears to do better in metric learning for entities.  Section~\ref{triplet_selection} describes a novel triplet selection mechanisms for entity matching.
 
 \subsection{Network Architecture}
 \label{architecture}
@@ -11,7 +11,7 @@ Section~\ref{acrhitecture} describes our overall network architecture for entity
 \label{siamese_nets}
 \end{figure}
 
-Figure~\ref{siamese_nets} illustrates overall network architecture we used to build a system for fuzzy joins.  Input vectors were computed assuming a maximum name length of 10 for each entity (i.e., no entity could have a name that spanned more than 10 words).  A 100 dimensional character embedding was computed for each `word' in the entity using pretrained embeddings \cite{hashimoto-jmt:2017:EMNLP2017}, which resulted in a 100 x 10 character encoding for each name used in a triplet.  As described earlier, in a triplet, each entity name (or \textit{anchor}) is paired with another name for the same entity (or \textit{positive}), and with a name for a completely different entity (or \textit{negative}).  The three input vectors from each triplet are fed to three identical networks that share the same weights.  Weight sharing ensures that the networks learn the same mapping function for any given input vector.  In our implementation, each of the three networks had 4 stacked layers of 128 unit Gated Recurrent Units (or GRUs) to capture the sequential nature of the input.  
+Figure~\ref{siamese_nets} illustrates overall network architecture we used to build a system for fuzzy joins.  Input is initially triples of a name (anchor), another name for the same entity (positive) and a name of another entity (negative).  For the network, input vectors are computed for each entity assuming a maximum name length of 10 for each entity (i.e., no entity could have a name that spanned more than 10 tokens).  A 100 dimensional character embedding was computed for each token in the entity using pretrained embeddings \cite{hashimoto-jmt:2017:EMNLP2017}, which resulted in a 100 x 10 character encoding for each name used in a triplet.  These three input vectors from each triplet are fed to three identical networks that share the same weights.  Weight sharing ensures that the networks learn the same mapping function for any given input vector.  In our implementation, each of the three networks had 4 stacked layers of 128 unit Gated Recurrent Units (or GRUs) to capture the sequential nature of the input.  
 
 GRUs are a type of recurrent network \cite{cho-al-emnlp14} where each hidden unit updates its weights at a specific step in the sequence $t$ based on the current input $x_t$ and the value of the hidden unit from the prior step $h_{t-1}$.  $r_t$ is a reset gate which determines whether the state from the previous step $h_{t-1}$ should be ignored. $z_t$ is an update gate which determines whether the current hidden state should be updated with the new hidden state $\tilde{h_t}$.  Equations~\ref{eq_1}-\ref{eq_4} that govern the update at $h_t$, as summarized by \cite{colah}.
 \begin{equation}
@@ -34,7 +34,7 @@ h_t = (1- z_t) * h_{t-1} + z_t * \tilde{h_t}
 \label{eq_4}
 \end{equation}
 
-The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark gray layer produces a vector embedding for the inputs.  These are fed to two layers which compute a euclidean distance between the \textit{anchor} and the \textit{positive} elements of a triplet (\textit{positive distance}), and the \textit{anchor} and the \textit{negative} elements of a triplet (\textit{negative distance}).  Conceptually, there are two objectives in metric learning, one to minimize \textit{positive distances}, and the other to maximize \textit{negative distances}.  As described below, this dual objective is achieved by different loss functions in the literature.
+The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark gray layer produces an output vector embedding for the inputs.  These are fed to two layers which compute a euclidean distance between the \textit{anchor} and the \textit{positive} elements of a triplet (\textit{positive distance}), and the \textit{anchor} and the \textit{negative} elements of a triplet (\textit{negative distance}).  Conceptually, there are two objectives in metric learning, one to minimize \textit{positive distances}, and the other to maximize \textit{negative distances}.  As described below, this dual objective is achieved by different loss functions in the literature.
 
 \subsection{Loss functions}
 \label{loss_functions}
