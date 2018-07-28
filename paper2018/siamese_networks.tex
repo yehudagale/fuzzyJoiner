@@ -120,3 +120,9 @@ l_{triplet} = \left[[\bf{x_{a}} - \bf{x_{p}}\|^2 - 4 \tan^2 \alpha \|\bf{x_{n}} 
 
 \subsubsection{Hyperbolic Tangent Loss}
 
+The inspiration for our loss is that triplet loss, in effect, only pushes the negative distance as far as $\alpha$; if the negative distance is larger than that, the total loss can become negative, which is then forced to 0.  However, the further the negative point is from the anchor, the better, so we want to push it as far away as possible, without a limit like $\alpha$.  To achieve this, we use hyperbolic tangent to compress all distances to the range 0 to 1, and substract the negative distance from 1.  Then our loss function simply needs to minimize both positive and negative numbers:
+
+ \begin{equation}
+  l_{triple} =  tanh\left(\|\bf{x_a} - \bf{x_p}\|\right) + \left(1-tanh\left(\|\bf{x_a} -\bf{x_n}\|\right)\right)
+\label{tanh}
+\end{equation}
