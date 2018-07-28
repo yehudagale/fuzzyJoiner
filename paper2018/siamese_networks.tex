@@ -38,14 +38,42 @@ The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark gr
 
 \subsection{Loss functions}
 \label{loss_functions}
-Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions to explore their effectiveness for the entity metric learning problem.
-\subsubsection{Triplet loss}
 
-\begin{figure}
-\includegraphics[width=0.5\linewidth]{schroff_triplet}
-\caption{Triplet loss}
-\label{schroff_loss}
-\end{figure}
+Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions to explore their effectiveness for the entity metric learning problem.
+
+\begin{figure*}[htb]
+    \centering
+    \begin{subfigure}[t]{0.23\textwidth}
+        \centering
+        \includegraphics[width=.9\linewidth]{schroff_triplet}
+        \caption{Triplet loss}
+        \label{schroff_loss}
+    \end{subfigure}%
+    ~ 
+    \begin{subfigure}[t]{0.23\textwidth}
+        \centering 
+        \includegraphics[width=.9\linewidth]{modified_loss}
+        \caption{Modified loss}
+        \label{modified_loss}
+    \end{subfigure}
+    ~ 
+    \begin{subfigure}[t]{0.23\textwidth}
+        \centering 
+        \includegraphics[width=.9\linewidth]{angular_loss}
+        \caption{Angular loss}
+        \label{angular_loss}
+    \end{subfigure}
+    ~ 
+    \begin{subfigure}[t]{0.23\textwidth}
+        \centering 
+        \includegraphics[width=.9\linewidth]{tanh_triplet}
+        \caption{$Tanh$ loss}
+        \label{tanh_loss}
+    \end{subfigure}
+    \caption{Loss functions}
+\end{figure*}
+
+\subsubsection{Triplet loss}
 
 For face recognition, Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15} propose a triplet loss function where the \textit{positive distances} for each triplet $i$ in the set of $N$ triplets is separated from \textit{negative distances} by a margin of $\alpha$, as shown in Figure~\ref{schroff_loss}.  For each of $N$ triples, $l_{triple}$ reflects the loss for a given triple as follows:
 \begin{equation}
@@ -63,12 +91,6 @@ and the loss function that is minimized across all $N$ triples is given by
 Note that in this formulation, it is assumed that embedding is normalized so $\|\bf{x} \| = 1$ because this normalization is robust across variations in illumination and contrast.  The value of $\alpha$ in the original work is a hyper-parameter that \cite{DBLP:conf/cvpr/SchroffKP15} was set to 0.2.
 
 \subsubsection{Improved Loss}
-
-\begin{figure}
-\includegraphics[width=0.5\linewidth]{modified_loss}
-\caption{Modified loss}
-\label{modified_loss}
-\end{figure}
 
  An improvement over the triplet loss function is proposed by \cite{DBLP:conf/cvpr/SchroffKP15} for the recognition of faces in videos \cite{Zhang:2016:DML:3088616.3088665}.  Conceptually, this function that we refer to as `improved loss' in the paper considers the distances from the \textit{positive} element of the triplet to the \textit{negative} element as well, and tries to maximize that difference as well as the distance from \textit{anchor} to the \textit{negative}.  In addition,it corrects the fact the  original triplet loss function has no constraints on how close the positive distance should be.  For instance, it is possible for the \textit{anchor} and \textit{positive} form a large cluster with a large intra-class distance. The equations that achieve these constraints are described below.  Equation~\ref{psi} tries to reduce intra-class distance by ensuring it is less than $\hat{\alpha}$.  Equation~\ref{phi} tries to maximize inter-class distance by ensuring that the distance from the \textit{anchor} and \textit{positive} to the negative are both taken into account.  Equation~\ref{improved_loss} balances inter-class constraints with intra-class constraints with the parameter $\lambda$. 
 
@@ -88,12 +110,6 @@ The parameter $\hat{\alpha}$ for equation~\ref{psi} is set to 0.1, and $\lambda$
 
 \subsubsection{Angular Loss}
 
-\begin{figure}
-\includegraphics[width=1\linewidth]{angular_loss}
-\caption{Angular loss}
-\label{angular_loss}
-\end{figure}
-
 Wang et al. \cite{DBLP:journals/corr/abs-1708-01682} define a novel angular loss function which is not based on pairwise distances, but rather is based on the angles of the triangle formed by the \textit{anchor}, \textit{positive} and the \textit{negative} triplet.  Conceptually, they point out that since the \textit{anchor} and the \textit{positive} pairs belong to the same class, the angle formed by the \textit{anchor}, \textit{negative}, and \textit{positive} elements should be as small as possible within that triangle.  Their loss function is an attempt to minimize this angle, as defined in the equation below.
 \begin{equation}
 \bf{x_{c}} = (\bf{x_{a}} + \bf{x_{c}}) / 2
@@ -101,3 +117,6 @@ Wang et al. \cite{DBLP:journals/corr/abs-1708-01682} define a novel angular loss
 \begin{equation}
 l_{triplet} = \left[[\bf{x_{a}} - \bf{x_{p}}\|^2 - 4 \tan^2 \alpha \|\bf{x_{n}} - \bf{x_{c}}\|^2 \right])_{+}
 \end{equation}
+
+\subsubsection{Hyperbolic Tangent Loss}
+
