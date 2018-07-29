@@ -181,7 +181,7 @@ def angular_loss(y_true, y_pred):
     Facenet triplet loss function: https://arxiv.org/pdf/1503.03832.pdf
 """
 def schroff_triplet_loss(y_true, y_pred):
-    margin = K.constant(MARGIN)
+    margin = K.constant(0.2)
     return K.mean(K.maximum(K.constant(0), K.square(y_pred[:,0,0]) - K.square(y_pred[:,1,0]) + margin))
 
 def triplet_loss(y_true, y_pred):
@@ -199,13 +199,13 @@ def triplet_tanh_loss(y_true, y_pred):
 # the following triplet loss function is from: Deep Metric Learning with Improved Triplet Loss for 
 # Face clustering in Videos 
 def improved_loss(y_true, y_pred):
-    margin = K.constant(MARGIN)
-    lambda_p = 0.02
-    threshold = 0.1
+    margin = K.constant(1)
+    lambda_p = K.constant(0.02)
+    threshold = K.constant(0.1)
     a_p_distance = y_pred[:,0,0]
     a_n_distance = y_pred[:,1,0]
     p_n_distance = y_pred[:,2,0]
-    phi = a_p_distance - ((a_n_distance + p_n_distance) / 2) + margin
+    phi = a_p_distance - ((a_n_distance + p_n_distance) / K.constant(2)) + margin
     psi = a_p_distance - threshold 
 
     return K.maximum(K.constant(0), phi) + lambda_p * K.maximum(K.constant(0), psi) 
