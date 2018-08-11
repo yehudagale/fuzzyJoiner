@@ -196,6 +196,12 @@ def triplet_tanh_loss(y_true, y_pred):
     return K.mean(K.tanh(y_pred[:,0,0]) + (K.constant(1) - K.tanh(y_pred[:,1,0])))
 
 
+def triplet_tanh_pn_loss(y_true, y_pred):
+    return K.mean((K.tanh(y_pred[:,0,0]) +
+                   K.tanh(y_pred[:,2,0]))/2 +
+                  (K.constant(1) - K.tanh(y_pred[:,1,0])))
+
+
 # the following triplet loss function is from: Deep Metric Learning with Improved Triplet Loss for 
 # Face clustering in Videos 
 def improved_loss(y_true, y_pred):
@@ -425,7 +431,7 @@ parser.add_argument('--debug_sample_size', type=int,
 parser.add_argument('--margin',  type=int,
                     help='margin')
 parser.add_argument('--loss_function',  type=str,
-                    help='triplet loss function type: schroff-loss, improved-loss, angular-loss, or our-loss')
+                    help='triplet loss function type: schroff-loss, improved-loss, angular-loss, tanh-loss, improved-tanh-loss')
 parser.add_argument('--use_l2_norm',  type=str,
                     help='whether to add a l2 norm')
 parser.add_argument('--num_layers', type=int,
@@ -446,6 +452,8 @@ elif args.loss_function == 'our-loss':
     LOSS_FUNCTION=triplet_loss
 elif args.loss_function == 'tanh-loss':
     LOSS_FUNCTION=triplet_tanh_loss
+elif args.loss_function == 'improved-tanh-loss':
+    LOSS_FUNCTION=triplet_tanh_pn_loss
 elif args.loss_function == 'angular-loss':
     USE_ANGULAR_LOSS = True
     LOSS_FUNCTION = angular_loss
