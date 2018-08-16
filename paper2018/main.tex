@@ -1,7 +1,7 @@
-\def\year{2018}\relax
+\def\year{2019}\relax
 %File: formatting-instruction.tex
 \documentclass[letterpaper]{article} %DO NOT CHANGE THIS
-\usepackage{aaai18}  %Required
+\usepackage{aaai19}  %Required
 \usepackage{times}  %Required
 \usepackage{helvet}  %Required
 \usepackage{courier}  %Required
@@ -14,7 +14,7 @@
 \setlength{\pdfpageheight}{11in}  %Required
 %PDF Info Is Required:
   \pdfinfo{
-/Title (Fuzzy joins through deep learning)
+/Title (Merging datasets through deep learning)
 /Author (Kavitha Srinivas, Yehuda Gale, Julian Dolby)}
 \setcounter{secnumdepth}{0}  
 \usepackage{bm}
@@ -23,7 +23,7 @@
 % The file aaai.sty is the style file for AAAI Press 
 % proceedings, working notes, and technical reports.
 %
-\title{Fuzzy joins through deep learning}
+\title{Merging datasets through deep learning}
 
 
 \author{Kavitha Srinivas \\ IBM Research
@@ -33,11 +33,12 @@
 
 \maketitle
 \begin{abstract}
-AAAI creates proceedings, working notes, and technical reports directly from electronic source furnished by the authors. To ensure that all papers in the publication have a uniform appearance, authors must adhere to the following instructions. 
+Merging datasets is a key operation for data analytics.  A frequent requirement for merging datasets is a join between two columns that frequently have different surface forms for the same entity (e.g., the name of a person might be represented as \textit{Douglas Adams} or \textit{Douglas Noel Adams}).  Data management systems are currently limited to performing merges based on string equality, or at best use string similarity to allow so-called `fuzzy' joins.  We explore a novel approach to performing merges based on recent advances in deep learning.  Our approach builds a deep learning model that maps names into a set of vector embeddings such that names for the same entity are closer in vector space than names for a different entity.  We then index these vector embeddings in an approximate nearest neighbors algorithm to find the names that can be potentially joined together.  Our approach for merging datasets is efficient $\mathcal{O}(n\log{}n)$ and flexible because it can be applied to any data that can be mapped into vector space with the constraint that joinable surface forms are closer in vector space than disparate forms.  We demonstrate the feasibility of the approach for people's names and company names drawn from Wikidata.
 \end{abstract}
 
 \input{introduction}
 \input{siamese_networks}
+\input{joins}
 
 %References and End of Paper
   %These lines must be placed at the end of your paper
