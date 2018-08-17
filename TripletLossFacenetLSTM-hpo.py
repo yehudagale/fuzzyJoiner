@@ -197,9 +197,9 @@ def triplet_tanh_loss(y_true, y_pred):
 
 
 def triplet_tanh_pn_loss(y_true, y_pred):
-    return K.mean((K.tanh(y_pred[:,0,0]) +
-                   K.tanh(y_pred[:,2,0]))/2 +
-                  (K.constant(1) - K.tanh(y_pred[:,1,0])))
+    return K.mean(K.tanh(y_pred[:,0,0]) +
+                  ((K.constant(1) - K.tanh(y_pred[:,1,0])) +
+                   (K.constant(1) - K.tanh(y_pred[:,2,0]))) / K.constant(2));
 
 
 # the following triplet loss function is from: Deep Metric Learning with Improved Triplet Loss for 
