@@ -120,7 +120,7 @@ Note that in this formulation, it is assumed that embedding is normalized so $\|
   l_{triple} = max(0, \phi) + \lambda * max(0, \psi)
 \label{improved_loss}
 \end{equation}
-The parameter $\hat{\alpha}$ for equation~\ref{psi} is set to 0.1, and $\lambda$ is set to .02 in equation~\ref{improved_loss}, and $\alpha$ was set to 1 in the paper \cite{Zhang:2016:DML:3088616.3088665}.  As in Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}, the embeddings are normalized to 1.
+The parameter $\hat{\alpha}$ for equation~\ref{psi} is set to 0.1, and $\lambda$ is set to .02 in equation~\ref{improved_loss}, and $\alpha$ was set to 1 in the paper \cite{Zhang:2016:DML:3088616.3088665}.  As in Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}, the embeddings are normalized to 1 although the actual paper does not make it clear.
 
 \subsubsection{Angular Loss}
 
@@ -137,7 +137,7 @@ equations below.  The rough idea is that moving the positive nearer
 and the negative further away each reduce the angle, which we
 illustrate in Figure~\ref{angular_loss} with the angle to shrink.
 \begin{equation}
-\bf{x_{c}} = (\bf{x_{a}} + \bf{x_{c}}) / 2
+\bf{x_{c}} = (\bf{x_{a}} + \bf{x_{p}}) / 2
 \end{equation}
 \begin{equation}
 l_{triplet} = \left[[\bf{x_{a}} - \bf{x_{p}}\|^2 - 4 \tan^2 \alpha \|\bf{x_{n}} - \bf{x_{c}}\|^2 \right])_{+}
