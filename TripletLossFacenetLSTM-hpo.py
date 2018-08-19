@@ -428,15 +428,6 @@ if args.debug_sample_size:
     DEBUG_DATA_LENGTH=args.debug_sample_size
     print('Debug data length:' + str(DEBUG_DATA_LENGTH))
 
-try:
-    with open("config.json", "r") as f:
-        print(f)
-        json_obj = json.load(f)
-        print(json_obj)
-        MARGIN = json_obj["margin"]
-except:
-    MARGIN = args.margin
-    
 print('Margin:' + str(MARGIN))
 
 USE_L2_NORM = args.use_l2_norm.lower() in ("yes", "true", "t", "1")
