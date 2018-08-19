@@ -375,7 +375,7 @@ def build_model(embedder):
                     )([positive_dist, negative_dist, exemplar_negative_dist])
 
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
-        model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
+        model.compile(optimizer="rmsprop", loss=LOSS_FUNCTION, metrics=[accuracy])
     test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
     test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
     inter_model = Model(input_anchor, net_anchor)
