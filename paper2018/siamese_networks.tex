@@ -75,7 +75,13 @@ Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\
 
 \subsubsection{Triplet loss}
 
-For face recognition, Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15} propose a triplet loss function where the \textit{positive distances} for each triplet $i$ in the set of $N$ triplets is separated from \textit{negative distances} by a margin of $\alpha$, as shown in Figure~\ref{schroff_loss}.  For each of $N$ triples, $l_{triple}$ reflects the loss for a given triple as follows:
+For face recognition, Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}
+propose a triplet loss function where the \textit{positive distances}
+for each triplet $i$ in the set of $N$ triplets is separated from
+\textit{negative distances} by a margin of $\alpha$, as shown in
+Figure~\ref{schroff_loss} with the arrow pushing toward $\alpha$.  For
+each of $N$ triples, $l_{triple}$ reflects the loss for a given triple
+as follows: 
 \begin{equation}
   l_{triple} =  \left[\|\bf{x_a} - \bf{x_p}\|^2 - \|\bf{x_a} -\bf{x_n}\|^2 + \alpha \right]_+
 \label{schroff}
@@ -92,7 +98,15 @@ Note that in this formulation, it is assumed that embedding is normalized so $\|
 
 \subsubsection{Improved Loss}
 
- An improvement over the triplet loss function is proposed by \cite{DBLP:conf/cvpr/SchroffKP15} for the recognition of faces in videos \cite{Zhang:2016:DML:3088616.3088665}.  Conceptually, this function that we refer to as `improved loss' in the paper considers the distances from the \textit{positive} element of the triplet to the \textit{negative} element as well, and tries to maximize that difference as well as the distance from \textit{anchor} to the \textit{negative}.  In addition,it corrects the fact the  original triplet loss function has no constraints on how close the positive distance should be.  For instance, it is possible for the \textit{anchor} and \textit{positive} form a large cluster with a large intra-class distance. The equations that achieve these constraints are described below.  Equation~\ref{psi} tries to reduce intra-class distance by ensuring it is less than $\hat{\alpha}$.  Equation~\ref{phi} tries to maximize inter-class distance by ensuring that the distance from the \textit{anchor} and \textit{positive} to the negative are both taken into account.  Equation~\ref{improved_loss} balances inter-class constraints with intra-class constraints with the parameter $\lambda$. 
+ An improvement over the triplet loss function is proposed by
+ \cite{DBLP:conf/cvpr/SchroffKP15} for the recognition of faces in
+ videos \cite{Zhang:2016:DML:3088616.3088665}.  Conceptually, this
+ function that we refer to as `improved loss' in the paper considers
+ the distances from the \textit{positive} element of the triplet to
+ the \textit{negative} element, and tries to push that
+ difference toward $\alpha$ as well as the distance from
+ \textit{anchor} to the \textit{negative}.  We show this in
+ Figure~\ref{modified_loss} with two push arrows.  In addition, it corrects the fact the  original triplet loss function has no constraints on how close the positive distance should be.  For instance, it is possible for the \textit{anchor} and \textit{positive} form a large cluster with a large intra-class distance. The equations that achieve these constraints are described below.  Equation~\ref{psi} tries to reduce intra-class distance by ensuring it is less than $\hat{\alpha}$.  Equation~\ref{phi} tries to maximize inter-class distance by ensuring that the distance from the \textit{anchor} and \textit{positive} to the negative are both taken into account.  Equation~\ref{improved_loss} balances inter-class constraints with intra-class constraints with the parameter $\lambda$. 
 
 \begin{equation}
   \psi_{triple} = \|\bf{x_{a}} - \bf{x_{p}}\|^2 - \hat{\alpha}
@@ -106,13 +120,24 @@ Note that in this formulation, it is assumed that embedding is normalized so $\|
   l_{triple} = max(0, \phi) + \lambda * max(0, \psi)
 \label{improved_loss}
 \end{equation}
-The parameter $\hat{\alpha}$ for equation~\ref{psi} is set to 0.1, and $\lambda$ is set to .02 in equation~\ref{improved_loss}, and $\alpha$ was set to 1 in the paper \cite{Zhang:2016:DML:3088616.3088665}.  As in Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}, the embeddings are normalized to 1.
+The parameter $\hat{\alpha}$ for equation~\ref{psi} is set to 0.1, and $\lambda$ is set to .02 in equation~\ref{improved_loss}, and $\alpha$ was set to 1 in the paper \cite{Zhang:2016:DML:3088616.3088665}.  As in Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}, the embeddings are normalized to 1 although the actual paper does not make it clear.
 
 \subsubsection{Angular Loss}
 
-Wang et al. \cite{DBLP:journals/corr/abs-1708-01682} define a novel angular loss function which is not based on pairwise distances, but rather is based on the angles of the triangle formed by the \textit{anchor}, \textit{positive} and the \textit{negative} triplet.  Conceptually, they point out that since the \textit{anchor} and the \textit{positive} pairs belong to the same class, the angle formed by the \textit{anchor}, \textit{negative}, and \textit{positive} elements should be as small as possible within that triangle.  Their loss function is an attempt to minimize this angle, as defined in the equation below.
+Wang et al. \cite{DBLP:journals/corr/abs-1708-01682} define a novel
+angular loss function which is not based on pairwise distances, but
+rather is based on the angles of the triangle formed by the
+\textit{anchor}, \textit{positive} and the \textit{negative} triplet.
+Conceptually, they point out that since the \textit{anchor} and the
+\textit{positive} pairs belong to the same class, the angle formed by
+the \textit{anchor}, \textit{negative}, and \textit{positive} elements
+should be as small as possible within that triangle.  Their loss
+function is an attempt to minimize this angle, as defined in the
+equations below.  The rough idea is that moving the positive nearer
+and the negative further away each reduce the angle, which we
+illustrate in Figure~\ref{angular_loss} with the angle to shrink.
 \begin{equation}
-\bf{x_{c}} = (\bf{x_{a}} + \bf{x_{c}}) / 2
+\bf{x_{c}} = (\bf{x_{a}} + \bf{x_{p}}) / 2
 \end{equation}
 \begin{equation}
 l_{triplet} = \left[[\bf{x_{a}} - \bf{x_{p}}\|^2 - 4 \tan^2 \alpha \|\bf{x_{n}} - \bf{x_{c}}\|^2 \right])_{+}
@@ -120,9 +145,20 @@ l_{triplet} = \left[[\bf{x_{a}} - \bf{x_{p}}\|^2 - 4 \tan^2 \alpha \|\bf{x_{n}} 
 
 \subsubsection{Hyperbolic Tangent Loss}
 
-The inspiration for our loss is that triplet loss, in effect, only pushes the negative distance as far as $\alpha$; if the negative distance is larger than that, the total loss can become negative, which is then forced to 0.  However, the further the negative point is from the anchor, the better, so we want to push it as far away as possible, without a limit like $\alpha$.  To achieve this, we use hyperbolic tangent to compress all distances to the range 0 to 1, and substract the negative distance from 1.  Then our loss function simply needs to minimize both positive and negative numbers:
+The inspiration for our loss is that triplet loss, in effect, only
+pushes the negative distance as far as $\alpha$; if the negative
+distance is larger than that, the total loss can become negative,
+which is then forced to 0.  However, the further the negative point is
+from the anchor, the better, so we want to push it as far away as
+possible, without a limit like $\alpha$.  This is illustrated in
+Figure~\ref{tanh_loss} by pushing toward $\infty$.  To achieve this,
+we use hyperbolic tangent to compress all distances to the range 0 to
+1, and substract the negative distance from 1.  Then our loss function
+simply needs to minimize both positive and negative numbers: 
 
  \begin{equation}
   l_{triple} =  tanh\left(\|\bf{x_a} - \bf{x_p}\|\right) + \left(1-tanh\left(\|\bf{x_a} -\bf{x_n}\|\right)\right)
 \label{tanh}
 \end{equation}
+
+\input{triplet_selection}

@@ -6,30 +6,6 @@ import json
 
 from keras import backend as K
 
-########################## FIX SEEDS ################################################
-import os
-os.environ['PYTHONHASHSEED'] = '0'
-# The below is necessary for starting Numpy generated random numbers
-# in a well-defined initial state.
-np.random.seed(42)
-# The below is necessary for starting core Python generated random numbers
-# in a well-defined state.
-random.seed(12345)
-# Force TensorFlow to use single thread.
-# Multiple threads are a potential source of
-# non-reproducible results.
-# For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-#
-# The below tf.set_random_seed() will make random number generation
-# in the TensorFlow backend have a well-defined initial state.
-# For further details, see: https://www.tensorflow.org/api_docs/python/tf/set_random_seed
-tf.set_random_seed(1234)
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-K.set_session(sess)
-
-#########################################################################
-
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
@@ -59,7 +35,7 @@ MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
 MAX_SEQUENCE_LENGTH = 10
 MARGIN=10
-ALPHA=30
+ALPHA=45
 
 DEBUG = False
 DEBUG_DATA_LENGTH = 100
@@ -185,15 +161,16 @@ def schroff_triplet_loss(y_true, y_pred):
     return K.mean(K.maximum(K.constant(0), K.square(y_pred[:,0,0]) - K.square(y_pred[:,1,0]) + margin))
 
 def triplet_loss(y_true, y_pred):
-
-    # margin = K.constant(MARGIN)
-    # return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]))
     margin = K.constant(MARGIN)
     return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]))
 
-
 def triplet_tanh_loss(y_true, y_pred):
     return K.mean(K.tanh(y_pred[:,0,0]) + (K.constant(1) - K.tanh(y_pred[:,1,0])))
+
+def triplet_tanh_pn_loss(y_true, y_pred):
+    return K.mean(K.tanh(y_pred[:,0,0]) +
+                  ((K.constant(1) - K.tanh(y_pred[:,1,0])) +
+                   (K.constant(1) - K.tanh(y_pred[:,2,0]))) / K.constant(2));
 
 
 # the following triplet loss function is from: Deep Metric Learning with Improved Triplet Loss for 
@@ -215,13 +192,6 @@ def accuracy(y_true, y_pred):
 
 def l2Norm(x):
     return K.l2_normalize(x, axis=-1)
-
-def oldTanhNorm(x):
-    square_sum = K.sum(K.square(x), axis=-1, keepdims=True)
-    dist = K.sqrt(K.maximum(square_sum,  K.epsilon()))
-    tanh = K.tanh(dist)
-    scale = tanh / dist
-    return x * scale
 
 def euclidean_distance(vects):
     x, y = vects
@@ -405,7 +375,7 @@ def build_model(embedder):
                     )([positive_dist, negative_dist, exemplar_negative_dist])
 
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
-        model.compile(optimizer="rmsprop", loss=triplet_loss, metrics=[accuracy])
+        model.compile(optimizer="rmsprop", loss=LOSS_FUNCTION, metrics=[accuracy])
     test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
     test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
     inter_model = Model(input_anchor, net_anchor)
@@ -425,7 +395,7 @@ parser.add_argument('--debug_sample_size', type=int,
 parser.add_argument('--margin',  type=int,
                     help='margin')
 parser.add_argument('--loss_function',  type=str,
-                    help='triplet loss function type: schroff-loss, improved-loss, angular-loss, or our-loss')
+                    help='triplet loss function type: schroff-loss, improved-loss, angular-loss, tanh-loss, improved-tanh-loss')
 parser.add_argument('--use_l2_norm',  type=str,
                     help='whether to add a l2 norm')
 parser.add_argument('--num_layers', type=int,
@@ -446,6 +416,8 @@ elif args.loss_function == 'our-loss':
     LOSS_FUNCTION=triplet_loss
 elif args.loss_function == 'tanh-loss':
     LOSS_FUNCTION=triplet_tanh_loss
+elif args.loss_function == 'improved-tanh-loss':
+    LOSS_FUNCTION=triplet_tanh_pn_loss
 elif args.loss_function == 'angular-loss':
     USE_ANGULAR_LOSS = True
     LOSS_FUNCTION = angular_loss
@@ -456,15 +428,6 @@ if args.debug_sample_size:
     DEBUG_DATA_LENGTH=args.debug_sample_size
     print('Debug data length:' + str(DEBUG_DATA_LENGTH))
 
-try:
-    with open("config.json", "r") as f:
-        print(f)
-        json_obj = json.load(f)
-        print(json_obj)
-        MARGIN = json_obj["margin"]
-except:
-    MARGIN = args.margin
-    
 print('Margin:' + str(MARGIN))
 
 USE_L2_NORM = args.use_l2_norm.lower() in ("yes", "true", "t", "1")
