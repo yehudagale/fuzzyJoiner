@@ -162,7 +162,7 @@ def schroff_triplet_loss(y_true, y_pred):
 
 def triplet_loss(y_true, y_pred):
     margin = K.constant(MARGIN)
-    return K.mean(K.square(y_pred[:,0,0]) + K.square(margin - y_pred[:,1,0]))
+    return K.mean(K.square(y_pred[:,0,0]) + K.square(K.maximum(margin - y_pred[:,1,0], K.constant(0))))
 
 def triplet_tanh_loss(y_true, y_pred):
     return K.mean(K.tanh(y_pred[:,0,0]) + (K.constant(1) - K.tanh(y_pred[:,1,0])))
@@ -233,7 +233,7 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
 
     match = 0
     no_match = 0
-    accuracy = 0
+    ann_accuracy = 0
     total = 0
 
     triplets = {}
@@ -270,7 +270,7 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
         # sample only the negatives that are true negatives
         # that is, they are not in the expected set - sampling only 'semi-hard negatives is not defined here'
         # positives = expected_text - nearest_text
-        positives = expected_text
+        positives = overlap
         negatives = nearest_text - expected_text
 
         # print(key + str(expected_text) + str(nearest_text))
@@ -281,11 +281,14 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
                 dist_neg = t.get_distance(index, entity2unique[i])
                 neg_distances.append(dist_neg)
                 if dist_pos < dist_neg:
-                    accuracy += 1
+                    ann_accuracy += 1
                 total += 1
                 # print(key + "|" +  j + "|" + i)
                 # print(dist_pos)
                 # print(dist_neg)               
+
+        for i in negatives:
+            for j in expected_text:
                 triplets['anchor'].append(key)
                 triplets['positive'].append(j)
                 triplets['negative'].append(i)
@@ -296,10 +299,10 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
     print("mean neg distance:" + str(statistics.mean(neg_distances)))
     print("stdev neg distance:" + str(statistics.stdev(neg_distances)))
     print("max neg distance:" + str(max(neg_distances)))
-    print("Accuracy in the ANN for triplets that obey the distance func:" + str(accuracy / total))
+    print("Accuracy in the ANN for triplets that obey the distance func:" + str(ann_accuracy / total))
 
     obj = {}
-    obj['accuracy'] = accuracy / total
+    obj['accuracy'] = ann_accuracy / total
     obj['steps'] = 1
     with open(output_file_name_for_hpo, 'w') as out:
         json.dump(obj, out)
