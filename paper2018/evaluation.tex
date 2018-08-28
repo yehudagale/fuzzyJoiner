@@ -1,7 +1,7 @@
 \section{Evaluation}
 \label{results}
 
-Table\ref{Characteristics} quantifies the difficulty of the metric problem for the people and company data in Wikidata.  After conversion to character embeddings, we computed the 20 nearest neighbors for each anchor, and computed what percentage of positives were found within the top 20 (recall), the average distance of positives and negatives from the anchor and their standard deviations respectively.  To compare it with metric learning for face recognition, which has been studied before, we also provide the same metrics for Labeled Faces in the Wild based on their input vector embeddings.  The table quantifies the difficulty of the metric learning problem across different data types, with positive distances for each being greater than negative distances.  Baseline recall rates are also poor, which is important if one needs to establish that the neural network did in fact learn after training.
+Table \ref{Characteristics} quantifies the difficulty of the metric problem for the people and company data in Wikidata.  After conversion to character embeddings, we computed the 20 nearest neighbors for each anchor, and computed what percentage of positives were found within the top 20 (recall), the average distance of positives and negatives from the anchor and their standard deviations respectively.  To compare it with metric learning for face recognition, which has been studied before, we also provide the same metrics for Labeled Faces in the Wild based on their input vector embeddings.  The table quantifies the difficulty of the metric learning problem across different data types, with positive distances for each being greater than negative distances.  Baseline recall rates are also poor, which is important because it suggests that a different mapping function learnt by a neural network is in fact needed for these entity types, just as it is for faces.
 
 \begin{table}[ht]
 \caption{Dataset characteristics}
@@ -15,7 +15,7 @@ Faces & 0.037 & 39.82 & 9.17 & 79.15 & 25.05 & 3.72 & 43.19 \\
 \end{tabular}
 \end{table}
 
-Table\ref{Evaluation} shows the same metrics after training.  Because we compared across different losses, the results are catagorized by each loss function for each dataset we tested.  For each value reported in the table, we conducted two runs to ensure the results were stable across runs, and we report the mean in the table.
+Table \ref{Evaluation} shows the same metrics after training.  Because we compared across different losses, the results are catagorized by each loss function for each dataset we tested.  For each value reported in the table, we conducted two runs to ensure the results were stable across runs, and we report the mean in the table.
 
 \begin{table}[ht]
 \caption{Results for people and companies by loss functions}

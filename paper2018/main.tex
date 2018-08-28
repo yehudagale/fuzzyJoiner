@@ -24,21 +24,22 @@
 % The file aaai.sty is the style file for AAAI Press 
 % proceedings, working notes, and technical reports.
 %
-\title{Merging datasets through deep learning}
+\title{Merging Datasets Through Deep learning}
 
 
-\author{Kavitha Srinivas \\ IBM Research
-\And Yehuda Gale \\ Yeshiva University
-\And Julian Dolby \\ IBM Research}
+%\author{Kavitha Srinivas \\ IBM Research
+%\And Yehuda Gale \\ Yeshiva University
+%\And Julian Dolby \\ IBM Research}
 
 
 \maketitle
 \begin{abstract}
-Merging datasets is a key operation for data analytics.  A frequent requirement for merging is joining across columns that have different surface forms for the same entity (e.g., the name of a person might be represented as \textit{Douglas Adams} or \textit{Douglas Noel Adams}).  Data management systems are currently limited to performing merges based on string equality, or at best use string similarity to allow so-called `fuzzy' joins.  We propose a novel approach to performing merges inspired in part by recent advances in deep learning.  Our approach depends on (a) creating a function that maps surface forms into a set of vectors such that alternate forms for the same entity are closest in vector space, (b) indexing these vectors using a nearest neighbors algorithm to find the forms that can be potentially joined together.  Using Wikidata as our ground truth, we built models for datasets with approximately 1.1M people's names (200K identities) and 130K company names (70K identities), where the vector embeddings allow joins with precision of .91-.93 and recall of .70-.81. To build these models, we developed novel techniques for the selection of samples to train on, as well as a loss function, which we describe in the paper.  We also make the models available to the community for use in joining names or for aligning people or companies across multiple ontologies.
+Merging datasets is a key operation for data analytics.  A frequent requirement for merging is joining across columns that have different surface forms for the same entity (e.g., the name of a person might be represented as \textit{Douglas Adams} or \textit{Douglas Noel Adams}).  Data management systems are currently limited to performing merges based on string equality, or at best use string similarity.  We propose a novel approach to performing merges based on deep learning models.  Our approach depends on (a) creating a deep learning model that maps surface forms of an entity into a set of vectors such that alternate forms for the same entity are closest in vector space, (b) indexing these vectors using a nearest neighbors algorithm to find the forms that can be potentially joined together.  Using Wikidata as our ground truth, we built models for datasets with approximately 1.1M people's names (200K identities) and 130K company names (70K identities), where the vector embeddings allow for joins with precision of .91-.93 and recall of .70-.81. To build these models, we developed novel techniques for the selection of samples to train on, as well as a loss function, which we describe in the paper.  We make the models available to the community for aligning people or companies across multiple datasets.
   
 \end{abstract}
 
 \input{introduction2}
+\input{relatedWork}
 \input{siamese_networks}
 \input{joins}
 \input{datasets}

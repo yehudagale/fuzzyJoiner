@@ -1,9 +1,4 @@
-\section{Siamese networks}
-\label{siamese networks}
-
-Section~\ref{architecture} describes our overall network architecture for entity matching.  Section~\ref{loss_functions} enumerates the different loss functions which have been used in prior work, and a new loss function which appears to do better in metric learning for entities.  Section~\ref{triplet_selection} describes a novel triplet selection mechanisms for entity matching.
-
-\subsection{Network Architecture}
+\section{Network Architecture}
 \label{architecture}
 \begin{figure}
 \includegraphics[width=1.0\linewidth]{triplet_siamese_network}
@@ -11,7 +6,7 @@ Section~\ref{architecture} describes our overall network architecture for entity
 \label{siamese_nets}
 \end{figure}
 
-Figure~\ref{siamese_nets} illustrates overall network architecture we used to build a system for fuzzy joins.  Input is initially triples of a name (anchor), another name for the same entity (positive) and a name of another entity (negative).  For the network, input vectors are computed for each entity assuming a maximum name length of 10 for each entity (i.e., no entity could have a name that spanned more than 10 tokens).  A 100 dimensional character embedding was computed for each token in the entity using pretrained embeddings \cite{hashimoto-jmt:2017:EMNLP2017}, which resulted in a 100 x 10 character encoding for each name used in a triplet.  These three input vectors from each triplet are fed to three identical networks that share the same weights.  Weight sharing ensures that the networks learn the same mapping function for any given input vector.  In our implementation, each of the three networks had 4 stacked layers of 128 unit Gated Recurrent Units (or GRUs) to capture the sequential nature of the input.  
+Figure~\ref{siamese_nets} illustrates the siamese network architecture \cite{DBLP:conf/cvpr/SchroffKP15} we used to build a system for merging data.  Input is initially triples of a name (\textit{anchor}), another name for the same entity (\textit{positive}) and a name of another entity (\textit{negative}).  For the network, input vectors are computed for each entity assuming a maximum name length of 10 for each entity (i.e., no entity could have a name that spanned more than 10 tokens).  A 100 dimensional character embedding was computed for each token in the entity using pretrained character embeddings \cite{hashimoto-jmt:2017:EMNLP2017}, which resulted in a 100 x 10 character encoding for each name used in a triplet.  These three input vectors from each triplet are fed to three identical networks that share the same weights.  Weight sharing ensures that the networks learn the same mapping function for any given input vector.  In our implementation, each of the three networks had 4 stacked layers of 128 unit Gated Recurrent Units (or GRUs) to capture the sequential nature of the input.  
 
 GRUs are a type of recurrent network \cite{cho-al-emnlp14} where each hidden unit updates its weights at a specific step in the sequence $t$ based on the current input $x_t$ and the value of the hidden unit from the prior step $h_{t-1}$.  $r_t$ is a reset gate which determines whether the state from the previous step $h_{t-1}$ should be ignored. $z_t$ is an update gate which determines whether the current hidden state should be updated with the new hidden state $\tilde{h_t}$.  Equations~\ref{eq_1}-\ref{eq_4} that govern the update at $h_t$, as summarized by \cite{colah}.
 \begin{equation}
@@ -34,12 +29,12 @@ h_t = (1- z_t) * h_{t-1} + z_t * \tilde{h_t}
 \label{eq_4}
 \end{equation}
 
-The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark gray layer produces an output vector embedding for the inputs.  These are fed to two layers which compute a euclidean distance between the \textit{anchor} and the \textit{positive} elements of a triplet (\textit{positive distance}), and the \textit{anchor} and the \textit{negative} elements of a triplet (\textit{negative distance}).  Conceptually, there are two objectives in metric learning, one to minimize \textit{positive distances}, and the other to maximize \textit{negative distances}.  As described below, this dual objective is achieved by different loss functions in the literature.
+The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark gray layer produces an output vector embedding for the inputs.  These are fed to two layers which compute a euclidean distance between the \textit{anchor} and the \textit{positive} elements of a triplet (\textit{positive distance}), and the \textit{anchor} and the \textit{negative} elements of a triplet (\textit{negative distance}).  Conceptually, there are two objectives in metric learning, one to minimize \textit{positive distances}, and the other to maximize \textit{negative distances}.  As described below, this dual objective can be achieved by different loss functions.
 
-\subsection{Loss functions}
+\section{Loss functions}
 \label{loss_functions}
 
-Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions to explore their effectiveness for the entity metric learning problem.
+Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions, three of which have been used in prior literature to explore their effectiveness for the entity metric learning problem.
 
 \begin{figure*}[htb]
     \centering
@@ -73,7 +68,7 @@ Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\
     \caption{Loss functions}
 \end{figure*}
 
-\subsubsection{Triplet loss}
+\subsection{Triplet loss}
 
 For face recognition, Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}
 propose a triplet loss function where the \textit{positive distances}
@@ -96,7 +91,7 @@ and the loss function that is minimized across all $N$ triples is given by
 \end{equation}
 Note that in this formulation, it is assumed that embedding is normalized so $\|\bf{x} \| = 1$ because this normalization is robust across variations in illumination and contrast.  The value of $\alpha$ in the original work is a hyper-parameter that \cite{DBLP:conf/cvpr/SchroffKP15} was set to 0.2.
 
-\subsubsection{Improved Loss}
+\subsection{Improved Loss}
 
  An improvement over the triplet loss function is proposed by
  \cite{DBLP:conf/cvpr/SchroffKP15} for the recognition of faces in
@@ -122,7 +117,7 @@ Note that in this formulation, it is assumed that embedding is normalized so $\|
 \end{equation}
 The parameter $\hat{\alpha}$ for equation~\ref{psi} is set to 0.1, and $\lambda$ is set to .02 in equation~\ref{improved_loss}, and $\alpha$ was set to 1 in the paper \cite{Zhang:2016:DML:3088616.3088665}.  As in Schroff et al. \cite{DBLP:conf/cvpr/SchroffKP15}, the embeddings are normalized to 1 although the actual paper does not make it clear.
 
-\subsubsection{Angular Loss}
+\subsection{Angular Loss}
 
 Wang et al. \cite{DBLP:journals/corr/abs-1708-01682} define a novel
 angular loss function which is not based on pairwise distances, but
@@ -143,7 +138,7 @@ illustrate in Figure~\ref{angular_loss} with the angle to shrink.
 l_{triplet} = \left[[\bf{x_{a}} - \bf{x_{p}}\|^2 - 4 \tan^2 \alpha \|\bf{x_{n}} - \bf{x_{c}}\|^2 \right])_{+}
 \end{equation}
 
-\subsubsection{Hyperbolic Tangent Loss}
+\subsection{Hyperbolic Tangent Loss}
 
 The inspiration for our loss is that triplet loss, in effect, only
 pushes the negative distance as far as $\alpha$; if the negative
@@ -156,7 +151,7 @@ we use hyperbolic tangent to compress all distances to the range 0 to
 1, and substract the negative distance from 1.  Then our loss function
 simply needs to minimize both positive and negative numbers: 
 
- \begin{equation}
+\begin{equation}
   l_{triple} =  tanh\left(\|\bf{x_a} - \bf{x_p}\|\right) + \left(1-tanh\left(\|\bf{x_a} -\bf{x_n}\|\right)\right)
 \label{tanh}
 \end{equation}
