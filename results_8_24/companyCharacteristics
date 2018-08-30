@@ -1,0 +1,52 @@
+/Users/kavithasrinivas/code/fuzzyJoiner/virtualenv/bin/python /Users/kavithasrinivas/code/fuzzyJoiner/ANNCharacteristics.py --input ./companies_to_cleanse/companies.txt --loss_function our-loss --use_l2_norm false --num_layers 3 --margin 10 --entity_type companies
+/Users/kavithasrinivas/code/fuzzyJoiner/virtualenv/lib/python3.6/site-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Using TensorFlow backend.
+Loss function: our-loss
+Margin:10
+Use L2Norm: False
+Use L2Norm: false
+Num layers: 2
+number of entities
+40555
+mean number of names:2.2012082357292564
+max number of names:68
+about to get kz
+got kz
+failed to find embedding for:à
+failed to find embedding for:£
+failed to find embedding for:ü
+Number of words:53068
+2018-08-30 13:30:34.175089: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+Characteristics at neighborhood length:20
+mean positive distance:4.640426788984447
+stdev positive distance:2.3355740331390176
+max positive distance:19.75181770324707
+mean neg distance:3.0532388492537783
+stdev neg distance:1.4368337256440424
+max neg distance:14.074431419372559
+recall:0.16387288481604137
+Characteristics at neighborhood length:100
+mean positive distance:4.640426788984447
+stdev positive distance:2.3355740331390176
+max positive distance:19.75181770324707
+mean neg distance:3.3527355656064937
+stdev neg distance:1.5717278109718618
+max neg distance:14.596267700195312
+recall:0.18966058026212612
+Characteristics at neighborhood length:500
+mean positive distance:4.640426788984447
+stdev positive distance:2.3355740331390176
+max positive distance:19.75181770324707
+mean neg distance:3.6615428018340053
+stdev neg distance:1.7225582180446148
+max neg distance:14.86568546295166
+recall:0.2236249579926067
+Characteristics at neighborhood length:1500
+mean positive distance:4.640426788984447
+stdev positive distance:2.3355740331390176
+max positive distance:19.75181770324707
+mean neg distance:3.863474500175335
+stdev neg distance:1.7971465919435534
+max neg distance:15.031625747680664
+recall:0.25366864568164
