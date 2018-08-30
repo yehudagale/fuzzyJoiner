@@ -534,4 +534,4 @@ sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
 embedder = get_embedding_layer(tokenizer)
 embedder_model = embedded_representation_model(embedder)
 
-characterize_dataset(embedder_model, sequences, entity2unique, entity2same, unique_text, [20, 100, 500])
+characterize_dataset(embedder_model, sequences, entity2unique, entity2same, unique_text, [20, 100, 500, 1000])
