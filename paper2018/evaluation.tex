@@ -1,28 +1,20 @@
 \section{Evaluation}
 \label{results}
+In building the models, we employed early stopping using the usual metric of accuracy of the validation data, and we performed hyper-parameter tuning using grid search varying margins for our loss function from 1-20.  Accuracy was defined as the percentage of validation triples where positive distances from anchor were less than negative distances from anchor.  For all our runs, test accuracy as measured by this metric ranged in the 9-- range.  Table \ref{Evaluation} shows the results for the people and company datasets, run with a fixed $k$ of 20 neighbors.  Because we compared across different losses, the results are categorized by each loss function for each dataset we tested.  For all the results reported here, we ran multiple runs because of the stochastic nature of neural network models; the results here are representative of what we saw across runs. 
 
-Table \ref{Characteristics} quantifies the difficulty of the metric problem for the people and company data in Wikidata.  After conversion to character embeddings, we computed the 20 nearest neighbors for each anchor, and computed what percentage of positives were found within the top 20 (recall), the average distance of positives and negatives from the anchor and their standard deviations respectively.  To compare it with metric learning for face recognition, which has been studied before, we also provide the same metrics for Labeled Faces in the Wild based on their input vector embeddings.  The table quantifies the difficulty of the metric learning problem across different data types, with positive distances for each being greater than negative distances.  Baseline recall rates are also poor, which is important because it suggests that a different mapping function learnt by a neural network is in fact needed for these entity types, just as it is for faces.
-
-\begin{table*}[ht]
-\caption{Dataset characteristics}
-\label{Characteristics}
-\begin{tabular}{l|r|r|r|r|r|r|r|}
-\hline
-Entity Type & Recall & Positives Avg. & Positives Std. & Max Positives & Negatives Avg. & Negatives Std. & Negatives Max \\
-People & 0.03 & 9.07 & 3.05 & 28.30 & 3.16 & 1.17 & 16.97 \\
-Companies & 0.20 & 4.67 & 2.29 & 19.21 & 3.18 & 1.40 & 12.77 \\
-Faces & 0.037 & 39.82 & 9.17 & 79.15 & 25.05 & 3.72 & 43.19 \\
-\end{tabular}
-\end{table*}
-
-Table \ref{Evaluation} shows the same metrics after training.  Because we compared across different losses, the results are categorized by each loss function for each dataset we tested.  For each value reported in the table, we conducted two runs to ensure the results were stable across runs, and we report the mean in the table.
-
+We report multiple metrics to measure the effectiveness of training, some of which are not standard because of the experimental setup, so we define them below:
+\begin{itemize}
+\item \textbf{Recall}.  Recall is measured by the percentage of positives in the nearest neighbor set of each anchor.
+\item \textbf{Precision@1}.  Precision@1 is measured by the percentage of anchors with the very nearest neighbor being a positive.
+\item \textbf{Precision}.  Precision is measured by the percentage of all positives for all anchors that were closer to the anchor than any other negative.
+\end{itemize}
+ 
 \begin{table*}[ht]
 \caption{Results for people and companies by loss functions}
 \label{Evaluation}
 \begin{tabular}{l|l|r|r|r|r|r|r|r|r|}
 \hline
-Entity Type & Loss Function & Recall & Precision & Positives Avg. & Positives Std. & Max Positives & Negatives Avg. & Negatives Std. & Negatives Max \\
+Entity Type & Loss Function & Recall & Precision@1 & Precision \\
 \hline
 \multirow{4}{*}{People} & Our loss & .81 & .93 & .69 & .53 & 21.08 & 2.39 & 1.27 & 33.46 \\
 \hline
@@ -42,21 +34,22 @@ Entity Type & Loss Function & Recall & Precision & Positives Avg. & Positives St
 \end{tabular}
 \end{table*}
 
+
 \subsection{Performance for Joins}
 
- For fuzzy joins, we need both precision and recall to be high.  Without good recall, a join will potentially miss names that should be joined.  Without high precision, a join will mistakenly join many inappropriate names.  To quantify recall, we measure, for each loss function, the fraction of positives---names of the same entity---that are found in our neighborhood.  The numbers for our own loss function are 81\% for people and 72\% for companies, so a join could capture most similar names.
+ For fuzzy joins, we need both precision and recall to be high.  Without good recall, a join will potentially miss names that should be joined.  Without high precision, a join will mistakenly join many inappropriate names.  To quantify recall, we measure, for each loss function.  The numbers for our adapted loss function are 81\% for people and 72\% for companies, so a join could capture most similar names.
 
  Precision is a little trickier to define, but one way is to measure how many true matches we get in the neighborhood before seeing a single mistake, i.e. a match that should not be there.  That metric gives a picture of how many names would be correctly found, on average, by a join.  Our loss function gives 62\% by this metric for people and 64\% for companies, so about two thirds of recalled names would be found before finding a single error.  Since every name has at least one other name for the same entity, we also measure precision at 1, which is the probability that the very nearest neighbor is a true match.  For that, our loss yields 81\% for people and 73\% for companies.  Note that measuring precision for larger neighborhoods is tricky, since not every name has more than one name for the same entity.
 
 \subsection{Learning Performance}
 
- We also assessed our learning mechanism more directly by examining how the nearest neighborhood changed from before to after training.  As can be seen from Tables~\ref{Characteristics} and~\ref{Evaluation}, recall is improved greatly, with the bigger change for people, in which case it improves from 3\% to 80\%.  For companies, it is from 17\% to 72\%.  Thus training is clearly effective in moving actual names for the same entity into the nearest neighbors.  For precision, the fraction of true matches found before the first error improves from 16\% to 73\% for people and 16\% to 64\% for companies.  Precision at one improves from 10\% to 81\% for people and from 26\% to 73\% for companies.  In both these cases, before training the results are basically noise even though embeddings are used for context, but training has made the results usable.
+ We also assessed our learning mechanism more directly by examining how the nearest neighborhood changed from before to after training.  As can be seen from Table \ref{Evaluation}, recall is improved greatly, with the bigger change for people, in which case it improves from 3\% to 80\%.  For companies, it is from 17\% to 72\%.  Thus training is clearly effective in moving actual names for the same entity into the nearest neighbors.  For precision, the fraction of true matches found before the first error improves from 16\% to 73\% for people and 16\% to 64\% for companies.  Precision at one improves from 10\% to 81\% for people and from 26\% to 73\% for companies.  In both these cases, before training the results are basically noise even though embeddings are used for context, but training has made the results usable.
 
 \subsection{Generalization Test on Faces}
 
- We have demonstrated that our strategy for joins could work well for textual names of people and companies, but the technique could potentially work for any kind of data for which a vector embedding can be made.  To test how well that works, we evaluated an existing model for face recognition: we took the existing trained model at \url{https://github.com/davidsandberg/facenet}, and extracted the output embeddings for faces from the LFW test set at \url{http://vis-www.cs.umass.edu/lfw/}.  We put these ooutput embeddings into an ANN structure, and computed our metrics on that.  Recall of the same face was remarkably similar to our results for names, getting 76\%; however, we found precision at one was much lower at 21\%.
+ We have demonstrated that our strategy for joins could work well for textual names of people and companies, but the technique could potentially work for any kind of data for which a vector embedding can be made.  To test how well that works, we evaluated two existing models for face recognition that were trained with the same approaches defined in the \cite{DBLP:conf/cvpr/SchroffKP15} on two different datasets, VGGFace2, and CasiaWebFace.  We took the existing trained model at \url{https://github.com/davidsandberg/facenet}, and extracted the output embeddings for faces from the LFW test set at \url{http://vis-www.cs.umass.edu/lfw/} using these embeddings.  We put these output embeddings into an ANN structure, and computed our metrics on that.  Recall of the same face was remarkably similar to our results for names, getting 80\% on the VGGFace2 dataset, and 76\% for the Casia Web Face dataset.  However, we found precision at one was much lower on both datasets at 23\% for VGGFace2 and 21\% for Casia Web faces.
 
- We hypothesize that one reason for lower precision at one is the nature of the training.  Training on pre-built LFW model focused on what they call semi-hard negatives, which are triplets for which the negative is further from training anchor than the corresponding positive.  Thus, negatives which are very close to an anchor may get less training to move them away from that anchor.  Our training focuses on nearby negatives, which allows tem to be moved.
+We hypothesize that one reason for lower precision at one is the nature of the training.  Training on pre-built LFW model focused on what they call semi-hard negatives, which are triplets for which the negative is further from training anchor than the corresponding positive.  Thus, negatives which are very close to an anchor may get less training to move them away from that anchor.  Our training focuses on nearby negatives, which allows them to be moved.  This is clearly a hypothesis that needs to be tested further.
 
 \subsection{Discussion}
 
