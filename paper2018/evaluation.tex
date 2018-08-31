@@ -3,7 +3,7 @@
 
 Table \ref{Characteristics} quantifies the difficulty of the metric problem for the people and company data in Wikidata.  After conversion to character embeddings, we computed the 20 nearest neighbors for each anchor, and computed what percentage of positives were found within the top 20 (recall), the average distance of positives and negatives from the anchor and their standard deviations respectively.  To compare it with metric learning for face recognition, which has been studied before, we also provide the same metrics for Labeled Faces in the Wild based on their input vector embeddings.  The table quantifies the difficulty of the metric learning problem across different data types, with positive distances for each being greater than negative distances.  Baseline recall rates are also poor, which is important because it suggests that a different mapping function learnt by a neural network is in fact needed for these entity types, just as it is for faces.
 
-\begin{table}[ht]
+\begin{table*}[ht]
 \caption{Dataset characteristics}
 \label{Characteristics}
 \begin{tabular}{l|r|r|r|r|r|r|r|}
@@ -13,11 +13,11 @@ People & 0.03 & 9.07 & 3.05 & 28.30 & 3.16 & 1.17 & 16.97 \\
 Companies & 0.20 & 4.67 & 2.29 & 19.21 & 3.18 & 1.40 & 12.77 \\
 Faces & 0.037 & 39.82 & 9.17 & 79.15 & 25.05 & 3.72 & 43.19 \\
 \end{tabular}
-\end{table}
+\end{table*}
 
-Table \ref{Evaluation} shows the same metrics after training.  Because we compared across different losses, the results are catagorized by each loss function for each dataset we tested.  For each value reported in the table, we conducted two runs to ensure the results were stable across runs, and we report the mean in the table.
+Table \ref{Evaluation} shows the same metrics after training.  Because we compared across different losses, the results are categorized by each loss function for each dataset we tested.  For each value reported in the table, we conducted two runs to ensure the results were stable across runs, and we report the mean in the table.
 
-\begin{table}[ht]
+\begin{table*}[ht]
 \caption{Results for people and companies by loss functions}
 \label{Evaluation}
 \begin{tabular}{l|l|r|r|r|r|r|r|r|r|}
@@ -40,5 +40,15 @@ Entity Type & Loss Function & Recall & Precision & Positives Avg. & Positives St
 & Angular loss & NA & NA & NA & NA & NA & NA & NA & NA \\
 \hline
 \end{tabular}
-\end{table}
+\end{table*}
+
+\subsection{Performance for Joins}
+
+ For fuzzy joins, we need both precision and recall to be high.  Without good recall, a join will potentially miss names that should be joined.  Without high precision, a join will mistakenly join many inappropriate names.  To quantify recall, we measure, for each loss function, the fraction of positives---names of the same entity---that are found in our neighborhood.  The numbers for our own loss function are 81\% for people and 72\% for companies, so a join could capture most similar names.
+
+ Precision is a little trickier to define, but one way is to measure how many true matches we get in the neighborhood before seeing a single mistake, i.e. a match that should not be there.  That metric gives a picture of how many names would be correctly found, on average, by a join.  Our loss function gives 62\% by this metric for people and 64\% for companies, so about two thirds of recalled names would be found before finding a single error.  Since every name has at least one other name for the same entity, we also measure precision at 1, which is the probability that the very nearest neighbor is a true match.  For that, our loss yields 81\% for people and 73\% for companies.  Note that measuring precision for larger neighborhoods is tricky, since not every name has more than one name for the same entity.
+
+\subsection{Learning Performance}
+
+ We also assessed our learning mechanism more directly by examining how the nearest neighborhood changed from before to after training.  As can be seen from Tables~\ref{Characteristics} and~\ref{Evaluation}, recall is improved greatly, with the bigger change for people, in which case it improves from 3\% to 80\%.  For companies, it is from 17\% to 72\%.  Thus training is clearly effective in moving actual names for the same entity into the nearest neighbors.  For precision, the fraction of true matches found before the first error improves from 16\% to 73\% for people and 16\% to 64\% for companies.  Precision at one improves from 10\% to 81\% for people and from 26\% to 73\% for companies.  In both these cases, before training the results are basically noise even though embeddings are used for context, but training has made the results usable.
 

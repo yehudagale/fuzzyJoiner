@@ -27,6 +27,7 @@ from names_cleanser import NameDataCleanser, CompanyDataCleanser
 import sys
 
 import statistics 
+from scipy.stats.mstats import gmean
 
 import argparse
 
@@ -48,6 +49,7 @@ TEST_NEIGHBOR_LEN=20
 EMBEDDING_TYPE = 'Kazuma'
 NUM_LAYERS = 3
 USE_L2_NORM = False
+filepath="weights.best.hdf5"
 
 output_file_name_for_hpo = "val_dict_list.json"
 
@@ -235,11 +237,15 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
     no_match = 0
     ann_accuracy = 0
     total = 0
-
+    precise = 0
+    
     triplets = {}
-
+    closest_positive_counts = []
+    
     pos_distances = []
     neg_distances = []
+    all_pos_distances = []
+    all_neg_distances = []
 
     triplets['anchor'] = []
     triplets['positive'] = []
@@ -255,6 +261,7 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
         nearest = t.get_nns_by_vector(predictions[index], NNlen)
         nearest_text = set([unique_text[i] for i in nearest])
         expected_text = set(entity2same[key])
+            
         # annoy has this annoying habit of returning the queried item back as a nearest neighbor.  Remove it.
         if key in nearest_text:
             nearest_text.remove(key)
@@ -287,20 +294,52 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
                 # print(dist_pos)
                 # print(dist_neg)               
 
+        min_neg_distance = 1000000        
+        for i in negatives:
+            dist_neg = t.get_distance(index, entity2unique[i])
+            all_neg_distances.append(dist_neg)
+            if dist_neg < min_neg_distance:
+                    min_neg_distance = dist_neg
+
+        for j in expected_text:
+            dist_pos = t.get_distance(index, entity2unique[j])
+            all_pos_distances.append(dist_pos)
+
+        closest_pos_count = 0
+        for p in overlap:
+            dist_pos = t.get_distance(index, entity2unique[p])
+            if dist_pos < min_neg_distance:
+                closest_pos_count+=1
+
+        if closest_pos_count > 0:
+            precise+=1
+
+        closest_positive_counts.append(closest_pos_count / min(len(expected_text), NNlen - 1))
+
+
+            
         for i in negatives:
             for j in expected_text:
                 triplets['anchor'].append(key)
                 triplets['positive'].append(j)
                 triplets['negative'].append(i)
 
+    print("mean closest positive count:" + str(statistics.mean(closest_positive_counts)))
     print("mean positive distance:" + str(statistics.mean(pos_distances)))
     print("stdev positive distance:" + str(statistics.stdev(pos_distances)))
     print("max positive distance:" + str(max(pos_distances)))
     print("mean neg distance:" + str(statistics.mean(neg_distances)))
     print("stdev neg distance:" + str(statistics.stdev(neg_distances)))
     print("max neg distance:" + str(max(neg_distances)))
+    print("mean all positive distance:" + str(statistics.mean(all_pos_distances)))
+    print("stdev all positive distance:" + str(statistics.stdev(all_pos_distances)))
+    print("max all positive distance:" + str(max(all_pos_distances)))
+    print("mean all neg distance:" + str(statistics.mean(all_neg_distances)))
+    print("stdev all neg distance:" + str(statistics.stdev(all_neg_distances)))
+    print("max all neg distance:" + str(max(all_neg_distances)))
     print("Accuracy in the ANN for triplets that obey the distance func:" + str(ann_accuracy / total))
-
+    print("Precision at 1: " +  str(precise / len(entity2same)))
+    
     obj = {}
     obj['accuracy'] = ann_accuracy / total
     obj['steps'] = 1
@@ -407,8 +446,12 @@ parser.add_argument('--input', type=str, help='Input file')
 
 parser.add_argument('--entity_type', type=str, help='people or companies')
 
+parser.add_argument('--model', type=str, help='name for model file')
+
 
 args = parser.parse_args()
+
+filepath = args.model
 
 LOSS_FUNCTION = None
 if args.loss_function == 'schroff-loss':
@@ -502,7 +545,6 @@ number_of_names = len(train_data['anchor'])
 print("number of names" + str(number_of_names))
 Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
 
-filepath="weights.best.hdf5"
 checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 
 early_stop = EarlyStopping(monitor='val_accuracy', patience=1, mode='max')
