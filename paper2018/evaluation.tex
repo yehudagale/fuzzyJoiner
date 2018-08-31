@@ -52,3 +52,12 @@ Entity Type & Loss Function & Recall & Precision & Positives Avg. & Positives St
 
  We also assessed our learning mechanism more directly by examining how the nearest neighborhood changed from before to after training.  As can be seen from Tables~\ref{Characteristics} and~\ref{Evaluation}, recall is improved greatly, with the bigger change for people, in which case it improves from 3\% to 80\%.  For companies, it is from 17\% to 72\%.  Thus training is clearly effective in moving actual names for the same entity into the nearest neighbors.  For precision, the fraction of true matches found before the first error improves from 16\% to 73\% for people and 16\% to 64\% for companies.  Precision at one improves from 10\% to 81\% for people and from 26\% to 73\% for companies.  In both these cases, before training the results are basically noise even though embeddings are used for context, but training has made the results usable.
 
+\subsection{Generalization Test on Faces}
+
+ We have demonstrated that our strategy for joins could work well for textual names of people and companies, but the technique could potentially work for any kind of data for which a vector embedding can be made.  To test how well that works, we evaluated an existing model for face recognition: we took the existing trained model at \url{https://github.com/davidsandberg/facenet}, and extracted the output embeddings for faces from the LFW test set at \url{http://vis-www.cs.umass.edu/lfw/}.  We put these ooutput embeddings into an ANN structure, and computed our metrics on that.  Recall of the same face was remarkably similar to our results for names, getting 76\%; however, we found precision at one was much lower at 21\%.
+
+ We hypothesize that one reason for lower precision at one is the nature of the training.  Training on pre-built LFW model focused on what they call semi-hard negatives, which are triplets for which the negative is further from training anchor than the corresponding positive.  Thus, negatives which are very close to an anchor may get less training to move them away from that anchor.  Our training focuses on nearby negatives, which allows tem to be moved.
+
+\subsection{Discussion}
+
+ Our results and our comparison with faces seems to show that training on hard negatives does not compromise recall overall and can boost precision for near neighbors.  Since joins will be most effective and efficient by focusing on a small, precise neighborhood, training on hard negatives may in fact be a useful addition.
