@@ -40,7 +40,7 @@ ALPHA=45
 
 DEBUG = False
 DEBUG_DATA_LENGTH = 100
-DEBUG_ANN = True
+DEBUG_ANN = False
 
 USE_ANGULAR_LOSS=False
 LOSS_FUNCTION=None
@@ -250,24 +250,21 @@ def generate_semi_hard_triplets_from_ANN(model, sequences, entity2unique, entity
         semi_hards = []
         expected_text = set(entity2same[key])
         expected_ids = [entity2unique[i] for i in expected_text]
-        print(key)
-        print(expected_text)
 
         for positive in expected_text:
             k = entity2unique[positive]
             nearest = t.get_nns_by_vector(predictions[k], NNlen)
             nearest_text = set([unique_text[i] for i in nearest])
-            print(positive)
-            print(nearest_text)
             dist_k = t.get_distance(index, k)
-            print(dist_k)
             for n in nearest:
                 if n == index or n in expected_ids or n == k:
                     continue
                 n_dist = t.get_distance(index, n)
-                print(n_dist)
                 if n_dist > dist_k:
                     semi_hards.append(unique_text[n])
+
+        shuffle(semi_hards)
+        semi_hards = semi_hards[0:20]
 
         for i in semi_hards:
             for j in expected_text:
@@ -595,8 +592,7 @@ counter = 0
 current_model = embedder_model
 prev_match_stats = 0
 
-train_data, match_stats = generate_triplets_from_ANN(current_model, sequences, entity2unique, entity2same_train, unique_text, False)
-print("Match stats:" + str(match_stats))
+train_data = generate_semi_hard_triplets_from_ANN(current_model, sequences, entity2unique, entity2same_train, unique_text, False)
 
 number_of_names = len(train_data['anchor'])
 # print(train_data['anchor'])
