@@ -220,6 +220,63 @@ def build_unique_entities(entity2same):
     return unique_text, entity2index
 
 
+def characterize_dataset(model, sequences, entity2unique, entity2same, unique_text, nnlens):
+    predictions = model.predict(sequences)
+    t = AnnoyIndex(len(predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
+    t.set_seed(123)
+    for i in range(len(predictions)):
+        # print(predictions[i])
+        v = predictions[i]
+        t.add_item(i, v)
+
+    t.build(100)  # 100 trees
+
+    for nnlen in nnlens:
+        print("Characteristics at neighborhood length:" + str(nnlen))
+        pos_distances = []
+        neg_distances = []
+        match = 0
+        no_match = 0
+
+        for key in entity2same:
+            index = entity2unique[key]
+            nearest = t.get_nns_by_vector(predictions[index], nnlen)
+            nearest_text = set([unique_text[i] for i in nearest])
+            expected_text = set(entity2same[key])
+            overlap = expected_text.intersection(nearest_text)
+
+            m = len(overlap)
+            match += m
+            # since we asked for only x nearest neighbors, and we get at most x-1 neighbors that are not the same as key (!)
+            # make sure we adjust our estimate of no match appropriately
+            no_match += min(len(expected_text), nnlen - 1) - m
+
+            # annoy has this annoying habit of returning the queried item back as a nearest neighbor.  Remove it.
+            if key in nearest_text:
+                nearest_text.remove(key)
+
+            # sample only the negatives that are true negatives
+            # that is, they are not in the expected set - sampling only 'semi-hard negatives is not defined here'
+            pos = expected_text
+            neg = nearest_text - expected_text
+
+            for i in pos:
+                dist_pos = t.get_distance(index, entity2unique[i])
+                pos_distances.append(dist_pos)
+            for i in neg:
+                dist_neg = t.get_distance(index, entity2unique[i])
+                neg_distances.append(dist_neg)
+
+        recall = match / (match + no_match)
+
+        print("mean positive distance:" + str(statistics.mean(pos_distances)))
+        print("stdev positive distance:" + str(statistics.stdev(pos_distances)))
+        print("max positive distance:" + str(max(pos_distances)))
+        print("mean neg distance:" + str(statistics.mean(neg_distances)))
+        print("stdev neg distance:" + str(statistics.stdev(neg_distances)))
+        print("max neg distance:" + str(max(neg_distances)))
+        print("recall:" + str(recall))
+
 def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, unique_text, test):
     predictions = model.predict(sequences)
     t = AnnoyIndex(len(predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
@@ -393,7 +450,7 @@ def build_model(embedder):
     return model, test_positive_model, test_negative_model, inter_model
 
 
-parser = argparse.ArgumentParser(description='Run fuzzy join algorithm')
+parser = argparse.ArgumentParser(description='Characterize the dataset')
 parser.add_argument('--debug_sample_size', type=int,
                     help='sample size for debug run')
 parser.add_argument('--margin',  type=int,
@@ -445,16 +502,18 @@ people = 'people' in args.entity_type
 
 # read all entities and create positive parts of a triplet
 entities = read_entities(args.input)
-train, test = split(entities, test_split = .20)
-print("TRAIN")
-print(train)
-print("TEST")
-print(test)
 
-entity2same_train = generate_names(train, people)
-entity2same_test = generate_names(test, people, limit_pairs=True)
-print(entity2same_train)
-print(entity2same_test)
+entity2same = generate_names(entities, people)
+
+print("number of entities")
+print(len(entity2same))
+
+number_of_names = []
+for i in entity2same:
+    number_of_names.append(len(entity2same[i]))
+print("mean number of names:" + str(statistics.mean(number_of_names)))
+print("max number of names:" + str(max(number_of_names)))
+
 
 # change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
 # clues for entity names
@@ -464,68 +523,15 @@ tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;
 # a mapping of entities in texts to an index in unique_text, a mapping of entities to other same entities, and the actual
 # vectorized representation of the text.  These structures will be used iteratively as we build up the model
 # so we need to create them once for re-use
-unique_text, entity2unique = build_unique_entities(entity2same_train)
-unique_text_test, entity2unique_test = build_unique_entities(entity2same_test)
+unique_text, entity2unique = build_unique_entities(entity2same)
 
-print("train text len:" + str(len(unique_text)))
-print("test text len:" + str(len(unique_text_test)))
-
-tokenizer.fit_on_texts(unique_text + unique_text_test)
+tokenizer.fit_on_texts(unique_text)
 
 sequences = tokenizer.texts_to_sequences(unique_text)
 sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
-sequences_test = tokenizer.texts_to_sequences(unique_text_test)
-sequences_test = pad_sequences(sequences_test, maxlen=MAX_SEQUENCE_LENGTH)
 
 # build models
 embedder = get_embedding_layer(tokenizer)
-model, test_positive_model, test_negative_model, inter_model = build_model(embedder)
 embedder_model = embedded_representation_model(embedder)
 
-
-if DEBUG_ANN:
-    generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
-    sys.exit()
-
-test_data, test_match_stats = generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, False)
-test_seq = get_sequences(test_data, tokenizer)
-print("Test stats:" + str(test_match_stats))
-
-counter = 0
-current_model = embedder_model
-prev_match_stats = 0
-
-train_data, match_stats = generate_triplets_from_ANN(current_model, sequences, entity2unique, entity2same_train, unique_text, False)
-print("Match stats:" + str(match_stats))
-
-number_of_names = len(train_data['anchor'])
-# print(train_data['anchor'])
-print("number of names" + str(number_of_names))
-Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
-
-filepath="weights.best.hdf5"
-checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-
-early_stop = EarlyStopping(monitor='val_accuracy', patience=1, mode='max')
-
-callbacks_list = [checkpoint, early_stop]
-
-train_seq = get_sequences(train_data, tokenizer)
-
-# check just for 5 epochs because this gets called many times
-model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
-current_model = inter_model
-# print some statistics on this epoch
-
-print("training data predictions")
-positives = test_positive_model.predict([train_seq['anchor'], train_seq['positive'], train_seq['negative']])
-negatives = test_negative_model.predict([train_seq['anchor'], train_seq['positive'], train_seq['negative']])
-print("f1score for train is: {}".format(f1score(positives, negatives)))
-print("test data predictions")
-positives = test_positive_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-negatives = test_negative_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-print("f1score for test is: {}".format(f1score(positives, negatives)))
-
-
-test_match_stats = generate_triplets_from_ANN(current_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
-print("Test stats:" + str(test_match_stats))
+characterize_dataset(embedder_model, sequences, entity2unique, entity2same, unique_text, [20, 100, 500, 1000])
