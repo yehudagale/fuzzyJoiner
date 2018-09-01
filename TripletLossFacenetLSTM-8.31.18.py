@@ -1,3 +1,5 @@
+from random import shuffle
+
 import numpy as np
 import pandas
 import tensorflow as tf
@@ -87,7 +89,7 @@ def get_embedding_layer(tokenizer):
 
         if embedding_vector is not None:
             if sum(embedding_vector) == 0:
-                print("failed to find embedding for:" + word)
+                print(str("failed to find embedding for:" + word).encode('utf-8'))
             # words not found in embedding index will be all-zeros.
             embedding_matrix[i] = embedding_vector
     print("Number of words:" + str(num_words))
@@ -116,7 +118,7 @@ def get_sequences(texts, tokenizer):
 
 def read_entities(filepath):
     entities = []
-    with open(filepath) as fl:
+    with open(filepath, 'r', encoding='utf8') as fl:
         for line in fl:
             entities.append(line)
 
@@ -124,7 +126,7 @@ def read_entities(filepath):
 
 def read_file(file_path):
     texts = {'anchor':[], 'negative':[], 'positive':[]}
-    fl = open(file_path, 'r')
+    fl = open(file_path, 'r', encoding='utf8')
     i = 0
     for line in fl:
         line_array = line.split("|")
@@ -247,15 +249,15 @@ def generate_semi_hard_triplets_from_ANN(model, sequences, entity2unique, entity
     for key in entity2same:
         index = entity2unique[key]
 
-        semi_hards = []
         expected_text = set(entity2same[key])
         expected_ids = [entity2unique[i] for i in expected_text]
 
         for positive in expected_text:
             k = entity2unique[positive]
             nearest = t.get_nns_by_vector(predictions[k], NNlen)
-            nearest_text = set([unique_text[i] for i in nearest])
             dist_k = t.get_distance(index, k)
+
+            semi_hards = []
             for n in nearest:
                 if n == index or n in expected_ids or n == k:
                     continue
@@ -263,13 +265,12 @@ def generate_semi_hard_triplets_from_ANN(model, sequences, entity2unique, entity
                 if n_dist > dist_k:
                     semi_hards.append(unique_text[n])
 
-        shuffle(semi_hards)
-        semi_hards = semi_hards[0:20]
+            # shuffle(semi_hards)
+            # semi_hards = semi_hards[0:20]
 
-        for i in semi_hards:
-            for j in expected_text:
+            for i in semi_hards:
                 triplets['anchor'].append(key)
-                triplets['positive'].append(j)
+                triplets['positive'].append(unique_text[k])
                 triplets['negative'].append(i)
 
     return triplets
@@ -397,7 +398,7 @@ def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, uni
     obj = {}
     obj['accuracy'] = ann_accuracy / total
     obj['steps'] = 1
-    with open(output_file_name_for_hpo, 'w') as out:
+    with open(output_file_name_for_hpo, 'w', encoding='utf8') as out:
         json.dump(obj, out)
 
     if test:
@@ -543,14 +544,14 @@ people = 'people' in args.entity_type
 entities = read_entities(args.input)
 train, test = split(entities, test_split = .20)
 print("TRAIN")
-print(train)
+print(str(train).encode('utf-8'))
 print("TEST")
-print(test)
+print(str(test).encode('utf-8'))
 
 entity2same_train = generate_names(train, people)
 entity2same_test = generate_names(test, people, limit_pairs=True)
-print(entity2same_train)
-print(entity2same_test)
+print(str(entity2same_train).encode('utf-8'))
+print(str(entity2same_test).encode('utf-8'))
 
 # change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
 # clues for entity names
