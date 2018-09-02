@@ -1,4 +1,4 @@
-\section{Evaluation}
+\section{Experiments}
 \label{results}
 In building the models, we employed early stopping using the usual metric of accuracy of the validation data, and we performed hyper-parameter tuning using grid search varying margins for our loss function from 1-20.  Accuracy was defined as the percentage of validation triples where positive distances from anchor were less than negative distances from anchor.  For all our runs, test accuracy as measured by this metric ranged in the 9-- range.  Table \ref{Evaluation} shows the results for the people and company datasets, run with a fixed $k$ of 20 neighbors.  Because we compared across different losses, the results are categorized by each loss function for each dataset we tested.  For all the results reported here, we ran multiple runs because of the stochastic nature of neural network models; the results here are representative of what we saw across runs. 
 
@@ -13,8 +13,8 @@ We report multiple metrics to measure the effectiveness of training, some of whi
 \caption{Precision and Recall by loss functions}
 \label{Evaluation}
 \begin{center}
-{\scriptsize
-\begin{tabular}{l|l|r|r|r|}
+%{\scriptsize
+\begin{tabular}{|l|l|r|r|r|}
 \hline
 Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
  & & & @1 & All \\
@@ -33,9 +33,9 @@ Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
 \cline{2-5}
 & Improved & .74 & .72 & .64 \\
 \cline{2-5}
-& Angular & NA & NA & NA \\
+& Angular & .26 & .32 & .22 \\
 \hline
-\end{tabular}}
+\end{tabular} %}
 \end{center}
 \end{table}
 
@@ -44,10 +44,10 @@ Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
 \caption{Distance estimates after training}
 \label{Evaluation}
 \begin{center}
-{\scriptsize 
-\begin{tabular}{l|l|r|r|r|r|}
+%{\scriptsize 
+\begin{tabular}{|l|l|r|r|r|r|}
 \hline
-Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c}{Neg} \\
+Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c|}{Neg} \\
 & & Mean & Std & Mean & Std \\
 \hline
 \multirow{4}{*}{People} & Adapted & 1.59 & 4.04 & 2.44 & 2.45 \\
@@ -62,11 +62,11 @@ Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c}{Neg} \\
 \cline{2-6}
 & Triplet & .39 & .28 & .55 & .09 \\
 \cline{2-6}
-& Improved & .32 & .50 & .42 & 0.19 \\
+& Improved & .32 & .50 & .42 & .19 \\
 \cline{2-6}
-& Angular & NA & NA & NA & NA \\
+& Angular & .07 & .04 & .04 & .01 \\
 \hline
-\end{tabular}}
+\end{tabular}%}
 \end{center}
 \end{table}
 
@@ -91,7 +91,7 @@ We compare our results to those from training againt semi-hard negatives.  To co
 \caption{Precision and Recall for hard and semi-hard training}
 \label{hard-semi-hard}
 \begin{center}
-{\scriptsize
+%{\scriptsize
 \begin{tabular}{|l|r|r|r|}
 \hline
 Training & Recall & Precision@1 & Precision \\
@@ -100,7 +100,7 @@ hard & .81 & .81 & .63 \\
 \hline
 semi-hard & .63 & .61 & .43 \\
 \hline
-\end{tabular}}
+\end{tabular}%}
 \end{center}
 \end{table}
 
