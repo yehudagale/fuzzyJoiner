@@ -9,57 +9,64 @@ We report multiple metrics to measure the effectiveness of training, some of whi
 \item \textbf{Precision}.  Precision is measured by the percentage of all positives for all anchors that were closer to the anchor than any other negative.
 \end{itemize}
  
-\begin{table*}[ht]
-\caption{Precision and Recall for people and companies by loss functions}
+\begin{table}[ht]
+\caption{Precision and Recall by loss functions}
 \label{Evaluation}
+\begin{center}
 \begin{tabular}{l|l|r|r|r|}
 \hline
-Entity Type & Loss Function & Recall & Precision@1 & Precision \\
+Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
+ & & & @1 & All \\
 \hline
-\multirow{4}{*}{People} & Adapted loss & .81 & .81 & .63 \\
+\multirow{4}{*}{People} & Adapted & .81 & .81 & .63 \\
+\cline{2-5}
+& Triplet & .74 & .84 & .55 \\
+\cline{2-5}
+& Improved & .71 & .52 & .45 \\
+\cline{2-5}
+& Angular & .04 & .09 & .02 \\
 \hline
-& Triplet loss & .74 & .84 & .55 \\
-\hline
-& Improved loss & .71 & .52 & .45 \\
-\hline
-& Angular loss & .04 & .09 & .02 \\
-\hline
-\multirow{4}{*}{Companies} & Adapted loss & .72 & .73 & .64 \\
-& Triplet loss & .75 & .76 & .67 \\
-\hline
-& Improved loss & .74 & .72 & .64 \\
-\hline
-& Angular loss & NA & NA & NA \\
+\multirow{4}{*}{Corps} & Adapted & .72 & .73 & .64 \\
+\cline{2-5}
+& Triplet & .75 & .76 & .67 \\
+\cline{2-5}
+& Improved & .74 & .72 & .64 \\
+\cline{2-5}
+& Angular & NA & NA & NA \\
 \hline
 \end{tabular}
-\end{table*}
+\end{center}
+\end{table}
 
 
-\begin{table*}[ht]
-\caption{Distance estimates for people and companies after training}
+\begin{table}[ht]
+\caption{Distance estimates after training}
 \label{Evaluation}
+\begin{center}
 \begin{tabular}{l|l|r|r|r|r|}
 \hline
-Entity Type & Loss Function & Mean Pos & Std Pos & Mean Neg & Std Neg \\
+Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c}{Neg} \\
+& & Mean & Std & Mean & Std \\
 \hline
-\multirow{4}{*}{People} & Adapted loss & 1.59 & 4.04 & 2.44 & 2.45 \\
+\multirow{4}{*}{People} & Adapted & 1.59 & 4.04 & 2.44 & 2.45 \\
+\cline{2-6}
+& Triplet & .46 & .18 & .55 & .10 \\
+\cline{2-6}
+& Improved & .15 & .38 & .21 & .18 \\
+\cline{2-6}
+& Angular & .51 & .25 & .06 & .02 \\
 \hline
-& Triplet loss & .46 & .18 & .55 & .10 \\
-\hline
-& Improved loss & .15 & .38 & .21 & .18 \\
-\hline
-& Angular loss & .51 & .25 & .06 & .02 \\
-\hline
-\multirow{4}{*}{Companies} & Adapted loss & 2.38 & 3.77 & 3.23 & 1.71 \\
-\hline
-& Triplet loss & .39 & .28 & .55 & .09 \\
-\hline
-& Improved loss & .32 & .50 & .42 & 0.19 \\
-\hline
-& Angular loss & NA & NA & NA & NA \\
+\multirow{4}{*}{Corps} & Adapted & 2.38 & 3.77 & 3.23 & 1.71 \\
+\cline{2-6}
+& Triplet & .39 & .28 & .55 & .09 \\
+\cline{2-6}
+& Improved & .32 & .50 & .42 & 0.19 \\
+\cline{2-6}
+& Angular & NA & NA & NA & NA \\
 \hline
 \end{tabular}
-\end{table*}
+\end{center}
+\end{table}
 
 
 \subsection{Performance for Joins}
