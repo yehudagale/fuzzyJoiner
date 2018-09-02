@@ -43,20 +43,20 @@ ontology alignment can require recognizing distinct surface forms of
 the same entity, especially when ontologies are independently
 developed.  However, data management systems are currently limited
 to performing merges based on string equality, or at best using
-string similarity.  We propose a novel approach to performing merges
+string similarity.  We propose an approach to performing merges
 based on deep learning models.  Our approach depends on (a) creating
 a deep learning model that maps surface forms of an entity into a
 set of vectors such that alternate forms for the same entity are
 closest in vector space, (b) indexing these vectors using a nearest
 neighbors algorithm to find the forms that can be potentially joined
 together.  To build these models, we had to adapt techniques from
-metric learning, due to the properties of entity names.  We
-demonstrate sample selection and loss functions, which work for this
+metric learning, due to the requirements of joins; specifically we describe 
+novel sample selection and loss functions that work for this
 domain.  To evaluate our approach, we used Wikidata as ground truth
 and built models for datasets with approximately 1.1M people's names
 (200K identities) and 130K company names (70K identities).  We found
-that vector embeddings allow for joins with precision of .91-.93 and
-recall of .70-.81.  We make the models available to the community
+that vector embeddings allow for joins with precision of .73-.81 and
+recall of .72-.81.  We make the models available to the community
 for aligning people or companies across multiple datasets.  
 \end{abstract}
 
