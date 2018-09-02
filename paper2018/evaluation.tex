@@ -51,6 +51,7 @@ Entity Type & Loss Function & Mean Pos & Std Pos & Mean Neg & Std Neg \\
 & Angular loss & .51 & .25 & .06 & .02 \\
 \hline
 \multirow{4}{*}{Companies} & Adapted loss & 2.38 & 3.77 & 3.23 & 1.71 \\
+\hline
 & Triplet loss & .39 & .28 & .55 & .09 \\
 \hline
 & Improved loss & .32 & .50 & .42 & 0.19 \\
@@ -70,6 +71,30 @@ Entity Type & Loss Function & Mean Pos & Std Pos & Mean Neg & Std Neg \\
 \subsection{Learning Performance}
 
  We also assessed our learning mechanism more directly by examining how the nearest neighborhood changed from before to after training.  As can be seen from Table \ref{Evaluation}, recall is improved greatly, with the bigger change for people, in which case it improves from 3\% to 80\%.  For companies, it is from 17\% to 72\%.  Thus training is clearly effective in moving actual names for the same entity into the nearest neighbors.  For precision, the fraction of true matches found before the first error improves from 16\% to 73\% for people and 16\% to 64\% for companies.  Precision at one improves from 10\% to 81\% for people and from 26\% to 73\% for companies.  In both these cases, before training the results are basically noise even though embeddings are used for context, but training has made the results usable.
+
+\subsection{Comparison with Semi-Hard Negatives}
+
+ We hypothesize that training against hard negatives can potentially benefit on datasets with characteristics like those of our people dataset, when compared to training against semi-hard negatives.  Such datasets have large numbers of hard negatives, as suggested by Figure~\ref{people_characteristics}, which shows positive distances higher on average than negative ones.  Our strategy of focusing on the hardest negatives, i.e. those in the nearest neighborhood, ought to learn a nearest neighborhood with fewer negatives.  The common technique of using semi-hard negatives will focus more on negatives that are further than already-distant positives, and hence place less emphasis on the nearest neighborhood.
+
+We compare our results to those from training againt semi-hard negatives.  To compute semi-hard negatives, we took, for each entity, all its positives, and found all negatives in the nearest neighborhood of that positive that are further from the entity than is the positive.  We made triplets for each such pair of positive and negative.  We thus chose the hardest semi-hard triplets: the negatives are as close to the positive as possible while still being further from the entity.  We ran experiments again for adapted loss on our people dataset, changing only the training used; these results are in Table~\ref{hard-semi-hard}.
+
+\begin{table}[ht]
+\caption{Precision and Recall for hard and semi-hard training}
+\label{hard-semi-hard}
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline
+Training & Recall & Precision@1 & Precision \\
+\hline
+hard & .81 & .81 & .63 \\
+\hline
+semi-hard & .63 & .61 & .43 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+ The results show training on hard negatives produces consistently better results, both for precision and recall.  Hard negative training resulted in recall of 81\% of posiives in the nearest set versus 63\% for semi-hard negatives.  Precision@1 is similar, with 81\% for hard negatives versus 61\% for semi-hard.  Overall precision, defined as the fraction of positives closer than any negative is 63\% for hard negatives versus 43\% for semi hard.
 
 \subsection{Generalization Test on Faces}
 
