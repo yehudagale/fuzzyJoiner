@@ -10,26 +10,52 @@ We report multiple metrics to measure the effectiveness of training, some of whi
 \end{itemize}
  
 \begin{table*}[ht]
-\caption{Results for people and companies by loss functions}
+\caption{Precision and Recall for people and companies by loss functions}
 \label{Evaluation}
-\begin{tabular}{l|l|r|r|r|r|r|r|r|r|}
+\begin{tabular}{l|l|r|r|r|}
 \hline
 Entity Type & Loss Function & Recall & Precision@1 & Precision \\
 \hline
-\multirow{4}{*}{People} & Our loss & .81 & .93 & .69 & .53 & 21.08 & 2.39 & 1.27 & 33.46 \\
+\multirow{4}{*}{People} & Adapted loss & .81 & .81 & .63 \\
 \hline
-& Triplet loss & .73 & .91 & .38 & .13 & .84 & .54 & .1 & .86 \\
+& Triplet loss & .74 & .84 & .55 \\
 \hline
-& Improved loss & NA & NA & NA & NA & NA & NA & NA & NA \\
+& Improved loss & .71 & .52 & .45 \\
 \hline
-& Angular loss & NA & NA & NA & NA & NA & NA & NA & NA \\
+& Angular loss & .04 & .09 & .02 \\
 \hline
-\multirow{4}{*}{Companies} & Our loss & NA & NA & NA & NA & NA & NA & NA & NA \\
-& Triplet loss & NA & NA & NA & NA & NA & NA & NA & NA \\
+\multirow{4}{*}{Companies} & Adapted loss & .72 & .73 & .64 \\
+& Triplet loss & .75 & .76 & .67 \\
 \hline
-& Improved loss & NA & NA & NA & NA & NA & NA & NA & NA \\
+& Improved loss & .74 & .72 & .64 \\
 \hline
-& Angular loss & NA & NA & NA & NA & NA & NA & NA & NA \\
+& Angular loss & NA & NA & NA \\
+\hline
+\end{tabular}
+\end{table*}
+
+
+\begin{table*}[ht]
+\caption{Distance estimates for people and companies after training}
+\label{Evaluation}
+\begin{tabular}{l|l|r|r|r|r|}
+\hline
+Entity Type & Loss Function & Mean Pos & Std Pos & Mean Neg & Std Neg \\
+\hline
+\multirow{4}{*}{People} & Adapted loss & 1.59 & 4.04 & 2.44 & 2.45 \\
+\hline
+& Triplet loss & .46 & .18 & .55 & .10 \\
+\hline
+& Improved loss & .15 & .38 & .21 & .18 \\
+\hline
+& Angular loss & .51 & .25 & .06 & .02 \\
+\hline
+\multirow{4}{*}{Companies} & Adapted loss & 2.38 & 3.77 & 3.23 & 1.71 \\
+& Triplet loss & .39 & .28 & .55 & .09 \\
+\hline
+& Improved loss & .32 & .50 & .42 & 0.19 \\
+\hline
+& Angular loss & NA & NA & NA & NA \\
 \hline
 \end{tabular}
 \end{table*}
