@@ -6,7 +6,7 @@ We report multiple metrics to measure the effectiveness of training, some of whi
 \begin{itemize}
 \item \textbf{Recall}.  Recall is measured by the percentage of positives in the nearest neighbor set of each anchor.
 \item \textbf{Precision@1}.  Precision@1 is measured by the percentage of anchors with the very nearest neighbor being a positive.  As pointed out earlier, this is an important metric for assessing join performance in a majority of cases.
-\item \textbf{Precision}.  Precision is measured by the percentage of all positives for each anchor that were closer to the anchor than any other negative relative to the size of the positive set.
+\item \textbf{Precision}.  Precision is measured by the fractions of all positives for each anchor that were closer to that anchor than was any negative.
 \end{itemize}
  
 \begin{table}[ht]
