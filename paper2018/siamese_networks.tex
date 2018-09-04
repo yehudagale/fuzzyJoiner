@@ -40,21 +40,21 @@ Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\
 
 \begin{figure}[htb]
     \centering
-    \begin{subfigure}[t]{0.3\linewidth}
+    \begin{subfigure}[t]{0.31\linewidth}
         \centering
         \includegraphics[width=\linewidth]{schroff_triplet}
         \caption{Triplet loss}
         \label{schroff_loss}
     \end{subfigure}%
     ~ 
-    \begin{subfigure}[t]{0.3\linewidth}
+    \begin{subfigure}[t]{0.31\linewidth}
         \centering 
         \includegraphics[width=\linewidth]{modified_loss}
         \caption{Modified loss}
         \label{modified_loss}
     \end{subfigure}
     ~ 
-    \begin{subfigure}[t]{0.3\linewidth}
+    \begin{subfigure}[t]{0.31\linewidth}
         \centering 
         \includegraphics[width=\linewidth]{angular_loss}
         \caption{Angular loss}
@@ -140,7 +140,7 @@ the negative distance from the positive one, we want to negate the
 negative distance and then add the two.  To approximate this, we
 subtract the negative distance from a margin, and use 0 instead if
 that difference is negative.  We then combine the squared distances as
-usual, as how in Figure~\ref{adapted}.
+usual, as shown in Figure~\ref{adapted}.
 
 \begin{equation}
   l_{triple} =  \|\bf{x_a} - \bf{x_p}\|^2 + \left[ \alpha - \|\bf{x_a} -\bf{x_n}\| \right]_+^2
