@@ -36,7 +36,7 @@ The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark la
 \section{Loss functions}
 \label{loss_functions}
 
-Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions, three of which have been used in prior literature to explore their effectiveness for the entity metric learning problem.
+Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions, three of which have been used in prior face recognition literature to explore their effectiveness for the entity metric learning problem.
 
 \begin{figure}[htb]
     \centering
@@ -122,7 +122,7 @@ Conceptually, they point out that since the \textit{anchor} and the
 the \textit{anchor}, \textit{negative}, and \textit{positive} elements
 should be as small as possible within that triangle.  Their loss
 function is an attempt to minimize this angle, as defined in the
-equations below.  The rough idea is that moving the positive nearer
+equations below.  The rough idea is that moving the \textit{positive} nearer
 and the \textit{negative} further away each reduce the angle, which we
 illustrate in Figure~\ref{angular_loss} with the angle to shrink.
 \begin{equation}
@@ -140,7 +140,7 @@ the negative distance from the positive one, we want to negate the
 negative distance and then add the two.  To approximate this, we
 subtract the negative distance from a margin, and use 0 instead if
 that difference is negative.  We then combine the squared distances as
-usual, as shown in Figure~\ref{adapted}.
+usual, as shown in Figure~\ref{adapted}.  Note that we did not normalize $\|\bf{x} \| = 1$ because learning was worse with normalization.
 
 \begin{equation}
   l_{triple} =  \|\bf{x_a} - \bf{x_p}\|^2 + \left[ \alpha - \|\bf{x_a} -\bf{x_n}\| \right]_+^2
