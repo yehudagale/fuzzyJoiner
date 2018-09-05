@@ -1,0 +1,166 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Cao \bgroup et al\mbox.\egroup
+  }{2018}]{DBLP:conf/fgr/CaoSXPZ18}
+Cao, Q.; Shen, L.; Xie, W.; Parkhi, O.~M.; and Zisserman, A.
+\newblock 2018.
+\newblock Vggface2: {A} dataset for recognising faces across pose and age.
+\newblock In {\em 13th {IEEE} International Conference on Automatic Face {\&}
+  Gesture Recognition, {FG} 2018, Xi'an, China, May 15-19, 2018},  67--74.
+
+\bibitem[\protect\citeauthoryear{Chen \bgroup et al\mbox.\egroup
+  }{2018}]{DBLP:journals/corr/abs-1802-03170}
+Chen, S.; Gong, C.; Yang, J.; Li, X.; Wei, Y.; and Li, J.
+\newblock 2018.
+\newblock Adversarial metric learning.
+\newblock {\em CoRR} abs/1802.03170.
+
+\bibitem[\protect\citeauthoryear{Cho \bgroup et al\mbox.\egroup
+  }{2014}]{cho-al-emnlp14}
+Cho, K.; van Merri{\"{e}}nboer, B.; G{\"{u}}l{\c c}ehre, {\c C}.; Bahdanau, D.;
+  Bougares, F.; Schwenk, H.; and Bengio, Y.
+\newblock 2014.
+\newblock Learning phrase representations using rnn encoder--decoder for
+  statistical machine translation.
+\newblock In {\em Proceedings of the 2014 Conference on Empirical Methods in
+  Natural Language Processing (EMNLP)},  1724--1734.
+\newblock Doha, Qatar: Association for Computational Linguistics.
+
+\bibitem[\protect\citeauthoryear{Cohen, Ravikumar, and
+  Fienberg}{2003}]{Cohen2003}
+Cohen, W.~W.; Ravikumar, P.; and Fienberg, S.~E.
+\newblock 2003.
+\newblock A comparison of string distance metrics for name-matching tasks.
+\newblock In {\em Proceedings of IJCAI-03 Workshop on Information Integration},
+   73--78.
+
+\bibitem[\protect\citeauthoryear{Hashimoto \bgroup et al\mbox.\egroup
+  }{2017}]{hashimoto-jmt:2017:EMNLP2017}
+Hashimoto, K.; Xiong, C.; Tsuruoka, Y.; and Socher, R.
+\newblock 2017.
+\newblock {A Joint Many-Task Model: Growing a Neural Network for Multiple NLP
+  Tasks}.
+\newblock In {\em Proceedings of the 2017 Conference on Empirical Methods in
+  Natural Language Processing (EMNLP)},  446--456.
+\newblock Copenhagen, Denmark: Association for Computational Linguistics.
+
+\bibitem[\protect\citeauthoryear{He, Ganjam, and
+  Chu}{2015}]{He:2015:SJS:2824032.2824036}
+He, Y.; Ganjam, K.; and Chu, X.
+\newblock 2015.
+\newblock Sema-join: Joining semantically-related tables using big table
+  corpora.
+\newblock {\em Proc. VLDB Endow.} 8(12):1358--1369.
+
+\bibitem[\protect\citeauthoryear{Huang \bgroup et al\mbox.\egroup
+  }{2012}]{Huang2012a}
+Huang, G.~B.; Mattar, M.; Lee, H.; and Learned-Miller, E.
+\newblock 2012.
+\newblock Learning to align from scratch.
+\newblock In {\em NIPS}.
+
+\bibitem[\protect\citeauthoryear{Johnson, Douze, and J{\'e}gou}{2017}]{JDH17}
+Johnson, J.; Douze, M.; and J{\'e}gou, H.
+\newblock 2017.
+\newblock Billion-scale similarity search with gpus.
+\newblock {\em arXiv preprint arXiv:1702.08734}.
+
+\bibitem[\protect\citeauthoryear{Kilias \bgroup et al\mbox.\egroup
+  }{2018}]{IDEL18}
+Kilias, T.; Loser, A.; Gers, F.; Koopmanschap, R.; Zhang, Y.; and Kersten, M.
+\newblock 2018.
+\newblock Idel: In-database entity linking with neural embeddings.
+\newblock {\em https://arxiv.org/pdf/1803.04884.pdf}.
+
+\bibitem[\protect\citeauthoryear{Kumar \bgroup et al\mbox.\egroup
+  }{2017}]{DBLP:journals/corr/KumarHC0D17}
+Kumar, B. G.~V.; Harwood, B.; Carneiro, G.; Reid, I.~D.; and Drummond, T.
+\newblock 2017.
+\newblock Smart mining for deep metric learning.
+\newblock {\em IEEE International Conference on Computer Vision, ICCV}.
+
+\bibitem[\protect\citeauthoryear{Muja and Lowe}{2014}]{ann_paper}
+Muja, M., and Lowe, D.~G.
+\newblock 2014.
+\newblock Scalable nearest neighbor algorithms for high dimensional data.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence}
+  36(11):2227–2240.
+
+\bibitem[\protect\citeauthoryear{Neves and Bordawekar}{2018}]{Bordawekar18}
+Neves, J.~L., and Bordawekar, R.
+\newblock 2018.
+\newblock Demonstrating ai-enabled sql queries over relational data using a
+  cognitive database.
+\newblock {\em Knowledge Discovery and Data Mining}.
+
+\bibitem[\protect\citeauthoryear{Schroff, Kalenichenko, and
+  Philbin}{2015}]{DBLP:conf/cvpr/SchroffKP15}
+Schroff, F.; Kalenichenko, D.; and Philbin, J.
+\newblock 2015.
+\newblock Facenet: {A} unified embedding for face recognition and clustering.
+\newblock In {\em {IEEE} Conference on Computer Vision and Pattern Recognition,
+  {CVPR} 2015, Boston, MA, USA, June 7-12, 2015},  815--823.
+
+\bibitem[\protect\citeauthoryear{Sohn}{2016}]{NIPS2016_6200}
+Sohn, K.
+\newblock 2016.
+\newblock Improved deep metric learning with multi-class n-pair loss objective.
+\newblock In Lee, D.~D.; Sugiyama, M.; Luxburg, U.~V.; Guyon, I.; and Garnett,
+  R., eds., {\em Advances in Neural Information Processing Systems 29}. Curran
+  Associates, Inc.
+\newblock  1857--1865.
+
+\bibitem[\protect\citeauthoryear{Song \bgroup et al\mbox.\egroup
+  }{2016}]{DBLP:conf/cvpr/SongXJS16}
+Song, H.~O.; Xiang, Y.; Jegelka, S.; and Savarese, S.
+\newblock 2016.
+\newblock Deep metric learning via lifted structured feature embedding.
+\newblock In {\em {CVPR}},  4004--4012.
+\newblock {IEEE} Computer Society.
+
+\bibitem[\protect\citeauthoryear{Song \bgroup et al\mbox.\egroup
+  }{2017}]{songCVPR17}
+Song, H.~O.; Jegelka, S.; Rathod, V.; and Murphy, K.
+\newblock 2017.
+\newblock Deep metric learning via facility location.
+\newblock In {\em Computer Vision and Pattern Recognition (CVPR)}.
+
+\bibitem[\protect\citeauthoryear{Wang \bgroup et al\mbox.\egroup
+  }{2017}]{DBLP:journals/corr/abs-1708-01682}
+Wang, J.; Zhou, F.; Wen, S.; Liu, X.; and Lin, Y.
+\newblock 2017.
+\newblock Deep metric learning with angular loss.
+\newblock {\em CoRR} abs/1708.01682.
+
+\bibitem[\protect\citeauthoryear{Yang, Zhou, and Wang}{2018}]{8445716}
+Yang, X.; Zhou, P.; and Wang, M.
+\newblock 2018.
+\newblock Person reidentification via structural deep metric learning.
+\newblock {\em IEEE Transactions on Neural Networks and Learning Systems}
+  1--12.
+
+\bibitem[\protect\citeauthoryear{Yi \bgroup et al\mbox.\egroup
+  }{2014}]{DBLP:journals/corr/YiLLL14a}
+Yi, D.; Lei, Z.; Liao, S.; and Li, S.~Z.
+\newblock 2014.
+\newblock Learning face representation from scratch.
+\newblock {\em CoRR} abs/1411.7923.
+
+\bibitem[\protect\citeauthoryear{Zhang, Gong, and
+  Wang}{2016}]{Zhang:2016:DML:3088616.3088665}
+Zhang, S.; Gong, Y.; and Wang, J.
+\newblock 2016.
+\newblock Deep metric learning with improved triplet loss for face clustering
+  in videos.
+\newblock In {\em 17th Pacific-Rim Conference on Advances in Multimedia
+  Information Processing - Volume 9916}, PCM 2016,  497--508.
+\newblock New York, NY, USA: Springer-Verlag New York, Inc.
+
+\bibitem[\protect\citeauthoryear{Zhu, He, and
+  Chaudhuri}{2017}]{auto-join-joining-tables-leveraging-transformations}
+Zhu, E.; He, Y.; and Chaudhuri, S.
+\newblock 2017.
+\newblock Auto-join: Joining tables by leveraging transformations.
+\newblock International Conference on Very Large Databases (VLDB).
+
+\end{thebibliography}

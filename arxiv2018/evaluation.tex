@@ -1,0 +1,113 @@
+\section{Experiments}
+\label{results}
+In building the models, we employed early stopping using the usual metric of accuracy of the validation data, and we performed hyper-parameter tuning using grid search varying margins for the adapted loss function from 1-20.  Accuracy was defined as the percentage of validation triples where positive distances from anchor were less than negative distances from anchor.  For all our runs, test accuracy as measured by this metric ranged in the 97-99\% range for the people dataset and 92-94\% companies dataset for all losses except angular loss which was poor throughout.  Table \ref{precision_recall} shows the results for the people and company datasets, run with a fixed $k$ of 20 neighbors.  Because we compared across different losses, the results are categorized by each loss function for each dataset we tested.  For all the results reported here, we ran multiple runs because of the stochastic nature of neural network models; the results here are means across two runs. 
+
+We report multiple metrics to measure the effectiveness of training, some of which are not standard because of the experimental setup, so we define them below:
+\begin{itemize}
+\item \textbf{Recall}.  Recall is measured by the percentage of positives in the nearest neighbor set of each anchor.
+\item \textbf{Precision@1}.  Precision@1 is measured by the percentage of anchors with the very nearest neighbor being a positive.  As pointed out earlier, this is an important metric for assessing join performance in a majority of cases.
+\item \textbf{Precision}.  Precision is measured by the fractions of all positives for each anchor that were closer to that anchor than was any negative.
+\end{itemize}
+ 
+\begin{table}[ht]
+\caption{Precision and Recall by loss functions}
+\label{precision_recall}
+\begin{center}
+%{\scriptsize
+\begin{tabular}{|l|l|r|r|r|}
+\hline
+Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
+ & & & @1 & All \\
+\hline
+\multirow{4}{*}{People} & Adapted & .81 & .81 & .63 \\
+\cline{2-5}
+& Triplet & .74 & .84 & .55 \\
+\cline{2-5}
+& Improved & .71 & .52 & .45 \\
+\cline{2-5}
+& Angular & .04 & .09 & .02 \\
+\hline
+\multirow{4}{*}{Corps} & Adapted & .74 & .73 & .66 \\
+\cline{2-5}
+& Triplet & .74 & .75 & .67 \\
+\cline{2-5}
+& Improved & .74 & .72 & .65 \\
+\cline{2-5}
+& Angular & .26 & .32 & .22 \\
+\hline
+\end{tabular} %}
+\end{center}
+\end{table}
+
+
+\begin{table}[ht]
+\caption{Distance estimates after training}
+\label{distance}
+\begin{center}
+%{\scriptsize 
+\begin{tabular}{|l|l|r|r|r|r|}
+\hline
+Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c|}{Neg} \\
+& & Mean & Std & Mean & Std \\
+\hline
+\multirow{4}{*}{People} & Adapted & 1.59 & 4.05 & 2.44 & 2.45 \\
+\cline{2-6}
+& Triplet & .46 & .18 & .55 & .10 \\
+\cline{2-6}
+& Improved & .15 & .38 & .21 & .18 \\
+\cline{2-6}
+& Angular & .51 & .25 & .06 & .02 \\
+\hline
+\multirow{4}{*}{Corps} & Adapted & 2.39 & 3.62 & 3.59 & 2.72 \\
+\cline{2-6}
+& Triplet & .43 & .31 & .59 & .09 \\
+\cline{2-6}
+& Improved & .32 & .50 & .42 & .19 \\
+\cline{2-6}
+& Angular & .07 & .04 & .04 & .01 \\
+\hline
+\end{tabular}%}
+\end{center}
+\end{table}
+
+
+\subsection{Performance for Joins}
+For fuzzy joins, we need both precision and recall to be high.  Without good recall, a join will potentially miss names that should be joined.  Without high precision, a join will mistakenly join many inappropriate names.  The numbers for the adapted loss function were 81\% for people and 74\% for companies, so a join could capture most similar names.  For people, the adapted loss function showed overall better performance than triplet loss (see Table \ref{precision_recall}).  Furthermore, it appears that triplet loss outperformed improved loss, which in turn is better than angular loss for learning this problem.  On the other hand, for companies the only significant difference was that angular was worse.
+
+ Precision is a little trickier to define, but one way is to measure it is to examine how many true matches we get in the neighborhood of each anchor before seeing a single mistake, i.e. a match that should not be there.  That metric gives a picture of how many names would be correctly found, on average, by a join.  Adapted loss is at 63\% by this metric for people and 66\% for companies, so about two thirds of recalled names would be found before finding a single error.  Since every name has at least one other name for the same entity, we also measure precision at 1, which is the probability that the very nearest neighbor is a true match.  For that, the very best performance we get is 84\% for people and 75\% for companies.  
+
+
+\subsection{Learning Performance}
+
+ We also assessed our learning mechanism more directly by examining how the nearest neighborhood changed from before to after training.  As can be seen from Table \ref{distance}, recall is improved greatly, with the bigger change for people, in which case it improves from 3\% to 81\%.  For companies, it is from 16\% to 74\%.  Thus training is clearly effective in moving actual names for the same entity into the nearest neighbors.  For precision, the fraction of true matches found before the first error improves from 16\% to 73\% for people and 16\% to 64\% for companies.  Precision@1 improves from 10\% to 81\% for people and from 26\% to 75\% for companies.  In both these cases, demonstrable training occurred.
+
+\subsection{Comparison with Semi-Hard Negatives}
+We hypothesized that training against hard negatives can potentially benefit on datasets with characteristics like those of our people dataset, when compared to training against semi-hard negatives.  Such datasets have large numbers of hard negatives, as suggested by Figure~\ref{people_characteristics}, which shows positive distances higher on average than negative ones.  
+%Our strategy of focusing on the hardest negatives, i.e. those in the nearest neighborhood, ought to learn a nearest neighborhood with fewer negatives.  The common technique of using semi-hard negatives will focus more on negatives that are further than already-distant positives, and hence place less emphasis on the nearest neighborhood.
+
+We therefore compared the hard negative triplet selection mechanism directly to training against semi-hard negatives.  To compute semi-hard negatives, we took, for each entity, all its positives, and found all negatives in the nearest neighborhood of that positive that were further from the entity than is the positive.  We made triplets for each such pair of positive and negative.  We thus chose the hardest semi-hard triplets: the negatives are as close to the positive as possible while still being further from the entity.  We ran experiments again for adapted loss on our people dataset, changing only the triplets used; these results are in Table~\ref{hard-semi-hard}.  The same comparison on the company dataset showed no difference, mostly because company data seems easier and seems more immune to differences in loss functions or training regimens.
+
+\begin{table}[ht]
+\caption{Precision and Recall for hard and semi-hard training}
+\label{hard-semi-hard}
+\begin{center}
+%{\scriptsize
+\begin{tabular}{|l|r|r|r|}
+\hline
+Training & Recall & Precision@1 & Precision \\
+\hline
+hard & .81 & .81 & .63 \\
+\hline
+semi-hard & .63 & .61 & .43 \\
+\hline
+\end{tabular}%}
+\end{center}
+\end{table}
+
+ The results show training on hard negatives produces consistently better results, both for precision and recall.  Hard negative training resulted in recall of 81\% of positives in the nearest set versus 63\% for semi-hard negatives.  Precision@1 is similar, with 81\% for hard negatives versus 61\% for semi-hard.  Overall precision, defined as the fraction of positives closer than any negative is 63\% for hard negatives versus 43\% for semi-hard.
+
+\subsection{Generalization Test on Faces}
+We have demonstrated that our strategy for joins could work well for textual names of people and companies, but the technique could potentially work for any kind of data for which a vector embedding can be made.  To test how well that works, we evaluated two existing models for face recognition that were trained with the same approaches defined in \cite{DBLP:conf/cvpr/SchroffKP15} on two different datasets, VGGFace2 \cite{DBLP:conf/fgr/CaoSXPZ18}, and CasiaWebFace \cite{DBLP:journals/corr/YiLLL14a}.  We took the two open sourced models\footnote{\url{https://github.com/davidsandberg/facenet}}, and extracted the output embeddings for faces from the LFW test set \cite{Huang2012a} using these embeddings.  We put these output embeddings into an ANN structure, and computed our metrics on that.  Note that for face datasets there is a greater number of variability of faces per identity with a maximum of 529 faces for a single identity.  We adjusted neighborhood length to a maximum of 20 or the number of expected neighbors in our experiments for each face.  Recall was 91\% on the VGGFace2 dataset, and 87\% for the Casia Web Face dataset.  Precision@1 was 95\% for VGGFace2 and 93\% for Casia Web faces.  Overall precision was 91\% for VGGFace2 and Casia Web faces was 87\%.  These results suggest that existing models can in fact be re-purposed for joins.  We point out that the face models seem better in terms of performance compared to our model for names but there are significant differences in the data characteristics for training.  The names data had a lot fewer positives per identity.  VGGFace2 has 362.6 faces per identity, and in CasiaWebFace, 500,000 images exist for 10,000 identities.
+
+\section{Conclusion and Future Work}
+We show that deep learning models can be used effectively for joins, and we provide these models to the community for use.  In the future, we will evaluate our work on other entity types and continue to explore refinements of both loss functions and triplet selection.

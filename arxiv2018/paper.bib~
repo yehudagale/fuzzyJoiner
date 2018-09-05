@@ -1,0 +1,336 @@
+@misc{annoy_impl, title={Nearest neighbors and vector models – part 2 – algorithms and data structures}, url={https://erikbern.com/2015/10/01/nearest-neighbors-and-vector-models-part-2-how-to-search-in-high-dimensional-spaces.html}, journal={ericbern}, author={Bernhardsson , Erik}, year={2015}, month={Oct}}
+
+@proceedings{DBLP:conf/cvpr/2014,
+  title     = {2014 {IEEE} Conference on Computer Vision and Pattern Recognition,
+               {CVPR} 2014, Columbus, OH, USA, June 23-28, 2014},
+  publisher = {{IEEE} Computer Society},
+  year      = {2014},
+  url       = {http://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=6909096},
+  isbn      = {978-1-4799-5118-5},
+  timestamp = {Thu, 28 Apr 2016 10:52:27 +0200},
+  biburl    = {https://dblp.org/rec/bib/conf/cvpr/2014},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{annoy_git, title={Approximate Nearest Neighbors in C++/Python optimized for memory usage and loading/saving to disk}, url={https://github.com/spotify/annoy}, year={2015}}
+
+@article{ann_paper, title={Scalable Nearest Neighbor Algorithms for High Dimensional Data}, volume={36}, DOI={10.1109/tpami.2014.2321376}, number={11}, journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, author={Muja, Marius and Lowe, David G.}, year={2014}, month={Jan}, pages={2227–2240}}
+
+@article{Wang:String, title={Fast-join: An efficient method for fuzzy token matching based string similarity join}, DOI={10.1109/icde.2011.5767865}, journal={2011 IEEE 27th International Conference on Data Engineering}, author={Wang, Jiannan and Li, Guoliang and Fe, Jianhua}, year={2011}}
+
+@article{Vernica:MapReduce, title={Efficient parallel set-similarity joins using MapReduce}, DOI={10.1145/1807167.1807222}, journal={Proceedings of the 2010 international conference on Management of data - SIGMOD 10}, author={Vernica, Rares and Carey, Michael J. and Li, Chen}, year={2010}}
+
+@article{Hasdell:Siamese, title={Dimensionality Reduction by Learning an Invariant Mapping}, DOI={10.1109/cvpr.2006.100}, journal={2006 IEEE Computer Society Conference on Computer Vision and Pattern Recognition - Volume 2 (CVPR06)}, author={Hadsell, R. and Chopra, S. and Lecun, Y.}}
+
+@article{JDH17,
+  title={Billion-scale similarity search with GPUs},
+  author={Johnson, Jeff and Douze, Matthijs and J{\'e}gou, Herv{\'e}},
+  journal={arXiv preprint arXiv:1702.08734},
+  year={2017}
+}
+
+@article{DBLP:journals/corr/KumarHC0D17,
+  author    = {B. G. Vijay Kumar and
+               Ben Harwood and
+               Gustavo Carneiro and
+               Ian D. Reid and
+               Tom Drummond},
+  title     = {Smart Mining for Deep Metric Learning},
+  journal   = {IEEE International Conference on Computer Vision, ICCV},
+  year      = {2017}
+}
+
+@article{Bordawekar18,
+  title={Demonstrating AI-enabled SQL Queries over Relational Data
+using a Cognitive Database},
+  author={Neves, Jos{\'e} Luis and Bordawekar, Rajesh},
+  journal={Knowledge Discovery and Data Mining},
+  year={2018}
+}
+
+@article{IDEL18,
+  title={IDEL: In-Database Entity Linking with Neural Embeddings},
+  author={Kilias, Torsten and Loser, Alexander and Gers, Felix and Koopmanschap, R. and Zhang, Y. and Kersten, M.},
+  journal={https://arxiv.org/pdf/1803.04884.pdf},
+  year={2018}
+}
+
+@article{DBLP:journals/corr/abs-1708-01682,
+  author    = {Jian Wang and
+               Feng Zhou and
+               Shilei Wen and
+               Xiao Liu and
+               Yuanqing Lin},
+  title     = {Deep Metric Learning with Angular Loss},
+  journal   = {CoRR},
+  volume    = {abs/1708.01682},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1708.01682},
+  archivePrefix = {arXiv},
+  eprint    = {1708.01682},
+  timestamp = {Tue, 05 Sep 2017 10:03:46 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1708-01682},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@InProceedings{hashimoto-jmt:2017:EMNLP2017,
+  author    = {Hashimoto, Kazuma and Xiong, Caiming and Tsuruoka, Yoshimasa and Socher, Richard},
+  title     = {{A Joint Many-Task Model: Growing a Neural Network for Multiple NLP Tasks}},
+  booktitle = {Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  month     = {September},
+  year      = {2017},
+  address   = {Copenhagen, Denmark},
+  publisher = {Association for Computational Linguistics},
+  pages      = {446--456},
+  url       = {http://arxiv.org/abs/1611.01587}
+}
+
+
+@INPROCEEDINGS{cho-al-emnlp14,
+     author = {Cho, Kyunghyun and van Merri{\"{e}}nboer, Bart and G{\"{u}}l{\c c}ehre, {\c C}ağlar and Bahdanau, Dzmitry and Bougares, Fethi and Schwenk, Holger and Bengio, Yoshua},
+      month = oct,
+      title = {Learning Phrase Representations using RNN Encoder--Decoder for Statistical Machine Translation},
+  booktitle = {Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+       year = {2014},
+      pages = {1724--1734},
+  publisher = {Association for Computational Linguistics},
+    address = {Doha, Qatar},
+        url = {http://www.aclweb.org/anthology/D14-1179}
+}
+
+@misc{colah,
+  title = {Understanding LSTM networks},
+  howpublished = {\url{http://colah.github.io/posts/2015-08-Understanding-LSTMs/}},
+  author= {Colah, Christoper},
+  year = 2015,
+  note = {Accessed: 2018-07-21}
+}
+
+@inproceedings{DBLP:conf/fgr/CaoSXPZ18,
+  author    = {Qiong Cao and
+               Li Shen and
+               Weidi Xie and
+               Omkar M. Parkhi and
+               Andrew Zisserman},
+  title     = {VGGFace2: {A} Dataset for Recognising Faces across Pose and Age},
+  booktitle = {13th {IEEE} International Conference on Automatic Face {\&} Gesture
+               Recognition, {FG} 2018, Xi'an, China, May 15-19, 2018},
+  pages     = {67--74},
+  year      = {2018},
+  crossref  = {DBLP:conf/fgr/2018},
+  url       = {https://doi.org/10.1109/FG.2018.00020},
+  doi       = {10.1109/FG.2018.00020},
+  timestamp = {Tue, 03 Jul 2018 17:32:38 +0200},
+  biburl    = {https://dblp.org/rec/bib/conf/fgr/CaoSXPZ18},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@InProceedings{Huang2012a,
+  author =    {Gary B. Huang and Marwan Mattar and Honglak Lee and 
+               Erik Learned-Miller},
+  title =     {Learning to Align from Scratch},
+  booktitle = {NIPS},
+  year =      {2012}
+}
+@inproceedings{DBLP:conf/fgr/CaoSXPZ18,
+  author    = {Qiong Cao and
+               Li Shen and
+               Weidi Xie and
+               Omkar M. Parkhi and
+               Andrew Zisserman},
+  title     = {VGGFace2: {A} Dataset for Recognising Faces across Pose and Age},
+  booktitle = {{FG}},
+  pages     = {67--74},
+  publisher = {{IEEE} Computer Society},
+  year      = {2018}
+}
+
+@article{DBLP:journals/corr/YiLLL14a,
+  author    = {Dong Yi and
+               Zhen Lei and
+               Shengcai Liao and
+               Stan Z. Li},
+  title     = {Learning Face Representation from Scratch},
+  journal   = {CoRR},
+  volume    = {abs/1411.7923},
+  year      = {2014}
+}
+
+@MISC{Huang_labeledfaces,
+    author = {Gary B. Huang and Manu Ramesh and Tamara Berg and Erik Learned-miller},
+    title = {Labeled Faces in the Wild: A Database for Studying Face Recognition in Unconstrained Environments},
+    year = {}
+}
+
+@incollection{NIPS2016_6200,
+title = {Improved Deep Metric Learning with Multi-class N-pair Loss Objective},
+author = {Sohn, Kihyuk},
+booktitle = {Advances in Neural Information Processing Systems 29},
+editor = {D. D. Lee and M. Sugiyama and U. V. Luxburg and I. Guyon and R. Garnett},
+pages = {1857--1865},
+year = {2016},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/6200-improved-deep-metric-learning-with-multi-class-n-pair-loss-objective.pdf}
+}
+
+@inproceedings{songCVPR17,
+  Author    = {Hyun Oh Song and Stefanie Jegelka and Vivek Rathod and Kevin Murphy},
+  Title     = {Deep Metric Learning via Facility Location},
+  Booktitle = {Computer Vision and Pattern Recognition (CVPR)},
+  Year      = {2017}}
+
+@inproceedings{DBLP:conf/cvpr/SchroffKP15,
+  author    = {Florian Schroff and
+               Dmitry Kalenichenko and
+               James Philbin},
+  title     = {FaceNet: {A} unified embedding for face recognition and clustering},
+  booktitle = {{IEEE} Conference on Computer Vision and Pattern Recognition, {CVPR}
+               2015, Boston, MA, USA, June 7-12, 2015},
+  pages     = {815--823},
+  year      = {2015},
+  crossref  = {DBLP:conf/cvpr/2015},
+  url       = {https://doi.org/10.1109/CVPR.2015.7298682},
+  doi       = {10.1109/CVPR.2015.7298682},
+  timestamp = {Thu, 25 May 2017 01:00:00 +0200},
+  biburl    = {https://dblp.org/rec/bib/conf/cvpr/SchroffKP15},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{Zhang:2016:DML:3088616.3088665,
+ author = {Zhang, Shun and Gong, Yihong and Wang, Jinjun},
+ title = {Deep Metric Learning with Improved Triplet Loss for Face Clustering in Videos},
+ booktitle = {17th Pacific-Rim Conference on Advances in Multimedia Information Processing - Volume 9916},
+ series = {PCM 2016},
+ year = {2016},
+ isbn = {978-3-319-48889-9},
+ pages = {497--508},
+ numpages = {12},
+ url = {https://doi.org/10.1007/978-3-319-48890-5_49},
+ doi = {10.1007/978-3-319-48890-5_49},
+ acmid = {3088665},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {New York, NY, USA},
+ keywords = {Deep metric learning, Face clustering in videos, Improved triple loss},
+} 
+
+
+@inproceedings{Cohen2003,
+  abstract = {Using an open-source, Java toolkit of name-matching methods, we experimentally compare string distance metrics on the task of matching entity names. We investigate a number of different metrics proposed by different communities, including edit-distance metrics, fast heuristic string comparators , token-based distance metrics, and hybrid methods. Overall, the best-performing method is a hybrid scheme combining a TFIDF weighting scheme, which is widely used in information retrieval, with the Jaro-Winkler string-distance scheme, which was developed in the probabilistic record linkage community.},
+  added-at = {2009-03-12T15:42:50.000+0100},
+  author = {Cohen, William W. and Ravikumar, Pradeep and Fienberg, Stephen E.},
+  biburl = {https://www.bibsonomy.org/bibtex/23bb9c395b0e75b41b95947ca73b897f8/lillejul},
+  booktitle = {Proceedings of IJCAI-03 Workshop on Information Integration},
+  citeulike-article-id = {1467939},
+  interhash = {b918a22c0ac156bcd7114e8361377773},
+  intrahash = {3bb9c395b0e75b41b95947ca73b897f8},
+  keywords = {ir visual-information-seeking},
+  month = {August},
+  pages = {73--78},
+  posted-at = {2007-07-19 22:34:55},
+  priority = {0},
+  timestamp = {2009-03-12T15:42:53.000+0100},
+  title = {A Comparison of String Distance Metrics for Name-Matching Tasks.},
+  year = 2003
+}
+@inproceedings{schroff2015facenet,
+  title={Facenet: A unified embedding for face recognition and clustering},
+  author={Schroff, Florian and Kalenichenko, Dmitry and Philbin, James},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={815--823},
+  year={2015}
+}
+@article{he_ganjam_chu_2015, title={Sema-Join}, volume={8}, DOI={10.14778/2824032.2824036}, number={12}, journal={Proceedings of the VLDB Endowment}, author={He, Yeye and Ganjam, Kris and Chu, Xu}, year={2015}, month={Jan}, pages={1358–1369}}
+
+@article{He:2015:SJS:2824032.2824036,
+ author = {He, Yeye and Ganjam, Kris and Chu, Xu},
+ title = {SEMA-JOIN: Joining Semantically-related Tables Using Big Table Corpora},
+ journal = {Proc. VLDB Endow.},
+ issue_date = {August 2015},
+ volume = {8},
+ number = {12},
+ month = aug,
+ year = {2015},
+ issn = {2150-8097},
+ pages = {1358--1369},
+ numpages = {12},
+ url = {http://dx.doi.org/10.14778/2824032.2824036},
+ doi = {10.14778/2824032.2824036},
+ acmid = {2824036},
+ publisher = {VLDB Endowment},
+} 
+
+@inproceedings{auto-join-joining-tables-leveraging-transformations,
+author = {Zhu, Erkang and He, Yeye and Chaudhuri, Surajit},
+title = {Auto-Join: Joining Tables by Leveraging Transformations},
+booktitle = {},
+year = {2017},
+month = {May},
+abstract = {Traditional equi-join relies solely on string equality comparisons to perform joins. However, in scenarios such as ad-hoc data analysis in spreadsheets, users increasingly need to join tables whose join-columns are from the same semantic domain but use different textual representations, for which transformations are needed before equi-join can be performed. We develop an Auto-Join system that can automatically search over a rich space of operators to compose a transformation program, whose execution makes input tables equi-join-able. Our evaluation using real test cases collected from both public web tables and proprietary enterprise tables shows that the proposed system can perform the desired transformation joins at interactive speed and with high quality.},
+publisher = {International Conference on Very Large Databases (VLDB)},
+url = {https://www.microsoft.com/en-us/research/publication/auto-join-joining-tables-leveraging-transformations/},
+address = {},
+pages = {},
+journal = {},
+volume = {},
+chapter = {},
+isbn = {},
+}
+
+@ARTICLE{bowman:reasoning,
+	AUTHOR = "Mic Bowman and Saumya K. Debray and Larry L. Peterson",
+	TITLE = "Reasoning About Naming Systems",
+	JOURNAL = "ACM Trans. Program. Lang. Syst.",
+	VOLUME = {15},
+	NUMBER = {5},
+	PAGES = {795-825},
+	MONTH = "November",
+	YEAR = {1993}	}
+
+@ARTICLE{braams:babel,
+	AUTHOR = "Johannes Braams",
+	TITLE = "Babel, a Multilingual Style-Option System for Use with LaTeX's Standard Document Styles",
+	JOURNAL = {TUGboat},
+	VOLUME = {12},
+	NUMBER = {2},
+	PAGES = {291-301},
+	MONTH = "June",
+	YEAR = {1991}	}
+
+@INPROCEEDINGS{clark:pct,
+	AUTHOR = "Malcolm Clark",
+	TITLE = "Post Congress Tristesse",
+	BOOKTITLE = "TeX90 Conference Proceedings",
+	PAGES = "84-89",
+	ORGANIZATION = "TeX Users Group",
+	MONTH = "March", 
+	YEAR = {1991}	}
+
+@ARTICLE{herlihy:methodology,
+	AUTHOR = "Maurice Herlihy",
+	TITLE = "A Methodology for Implementing Highly Concurrent
+	Data Objects",
+	JOURNAL = {ACM Trans. Program. Lang. Syst.},
+	VOLUME = {15},
+	NUMBER = {5},
+	PAGES = {745-770},
+	MONTH = "November",
+	YEAR = {1993}	}
+
+@BOOK{Lamport:LaTeX,
+	AUTHOR = "Leslie Lamport",
+	TITLE = "LaTeX User's Guide and Document Reference Manual",
+	PUBLISHER = "Addison-Wesley Publishing Company",
+	ADDRESS = "Reading, Massachusetts",
+	YEAR = "1986"	}
+
+@BOOK{salas:calculus,
+	AUTHOR = "S.L. Salas and Einar Hille",
+	TITLE = "Calculus: One and Several Variable",
+	PUBLISHER = "John Wiley and Sons",
+	ADDRESS = "New York",
+	YEAR = "1978"	}
+
+
+
+
+

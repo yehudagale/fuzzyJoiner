@@ -1,0 +1,75 @@
+\def\year{2019}\relax
+%File: formatting-instruction.tex
+\documentclass[letterpaper]{article} %DO NOT CHANGE THIS
+\usepackage{aaai19}
+\usepackage{times}  %Required
+\usepackage{helvet}  %Required
+\usepackage{courier}  %Required
+\usepackage{url}  %Required
+\usepackage{graphicx}  %Required
+\usepackage{subcaption}
+\usepackage{multirow}
+
+\frenchspacing  %Required
+\setlength{\pdfpagewidth}{8.5in}  %Required
+\setlength{\pdfpageheight}{11in}  %Required
+%PDF Info Is Required:
+  \pdfinfo{
+/Title (Merging datasets through deep learning)
+/Author (Kavitha Srinivas, Yehuda Gale, Julian Dolby)}
+\setcounter{secnumdepth}{0}  
+\usepackage{bm}
+
+ \begin{document}
+% The file aaai.sty is the style file for AAAI Press 
+% proceedings, working notes, and technical reports.
+%
+\title{Merging Datasets Through Deep learning}
+
+
+
+\author{Kavitha Srinivas \\ IBM Research
+\And Yehuda Gale \\ Yeshiva University
+\And Julian Dolby \\ IBM Research}
+
+
+\maketitle
+\begin{abstract}
+Merging datasets is a key operation for data analytics.  A frequent
+requirement for merging is joining across columns that have
+different surface forms for the same entity (e.g., the name of a
+person might be represented as \textit{Douglas Adams} or
+\textit{Adams, Douglas}).  Similarly,
+ontology alignment can require recognizing distinct surface forms of
+the same entity, especially when ontologies are independently
+developed.  However, data management systems are currently limited
+to performing merges based on string equality, or at best using
+string similarity.  We propose an approach to performing merges
+based on deep learning models.  Our approach depends on (a) creating
+a deep learning model that maps surface forms of an entity into a
+set of vectors such that alternate forms for the same entity are
+closest in vector space, (b) indexing these vectors using a nearest
+neighbors algorithm to find the forms that can be potentially joined
+together.  To build these models, we had to adapt techniques from
+metric learning due to the characteristics of the data; specifically we describe 
+novel sample selection techniques and loss functions that work for this problem.  
+To evaluate our approach, we used Wikidata as ground truth
+and built models from datasets with approximately 1.1M people's names
+(200K identities) and 130K company names (70K identities).  We developed models that 
+allow for joins with precision@1 of .75-.81 and
+recall of .74-.81.  We make the models available for aligning people or companies across multiple datasets.  
+\end{abstract}
+
+\input{introduction2}
+\input{relatedWork}
+\input{siamese_networks}
+\input{joins}
+\input{datasets}
+\input{evaluation}
+
+%References and End of Paper
+  %These lines must be placed at the end of your paper
+  \bibliography{paper}
+  \bibliographystyle{aaai}
+  \end{document}
+

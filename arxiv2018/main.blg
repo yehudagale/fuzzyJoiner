@@ -1,0 +1,54 @@
+This is BibTeX, Version 0.99d (TeX Live 2018)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: main.aux
+The style file: aaai.bst
+Database file #1: paper.bib
+A bad cross reference---entry "DBLP:conf/cvpr/SchroffKP15"
+refers to entry "DBLP:conf/cvpr/2015", which doesn't exist
+A bad cross reference---entry "DBLP:conf/fgr/CaoSXPZ18"
+refers to entry "DBLP:conf/fgr/2018", which doesn't exist
+Warning--I didn't find a database entry for "DBLP:conf/fgr/2018"
+Warning--I didn't find a database entry for "DBLP:conf/cvpr/2015"
+Warning--empty booktitle in auto-join-joining-tables-leveraging-transformations
+You've used 21 entries,
+            2568 wiz_defined-function locations,
+            713 strings with 9394 characters,
+and the built_in function-call counts, 9921 in all, are:
+= -- 1050
+> -- 479
+< -- 9
++ -- 166
+- -- 165
+* -- 771
+:= -- 1596
+add.period$ -- 112
+call.type$ -- 21
+change.case$ -- 164
+chr.to.int$ -- 21
+cite$ -- 22
+duplicate$ -- 388
+empty$ -- 649
+format.name$ -- 202
+if$ -- 2080
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 21
+newline$ -- 134
+num.names$ -- 65
+pop$ -- 152
+preamble$ -- 1
+purify$ -- 185
+quote$ -- 0
+skip$ -- 321
+stack$ -- 0
+substring$ -- 449
+swap$ -- 120
+text.length$ -- 9
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 168
+warning$ -- 1
+while$ -- 72
+width$ -- 27
+write$ -- 300
+(There were 2 error messages)

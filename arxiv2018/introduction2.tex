@@ -1,0 +1,56 @@
+\section{Introduction}
+
+Merging datasets is a key operation for data analytics.  A frequent
+requirement for merging is joining across columns that have
+different surface forms for the same entity.  For instance, the name of a person might be represented as \textit{Douglas Adams}, \textit{Douglas Noel Adams}, \textit{D. Adams} or \textit{Adams, Douglas}.  Similarly, ontology alignment can require recognizing distinct surface forms of
+the same entity, especially when ontologies are independently
+developed.  This problem occurs for many entity types such as people's names, company names, addresses, product descriptions, conference venues, or even people's faces.  Data management systems have however, largely focussed solely on equi-joins, where string or numeric equality determines which rows should be joined, because such joins are efficient.
+
+We propose a different approach to joining different surface representations of the same entity, inspired by recent advances in deep learning.  Our approach depends on (a) mapping surface forms into sets of vectors such that forms for the same entity are closest in vector space, (b) indexing these vectors to find the forms that can be potentially joined together.  The approach is general, in the sense that once a model has been built for a specific semantic type (e.g. people, companies or faces) it can be used for joining any two datasets which share that semantic type.  It is also efficient because indexing uses space partitioning algorithms (such as approximate nearest neighbor) to find surface forms that are potentially joinable, thus eliminating large parts of the vector space from consideration.  Further, nearest neighbor algorithms have been applied to billions of vectors \cite{JDH17}, so the approach is practical for most datasets.  
+
+To test the feasibility of these ideas, we used Wikidata as ground truth to build models for datasets with 1.1M people's names (about 200K identities) and 130K company names (70K identities).  The problem of mapping vectors for the same entity closer in vector space than vectors for other entities is known in the literature as deep metric learning.  Deep metric learning is known to be a difficult problem as studied in the space of face recognition and person-re-identification \cite{DBLP:conf/cvpr/SchroffKP15}, \cite{8445716}, \cite{DBLP:journals/corr/abs-1802-03170}.  As a result, there is a significant amount of research on two aspects of training these networks: (a) how to choose samples for efficient learning, and (b) what constitutes a good loss function.  In building models for entity names, we had to adapt these techniques for triplet selection and loss functions because matching entity names has different characteristics, as we describe below.
+
+As in face recognition, our system for metric learning is built by training a so-called triplet based `siamese triplet' network to learn to produce a small distance estimate for two surface forms for the same entity (between an arbitrarily chosen \textit{anchor} and \textit{positive}), and a large distance estimate for surface forms of different entities (an \textit{anchor} and a \textit{negative}).  A key problem in effective training of such networks is the problem of how to select negative pairs for training, because one cannot exhaustively show all negative pairs to the network.  In prior work for instance, this problem is solved by so-called `triplet mining' where so-called `semi-hard' negatives are gleaned after an all-pairs comparison of input vectors in a batch, e.g., \cite{DBLP:conf/cvpr/SchroffKP15}.  `Semi-hard' negatives are negatives that are further away from the anchor than positives, but not by a sufficient margin.  The idea of focusing on semi-hard negatives is to avoid mining noisy regions of the embedding space.  However, for matching across entity names, most positive forms for the entity names are actually substantially further away from the anchor than are negatives, as we show empirically in this paper.  In other words, `hard negatives' dominate the space, and are the norm.  Our approach to the problem of triplet mining was therefore to use an approximate nearest neighbors algorithm to choose negatives for training that were in the nearest neighbor set, which means that most of the time, our negatives are `hard negatives', where the negative is closer to the anchor than positives.  This approach has three key benefits.  First, it lays out the entities based on their input vectors, and thus allows an efficient gathering of all nearest neighbors without a quadratic comparison of vectors in a batch to determine suitable negatives.  Second, it provides a baseline against which one can objectively measure the effects of training.  Third, it examines whether focusing on hard negatives is really detrimental to deep metric learning, at least for learning to map entity names in vector space.  As we show empirically in this paper, this technique is better for building models that are suitable for use in joins than semi-hard triplet mining when the dataset is dominated by hard negatives.  For easier datasets, the nearest neighbors approach was just as good as semi-hard training.
+
+We also investigated the effect of using multiple local loss functions which have been proposed in the literature for improving deep metric learning, e.g., the triplet loss \cite{DBLP:conf/cvpr/SchroffKP15}, improved loss \cite{Zhang:2016:DML:3088616.3088665}, and angular loss \cite{DBLP:journals/corr/abs-1708-01682} functions.  For the problem of building models for datasets dominated by hard negatives, we found that an adaptation to the triplet loss function proposed in \cite{DBLP:conf/cvpr/SchroffKP15} was better than three other functions that have been used in the literature. 
+%
+%\begin{table}[!htb]
+%    \caption{Example of a merge problem}
+%    \begin{subtable}{.5\linewidth}
+%      \centering
+%        \caption{Table A}
+%        \begin{tabular}{|l|l|}
+%          \hline
+%           Dept & Name \\
+%           \hline
+%           1    & Douglas Adams \\
+%           2    & John Adams \\
+%           3  & Douglas Bard \\
+%           \hline
+%        \end{tabular}
+%    \end{subtable}%
+%    \begin{subtable}{.5\linewidth}
+%      \centering
+%        \caption{Table B}
+%        \begin{tabular}{|l|l|}
+%          \hline
+%           Name & Salary \\
+%           \hline
+%           Douglas Noel Adams & 2000 \\
+%           Adams, John & 3000 \\
+%           John Smith & 3000 \\
+%           \hline
+%        \end{tabular}
+%    \end{subtable}
+%    \label{table-example}
+% \end{table}
+
+
+%Our key contributions are as follows:
+%\begin{itemize}
+%\item We outline a general approach to the problem of merging datasets for different surface forms of the same entity.  Our approach consists of building a deep neural network model for specific entity types and using a space partitioning algorithm to find the nearest neighbors to join.  To test the generality of our approach, we built triplet loss based siamese networks for 200K people's names and 70K company names respectively, drawn from Wikidata.  We show that such networks did learn to map surface forms of the same entity closer in vector space, with a recall rate of 81\% and 75\% after training for 20 neighbors.  Moreover, within the 20 neighbors, 93\% and 96\% of the positive names were closer to the anchor than negative names for people and companies respectively, suggesting good precision.  Our results suggest that deep learning models can be used successfully for data driven joins, assuming that such models are built for common entity types.
+%\item Training neural networks for deep metric learning is difficult because one cannot show quadratic combinations of the data to the system.  In face recognition, a number of techniques exist for triplet selection, and methods for selecting triples is an active area of research.  We developed a new technique for triplet selection for entity names based on an approximate nearest neighbors algorithm over input vectors.  We also explored whether a modified loss function can be used to train the network more effectively, and found that it does in fact perform better for training on people's names.
+%\item A key element of our argument is that once these embedding models have been built, they can be applied to perform joins efficiently for a new dataset.  We test if this is true with previously built face recognition models, because of the paucity of large datasets for companies and people, and the wealth of datasets in the face recognition literature.  For the most part, deep metric models for faces have been used with a classification layer have been used to identify a specific individual, or for clustering faces to measure goodness of the clustering algorithm.  Because we use these existing models for a slightly different purpose, we calculated the same metrics of precision and recall that we calculated for people and companies. We compared the performance of the Facenet model that was trained on VGGFace2 \cite{DBLP:conf/fgr/CaoSXPZ18} on the Labeled Faces in the Wild dataset \cite{Huang_labeledfaces}.  Our results show a recall of 80\%, and a precision of 93\%.  
+%\end{itemize} 
+
+%The rest of the paper is organized as follows: Section~\ref{siamese networks} describes how we adapted siamese networks to the problem of entity matching, specifically the problem of triplet selection for entity names, and the need for a new type of loss function to improve metric learning for this problem, section ~\ref{joins} describes how to use these models for efficient joins across datasets, section ~\ref{dataset} describes characteristics of the datasets we used for training, as well as cleansing and data augmentation techniques we used to generate data, section ~\ref{results} provides the experimental results, section~\ref{related work} covers related work, and section~\ref{conclusions} describes future work and conclusions.
