@@ -429,8 +429,8 @@ def embedded_representation_model(embedding_layer):
     return seq
 
 
-def build_model_from_weights(weights_file):
-    embedder = embedding_layer = Embedding(157495, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable=False)
+def build_model_from_weights(weights_file, embbeding_dimensions):
+    embedder = embedding_layer = Embedding(embbeding_dimensions, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable=False)
     main_input = Input(shape=(MAX_SEQUENCE_LENGTH,))
     net = embedder(main_input)
 
@@ -463,7 +463,13 @@ def build_model_from_weights(weights_file):
                     name='stacked_dists', output_shape=(3, 1)
                     )([a_p, n_c])
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
-        model.load_weights(weights_file)
+        try:
+            model.load_weights(weights_file)
+        except ValueError as e:
+            full = str(e)
+            #https://stackoverflow.com/questions/4289331/python-extract-numbers-from-a-string
+            new_emb = [int(num) for num in full.replace('.', ' ').split() if num.isdigit()]
+            return build_model_from_weights(weights_file, new_emb[2])
         model.compile(optimizer="rmsprop", loss=angular_loss, metrics=[accuracy])
     else:
         exemplar_negative_dist = Lambda(euclidean_distance, name='exemplar_neg_dist', output_shape=(1,))([net_positive, net_negative])
@@ -474,7 +480,13 @@ def build_model_from_weights(weights_file):
                     )([positive_dist, negative_dist, exemplar_negative_dist])
 
         model = Model([input_anchor, input_positive, input_negative], stacked_dists, name='triple_siamese')
-        model.load_weights(weights_file)
+        try:
+            model.load_weights(weights_file)
+        except ValueError as e:
+            full = str(e)
+            #https://stackoverflow.com/questions/4289331/python-extract-numbers-from-a-string
+            new_emb = [int(num) for num in full.replace('.', ' ').split() if num.isdigit()]
+            return build_model_from_weights(weights_file, new_emb[2])
         model.compile(optimizer="rmsprop", loss=LOSS_FUNCTION, metrics=[accuracy])
     test_positive_model = Model([input_anchor, input_positive, input_negative], positive_dist)
     test_negative_model = Model([input_anchor, input_positive, input_negative], negative_dist)
@@ -558,8 +570,8 @@ sequences_test = tokenizer.texts_to_sequences(unique_text_test)
 sequences_test = pad_sequences(sequences_test, maxlen=MAX_SEQUENCE_LENGTH)
 
 # build models
-embedder =  get_embedding_layer(tokenizer)
-model, test_positive_model, test_negative_model, inter_model = build_model_from_weights(args.model)
+#embedder =  get_embedding_layer(tokenizer)
+model, test_positive_model, test_negative_model, inter_model = build_model_from_weights(args.model, 0)
 #embedder_model =  embedded_representation_model(embedder)
 
 
