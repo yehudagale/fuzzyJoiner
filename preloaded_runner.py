@@ -3,7 +3,6 @@ from random import shuffle
 import numpy as np
 
 import tensorflow as tf
-print('yay')
 import random as random
 import json
 from keras import backend as K
