@@ -429,11 +429,12 @@ def embedded_representation_model(embedding_layer):
     return seq
 
 
-def build_model_from_weights(embedder, weights_file):
+def build_model_from_weights(weights_file):
+    embedder = embedding_layer = Embedding(157495, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable=False)
     main_input = Input(shape=(MAX_SEQUENCE_LENGTH,))
     net = embedder(main_input)
 
-    for i in range(0, 3):
+    for i in range(0, 2):
         net = GRU(128, return_sequences=True, activation='relu', name='embed' + str(i))(net)
     net = GRU(128, activation='relu', name='embed' + str(i+1))(net)
     
@@ -558,22 +559,22 @@ sequences_test = pad_sequences(sequences_test, maxlen=MAX_SEQUENCE_LENGTH)
 
 # build models
 embedder =  get_embedding_layer(tokenizer)
-model, test_positive_model, test_negative_model, inter_model = build_model(embedder, args.model)
-embedder_model =  embedded_representation_model(embedder)
+model, test_positive_model, test_negative_model, inter_model = build_model_from_weights(args.model)
+#embedder_model =  embedded_representation_model(embedder)
 
 
-test_data, test_match_stats = generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, False)
-test_seq = get_sequences(test_data, tokenizer)
-print("Test stats:" + str(test_match_stats))
+#test_data, test_match_stats = generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, False)
+#test_seq = get_sequences(test_data, tokenizer)
+#print("Test stats:" + str(test_match_stats))
 
-counter = 0
-current_model = embedder_model
-prev_match_stats = 0
+#counter = 0
+#current_model = embedder_model
+#prev_match_stats = 0
 
 
-number_of_names = len(test_data['anchor'])
+#number_of_names = len(test_data['anchor'])
 # print(train_data['anchor'])
-print("number of names" + str(number_of_names))
+#print("number of names" + str(number_of_names))
 
 
 
@@ -583,9 +584,9 @@ current_model = inter_model
 # print some statistics on this epoch
 
 print("test data predictions")
-positives = test_positive_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-negatives = test_negative_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-print("f1score for test is: {}".format(f1score(positives, negatives)))
+#positives = test_positive_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
+#negatives = test_negative_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
+#print("f1score for test is: {}".format(f1score(positives, negatives)))
 
 
 test_match_stats =  generate_triplets_from_ANN(current_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
