@@ -547,7 +547,7 @@ print("TRAIN")
 print(str(train).encode('utf-8'))
 print("TEST")
 print(str(test).encode('utf-8'))
-
+pickle.dump(test, open(filepath + '.test_data.pickle', 'wb'))
 entity2same_train = generate_names(train, people)
 entity2same_test = generate_names(test, people, limit_pairs=True)
 print(str(entity2same_train).encode('utf-8'))

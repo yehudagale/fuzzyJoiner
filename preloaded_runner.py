@@ -513,6 +513,7 @@ parser.add_argument('--entity_type', type=str, help='people or companies')
 
 parser.add_argument('--model', type=str, help='name for model file')
 
+parser.add_argument('--previos_test', type=str, help='use previos test data')
 
 args = parser.parse_args()
 
@@ -542,7 +543,10 @@ print('Loss function: ' + args.loss_function)
 people = 'people' in args.entity_type
 
 # read all entities and create positive parts of a triplet
-test =  read_entities(args.input)
+if args.previos_test and args.previos_test.lower() in ("yes", "true", "t", "1"):
+    test = pickle.load(open(filepath + '.test_data.pickle', 'rb'))
+else:
+    test =  read_entities(args.input)
 
 print("TEST")
 print(str(test).encode('utf-8'))
