@@ -1,5 +1,5 @@
 from random import shuffle
-
+import pickle
 import numpy as np
 # import pandas
 import tensorflow as tf
@@ -607,6 +607,7 @@ early_stop = EarlyStopping(monitor='val_accuracy', patience=1, mode='max')
 callbacks_list = [checkpoint, early_stop]
 
 train_seq = get_sequences(train_data, tokenizer)
+pickle.dump( tokenizer, open( 'tokenizer' + args.model, "wb" ))
 
 # check just for 5 epochs because this gets called many times
 model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
