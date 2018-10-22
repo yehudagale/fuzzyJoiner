@@ -183,9 +183,9 @@ def improved_loss(y_true, y_pred):
     margin = K.constant(1)
     lambda_p = K.constant(0.02)
     threshold = K.constant(0.1)
-    a_p_distance = y_pred[:,0,0]
-    a_n_distance = y_pred[:,1,0]
-    p_n_distance = y_pred[:,2,0]
+    a_p_distance = K.square(y_pred[:,0,0])
+    a_n_distance = K.square(y_pred[:,1,0])
+    p_n_distance = K.square(y_pred[:,2,0])
     phi = a_p_distance - ((a_n_distance + p_n_distance) / K.constant(2)) + margin
     psi = a_p_distance - threshold 
 
