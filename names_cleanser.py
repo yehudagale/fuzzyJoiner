@@ -5,7 +5,7 @@ from nltk import bigrams
 from os import listdir
 from os.path import isfile, join
 from difflib import SequenceMatcher
-from sklearn.metrics import jaccard_similarity_score
+# from sklearn.metrics import jaccard_similarity_score
 
 
 class GenericDataCleanser(object):
