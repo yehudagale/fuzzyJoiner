@@ -1,5 +1,5 @@
 from random import shuffle
-
+import pickle
 import numpy as np
 
 import tensorflow as tf
@@ -553,7 +553,8 @@ print(str(entity2same_test).encode('utf-8'))
 
 # change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
 # clues for entity names
-tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
+tokenizer = pickle.load(open(args.model + '.tokenizer.pickle', 'rb'))
+#Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
 
 # build a set of data structures useful for annoy, the set of unique entities (unique_text), 
 # a mapping of entities in texts to an index in unique_text, a mapping of entities to other same entities, and the actual
@@ -563,14 +564,16 @@ unique_text_test, entity2unique_test =  build_unique_entities(entity2same_test)
 
 print("test text len:" + str(len(unique_text_test)))
 
-tokenizer.fit_on_texts(unique_text_test)
+#tokenizer.fit_on_texts(unique_text_test)
 
 sequences_test = tokenizer.texts_to_sequences(unique_text_test)
 sequences_test = pad_sequences(sequences_test, maxlen=MAX_SEQUENCE_LENGTH)
 
 # build models
 #embedder =  get_embedding_layer(tokenizer)
-model, test_positive_model, test_negative_model, inter_model = build_model_from_weights(args.model, 0)
+word_index = tokenizer.word_index
+num_words = len(word_index) + 1
+model, test_positive_model, test_negative_model, inter_model = build_model_from_weights(args.model, num_words)
 #embedder_model =  embedded_representation_model(embedder)
 
 
