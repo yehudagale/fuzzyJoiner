@@ -581,7 +581,7 @@ embedder_model = embedded_representation_model(embedder)
 
 
 if DEBUG_ANN:
-    triplets = generate_semi_hard_triplets_from_ANN(embedder_model, sequences, entity2unique, entity2same_train, unique_text, True)
+    triplets = generate_triplets_from_ANN(embedder_model, sequences, entity2unique, entity2same_train, unique_text, True)
     print(len(triplets['anchor']))
     sys.exit()
 
@@ -593,7 +593,7 @@ counter = 0
 current_model = embedder_model
 prev_match_stats = 0
 
-train_data = generate_semi_hard_triplets_from_ANN(current_model, sequences, entity2unique, entity2same_train, unique_text, False)
+train_data, train_match_stats = generate_triplets_from_ANN(current_model, sequences, entity2unique, entity2same_train, unique_text, False)
 
 number_of_names = len(train_data['anchor'])
 # print(train_data['anchor'])
