@@ -39,28 +39,17 @@ The output of the last layer shown in the Figure~\ref{siamese_nets} as a dark la
 Let $\mathbf{x}$ represent an embedding for an entity name, and $\bf{x_{a}}$, $\bf{x_{p}}$, $\bf{x_{n}}$ reflect the vector embeddings of the \textit{anchor}, \textit{positive} and \textit{negative}, respectively.  We investigated four different loss functions, three of which have been used in prior face recognition literature to explore their effectiveness for the entity metric learning problem.
 
 \begin{figure}[htb]
-    \centering
-    \begin{subfigure}[t]{0.31\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{schroff_triplet}
-        \caption{Triplet loss}
-        \label{schroff_loss}
-    \end{subfigure}%
+    \subfloat[Triplet loss\label{schroff_loss}]{%
+        \includegraphics[width=.3\linewidth]{schroff_triplet}
+     }
     ~ 
-    \begin{subfigure}[t]{0.31\linewidth}
-        \centering 
-        \includegraphics[width=\linewidth]{modified_loss}
-        \caption{Modified loss}
-        \label{modified_loss}
-    \end{subfigure}
+    \subfloat[Triplet loss\label{modified_loss}]{%
+        \includegraphics[width=.3\linewidth]{modified_loss}
+     }
     ~ 
-    \begin{subfigure}[t]{0.31\linewidth}
-        \centering 
-        \includegraphics[width=\linewidth]{angular_loss}
-        \caption{Angular loss}
-        \label{angular_loss}
-    \end{subfigure}
-    \caption{Loss functions}
+    \subfloat[Triplet loss\label{angular_loss}]{%
+        \includegraphics[width=.3\linewidth]{angular_loss}
+     }
 \end{figure}
 
 \subsection{Triplet loss}

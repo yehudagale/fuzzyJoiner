@@ -19,41 +19,26 @@ After cleansing, if a name had no alternate surface forms, they were dropped.  T
 As a baseline, we measured how the anchors, positives and negatives were laid out in vector space based on character embeddings alone.  This gives us a measure of how difficult the problem is for the neural network to learn.  We indexed all the vector embeddings (regardless of test or train) into a nearest neighbors algorithm using the Spotify ANNOY\footnote{\url{https://github.com/spotify/annoy}} implementation.  We then queried the index for the $k$ nearest neighbors of this set, varying $k$ so it was either 20, 100, 500, or 1500 neighbors.  Our primary interest was in recall rates of positives prior to any training, to establish the baseline prior to training.  We also measured the nature of hard negatives as we varied the neighborhoods; i.e., what is the mean distance of negatives from the anchor while we increased neighborhoods, compared to the positive distances.  Figure \ref{people_characteristics} shows the results for the people data.  First, recall rate of positives in the nearest neighbor set was very low at 3\%, and it increased only to 6\% at a neighborhood size of 1500.  The difficulty of the problem for reconciling people's names is further highlighted by the distance data.  The mean distance of positives from anchor was 9.05, with a standard deviation of 3.08.  The mean distances of negatives from anchor was 2.73, with a standard deviation of 0.99 for $k$ of 20.  However even for $k$ of 1500, the mean negative distance was 3.64, well below the mean positive distance of 9.05.  The company data show a similar trend, although companies seems to be an easier problem than reconciling people data, as shown in Figure \ref{company_characteristics}.  Recall rate for companies starts at 16\% for a neighborhood size of 20, and is up to 25\% for a neighborhood size of 1500.  Mean negative distance is at 3.05 compared to 4.64 at a neighborhood size of 20, with a standard deviation of 1.44.  At a neighborhood size of 1500, mean negative sizes are slightly higher at 3.86. 
 
 \begin{figure}[htb]
-    \centering
-    \begin{subfigure}[t]{0.23\textwidth}
-        \centering
-        \includegraphics[width=.95\linewidth]{people_recall}
-        \caption{Recall rate as a function of neighborhood size}
-        \label{people_recall}
-    \end{subfigure}%
+    \subfloat[Recall rate as a function of neighborhood size\label{people_recall}]{% 
+        \includegraphics[width=.5\linewidth]{people_recall}
+    }
     ~ 
-    \begin{subfigure}[t]{0.23\textwidth}
-        \centering 
-        \includegraphics[width=.95\linewidth]{people_distances}
-        \caption{Mean negative distance as a function of neighborhood size}
-        \label{modified_loss}
-    \end{subfigure}
+    \subfloat[Mean negative distance as a function of neighborhood size\label{modified_loss}]{%
+        \includegraphics[width=.5\linewidth]{people_distances}
+     }
     \label{people_distances}
     \caption{Characteristics of people data}
 \label{people_characteristics}
 \end{figure}
 
-
 \begin{figure}[htb]
-    \centering
-    \begin{subfigure}[t]{0.23\textwidth}
-        \centering
-        \includegraphics[width=.99\linewidth]{company_recall}
-        \caption{Recall rate as a function of neighborhood size}
-        \label{company_recall}
-    \end{subfigure}%                                                                                                   
-    ~
-    \begin{subfigure}[t]{0.23\textwidth}
-        \centering
-        \includegraphics[width=.99\linewidth]{company_distances}
-        \caption{Mean negative distance from anchor as a function of neighborhood size}
-        \label{modified_loss}
-    \end{subfigure}
+   \subfloat[Recall rate as a function of neighborhood size\label{company_recall}]{%
+        \includegraphics[width=.5\linewidth]{company_recall}
+   }
+   ~
+   \subfloat[Mean negative distance from anchor as a function of neighborhood size \label{modified_loss}]{%
+        \includegraphics[width=.5\linewidth]{company_distances}
+   }
     \label{company_distances}
     \caption{Characteristics of company data}
 \label{company_characteristics}
