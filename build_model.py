@@ -43,6 +43,7 @@ ALPHA=45
 DEBUG = False
 DEBUG_DATA_LENGTH = 100
 DEBUG_ANN = False
+USE_PRECOMPUTED_SPLIT = False
 
 USE_ANGULAR_LOSS=False
 LOSS_FUNCTION=None
@@ -138,14 +139,27 @@ def read_file(file_path):
             break
     return texts
 
-def split(entities, test_split = 0.2):
+def split(entities, test_split = 0.2, val_split = 0.2, base_file=None):
     if DEBUG:
         ents = entities[0:DEBUG_DATA_LENGTH]
     else:
         random.shuffle(entities)
         ents = entities
-    num_validation_samples = int(test_split * len(ents))
-    return ents[:-num_validation_samples], ents[-num_validation_samples:]
+    num_test_samples = int(test_split * len(ents))
+    num_validation_samples = int(val_split * len(ents))
+    if USE_PRECOMPUTED_SPLIT:
+        train = pickle.load(open((base_file + '.train'), "rb" ))
+        test = pickle.load(open((base_file + '.test'), "rb" ))
+        validation = pickle.load(open((base_file + '.validation'), "rb" ))
+    else:
+        train = ents[:-(num_validation_samples + num_test_samples)]
+        test =  ents[-num_test_samples:]
+        validation = ents[-(num_validation_samples + num_test_samples):-num_test_samples]
+        pickle.dump(train, open(base_file + '.train', 'wb'))
+        pickle.dump(test, open(base_file + '.test', 'wb'))
+        pickle.dump(validation, open(base_file + '.validation', 'wb'))
+
+    return train, test, validation 
 
 """
   define a single objective function based on angular loss instead of triplet loss
@@ -503,7 +517,9 @@ parser.add_argument('--entity_type', type=str, help='people or companies')
 
 parser.add_argument('--model', type=str, help='name for model file')
 
+parser.add_argument('--use_precomputed_split', action='store_true', help='load precomputed split for test and validation data')
 
+parser.add_argument('--data_path', type=str, help='location to store/load data from')
 args = parser.parse_args()
 
 filepath = args.model
@@ -524,6 +540,9 @@ elif args.loss_function == 'angular-loss':
     LOSS_FUNCTION = angular_loss
 print('Loss function: ' + args.loss_function)
 
+USE_PRECOMPUTED_SPLIT = args.use_precomputed_split
+
+
 if args.debug_sample_size:
     DEBUG=True
     DEBUG_DATA_LENGTH=args.debug_sample_size
@@ -541,21 +560,25 @@ print('Num layers: ' + str(NUM_LAYERS))
 people = 'people' in args.entity_type
 
 # read all entities and create positive parts of a triplet
+
 entities = read_entities(args.input)
-train, test = split(entities, test_split = .20)
+train, test, validation = split(entities, test_split = .20, val_split = 0.20 , base_file=args.data_path)
 print("TRAIN")
 print(str(train).encode('utf-8'))
+print(len(train))
 print("TEST")
 print(str(test).encode('utf-8'))
-pickle.dump(test, open(filepath + '.test_data.pickle', 'wb'))
+print(len(test))
+print("validation")
+print(str(validation).encode('utf-8'))
+print(len(validation))
+#pickle.dump(test, open(filepath + '.test_data.pickle', 'wb'))
 entity2same_train = generate_names(train, people)
 entity2same_test = generate_names(test, people, limit_pairs=True)
+entity2same_validation = generate_names(validation, people)
 print(str(entity2same_train).encode('utf-8'))
 print(str(entity2same_test).encode('utf-8'))
 
-# change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
-# clues for entity names
-tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
 
 # build a set of data structures useful for annoy, the set of unique entities (unique_text), 
 # a mapping of entities in texts to an index in unique_text, a mapping of entities to other same entities, and the actual
@@ -563,16 +586,23 @@ tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;
 # so we need to create them once for re-use
 unique_text, entity2unique = build_unique_entities(entity2same_train)
 unique_text_test, entity2unique_test = build_unique_entities(entity2same_test)
-
+unique_text_validation, entity2unique_validation = build_unique_entities(entity2same_validation)
 print("train text len:" + str(len(unique_text)))
 print("test text len:" + str(len(unique_text_test)))
-
-tokenizer.fit_on_texts(unique_text + unique_text_test)
-
+if not USE_PRECOMPUTED_SPLIT:
+    # change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
+    # clues for entity names
+    tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")
+    tokenizer.fit_on_texts(unique_text + unique_text_test + unique_text_validation)
+    pickle.dump( tokenizer, open(args.data_path + '.tokenizer' , "wb" ))   
+else:
+    tokenizer = pickle.load(open(args.data_path + '.tokenizer', 'rb'))
 sequences = tokenizer.texts_to_sequences(unique_text)
 sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
 sequences_test = tokenizer.texts_to_sequences(unique_text_test)
 sequences_test = pad_sequences(sequences_test, maxlen=MAX_SEQUENCE_LENGTH)
+sequences_validation = tokenizer.texts_to_sequences(unique_text_validation)
+sequences_validation = pad_sequences(sequences_validation, maxlen=MAX_SEQUENCE_LENGTH)
 
 # build models
 embedder = get_embedding_layer(tokenizer)
@@ -587,6 +617,8 @@ if DEBUG_ANN:
 
 test_data, test_match_stats = generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, False)
 test_seq = get_sequences(test_data, tokenizer)
+validation_data, val_match_stats = generate_triplets_from_ANN(embedder_model, sequences_validation, entity2unique_validation, entity2same_validation, unique_text_validation, False)
+validation_seq = get_sequences(validation_data, tokenizer)
 print("Test stats:" + str(test_match_stats))
 
 counter = 0
@@ -599,6 +631,7 @@ number_of_names = len(train_data['anchor'])
 # print(train_data['anchor'])
 print("number of names" + str(number_of_names))
 Y_train = np.random.randint(2, size=(1,2,number_of_names)).T
+Y_val = np.random.randint(2, size=(1,2,len(validation_data['anchor']))).T
 
 checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 
@@ -607,10 +640,9 @@ early_stop = EarlyStopping(monitor='val_accuracy', patience=2, mode='max')
 callbacks_list = [checkpoint, early_stop]
 
 train_seq = get_sequences(train_data, tokenizer)
-pickle.dump( tokenizer, open( filepath + '.tokenizer.pickle' , "wb" ))
 
 # check just for 5 epochs because this gets called many times
-model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
+model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_data=([validation_seq['anchor'], validation_seq['positive'], validation_seq['negative']],Y_val))
 current_model = inter_model
 # print some statistics on this epoch
 

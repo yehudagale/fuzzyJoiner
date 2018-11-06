@@ -1,4 +1,3 @@
-from random import shuffle
 import pickle
 import numpy as np
 
@@ -7,31 +6,24 @@ import random as random
 import json
 from keras import backend as K
 
-from keras.preprocessing.text import Tokenizer
+#from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
-from keras.layers import Dense, Input, Flatten, Dropout, Lambda, GRU, Activation
-from keras.layers.wrappers import Bidirectional
+from keras.layers import Input, Lambda, GRU
 
-from keras.layers import Conv1D, MaxPooling1D, Embedding
+from keras.layers import Embedding
 
-from keras.models import Model, model_from_json, Sequential
+from keras.models import Model
 
 from embeddings import KazumaCharEmbedding
 
 from annoy import AnnoyIndex
 
-from keras.callbacks import ModelCheckpoint, EarlyStopping
-
 from names_cleanser import NameDataCleanser, CompanyDataCleanser
 
-import sys
-
 import statistics 
-from scipy.stats.mstats import gmean
 
 import argparse
-# from build_model import read_entities, generate_names, build_unique_entities, get_embedding_layer, embedded_representation_model,generate_triplets_from_ANN
 #must fix
 MAX_NB_WORDS = 140000
 EMBEDDING_DIM = 100
@@ -52,24 +44,6 @@ NUM_LAYERS = 3
 USE_L2_NORM = False
 filepath="weights.best.hdf5"
 
-
-def f1score(positive, negative):
-    #labels[predictions.ravel() < 0.5].sum()
-    fsocre = 0.0
-    true_positive = 0.0
-    false_positive = 0
-    false_negitive = 0
-    for i in range(len(positive)):
-        if positive[i] <= negative[i]:
-            true_positive += 1
-        else:
-            false_negitive += 1
-            false_positive += 1
-    print('tp' + str(true_positive))
-    print('fp' + str(false_positive))
-    print('fn' + str(false_negitive))
-    fscore = (2 * true_positive) / ((2 * true_positive) + false_negitive + false_positive)
-    return fscore 
 
 
 def get_embedding_layer(tokenizer):
@@ -122,28 +96,6 @@ def read_entities(filepath):
 
     return entities
 
-def read_file(file_path):
-    texts = {'anchor':[], 'negative':[], 'positive':[]}
-    fl = open(file_path, 'r', encoding='utf8')
-    i = 0
-    for line in fl:
-        line_array = line.split("|")
-        texts['anchor'].append(line_array[0])
-        texts['positive'].append(line_array[1])
-        texts['negative'].append(line_array[2])
-        i += 1
-        if i > DEBUG_DATA_LENGTH and DEBUG:
-            break
-    return texts
-
-def split(entities, test_split = 0.2):
-    if DEBUG:
-        ents = entities[0:DEBUG_DATA_LENGTH]
-    else:
-        random.shuffle(entities)
-        ents = entities
-    num_validation_samples = int(test_split * len(ents))
-    return ents[:-num_validation_samples], ents[-num_validation_samples:]
 
 """
   define a single objective function based on angular loss instead of triplet loss
@@ -220,59 +172,6 @@ def build_unique_entities(entity2same):
             unique_text.append(v)
 
     return unique_text, entity2index
-
-
-def generate_semi_hard_triplets_from_ANN(model, sequences, entity2unique, entity2same, unique_text, test):
-    predictions = model.predict(sequences)
-    t = AnnoyIndex(len(predictions[0]), metric='euclidean')  # Length of item vector that will be indexed
-    t.set_seed(123)
-    for i in range(len(predictions)):
-        # print(predictions[i])
-        v = predictions[i]
-        t.add_item(i, v)
-
-    t.build(100)  # 100 trees
-
-    triplets = {}
-
-    triplets['anchor'] = []
-    triplets['positive'] = []
-    triplets['negative'] = []
-
-    if test:
-        NNlen = TEST_NEIGHBOR_LEN
-    else:
-        NNlen = TRAIN_NEIGHBOR_LEN
-
-    for key in entity2same:
-        index = entity2unique[key]
-
-        expected_text = set(entity2same[key])
-        expected_ids = [entity2unique[i] for i in expected_text]
-
-        for positive in expected_text:
-            k = entity2unique[positive]
-            nearest = t.get_nns_by_vector(predictions[k], NNlen)
-            dist_k = t.get_distance(index, k)
-
-            semi_hards = []
-            for n in nearest:
-                if n == index or n in expected_ids or n == k:
-                    continue
-                n_dist = t.get_distance(index, n)
-                if n_dist > dist_k:
-                    semi_hards.append(unique_text[n])
-
-            # shuffle(semi_hards)
-            # semi_hards = semi_hards[0:20]
-
-            for i in semi_hards:
-                triplets['anchor'].append(key)
-                triplets['positive'].append(unique_text[k])
-                triplets['negative'].append(i)
-
-    return triplets
-
 
 
 def generate_triplets_from_ANN(model, sequences, entity2unique, entity2same, unique_text, test):
@@ -421,15 +320,9 @@ def generate_names(entities, people, limit_pairs=False):
     return entity2same
 
 
-def embedded_representation_model(embedding_layer):
-    seq = Sequential()
-    seq.add(embedding_layer)
-    seq.add(Flatten())
-    return seq
-
 
 def build_model_from_weights(weights_file, embbeding_dimensions):
-    embedder = embedding_layer = Embedding(embbeding_dimensions, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable=False)
+    embedder = Embedding(embbeding_dimensions, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable=False)
     main_input = Input(shape=(MAX_SEQUENCE_LENGTH,))
     net = embedder(main_input)
 
@@ -498,7 +391,7 @@ def build_model_from_weights(weights_file, embbeding_dimensions):
     # print(neg_dist.output_shape)
 
     return model, test_positive_model, test_negative_model, inter_model
-
+# First get the arguments 
 
 output_file_name_for_hpo = "val_dict_list.json"
 
@@ -533,16 +426,10 @@ print('Loss function: ' + args.loss_function)
 
 
 
-# # USE_L2_NORM = args.use_l2_norm.lower() in ("yes", "true", "t", "1")
-# print('Use L2Norm: ' + str(USE_L2_NORM)) 
-# print('Use L2Norm: ' + str(args.use_l2_norm)) 
-
-# NUM_LAYERS = args.num_layers - 1
-# print('Num layers: ' + str(NUM_LAYERS))
 
 people = 'people' in args.entity_type
 
-# read all entities and create positive parts of a triplet
+# Load test data if specified
 if args.previos_test and args.previos_test.lower() in ("yes", "true", "t", "1"):
     test = pickle.load(open(filepath + '.test_data.pickle', 'rb'))
 else:
@@ -550,13 +437,12 @@ else:
 
 print("TEST")
 print(str(test).encode('utf-8'))
-
+#encode test data for annoy
 entity2same_test =  generate_names(test, people, limit_pairs=True)
 
 print(str(entity2same_test).encode('utf-8'))
 
-# change the default behavior of the tokenizer to ignore all punctuation except , - and . which are important
-# clues for entity names
+#load tokenizer
 tokenizer = pickle.load(open(args.model + '.tokenizer.pickle', 'rb'))
 #Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
 
@@ -568,43 +454,19 @@ unique_text_test, entity2unique_test =  build_unique_entities(entity2same_test)
 
 print("test text len:" + str(len(unique_text_test)))
 
-#tokenizer.fit_on_texts(unique_text_test)
-
+#use tokenizer to convert to sequences
 sequences_test = tokenizer.texts_to_sequences(unique_text_test)
 sequences_test = pad_sequences(sequences_test, maxlen=MAX_SEQUENCE_LENGTH)
 
-# build models
-#embedder =  get_embedding_layer(tokenizer)
+# build model so we can load weights into it
 word_index = tokenizer.word_index
 num_words = len(word_index) + 1
 model, test_positive_model, test_negative_model, inter_model = build_model_from_weights(args.model, num_words)
-#embedder_model =  embedded_representation_model(embedder)
 
 
-#test_data, test_match_stats = generate_triplets_from_ANN(embedder_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, False)
-#test_seq = get_sequences(test_data, tokenizer)
-#print("Test stats:" + str(test_match_stats))
-
-#counter = 0
-#current_model = embedder_model
-#prev_match_stats = 0
-
-
-#number_of_names = len(test_data['anchor'])
-# print(train_data['anchor'])
-#print("number of names" + str(number_of_names))
-
-
-
-# check just for 5 epochs because this gets called many times
-# model.fit([train_seq['anchor'], train_seq['positive'], train_seq['negative']], Y_train, epochs=100,  batch_size=40, callbacks=callbacks_list, validation_split=0.2)
 current_model = inter_model
-# print some statistics on this epoch
+# print some statistics
 
-print("test data predictions")
-#positives = test_positive_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-#negatives = test_negative_model.predict([test_seq['anchor'], test_seq['positive'], test_seq['negative']])
-#print("f1score for test is: {}".format(f1score(positives, negatives)))
 
 
 test_match_stats =  generate_triplets_from_ANN(current_model, sequences_test, entity2unique_test, entity2same_test, unique_text_test, True)
