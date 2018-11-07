@@ -10,10 +10,7 @@ We report multiple metrics to measure the effectiveness of training, some of whi
 \end{itemize}
  
 \begin{table}[ht]
-\caption{Precision and Recall by loss functions}
-\label{precision_recall}
-\begin{center}
-%{\scriptsize
+\subfloat[Precision and Recall by loss functions\label{precision_recall}]{%
 \begin{tabular}{|l|l|r|r|r|}
 \hline
 Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
@@ -35,16 +32,9 @@ Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
 \cline{2-5}
 & Angular & .26 & .32 & .22 \\
 \hline
-\end{tabular} %}
-\end{center}
-\end{table}
-
-
-\begin{table}[ht]
-\caption{Distance estimates after training}
-\label{distance}
-\begin{center}
-%{\scriptsize 
+\end{tabular}}
+~
+\subfloat[Distance estimates after training\label{distance}]{%
 \begin{tabular}{|l|l|r|r|r|r|}
 \hline
 Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c|}{Neg} \\
@@ -66,8 +56,7 @@ Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c|}{Neg} \\
 \cline{2-6}
 & Angular & .07 & .04 & .04 & .01 \\
 \hline
-\end{tabular}%}
-\end{center}
+\end{tabular}}
 \end{table}
 
 
