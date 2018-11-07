@@ -17,34 +17,52 @@
 
 \begin{document}
 %
-\title{Contribution Title\thanks{Supported by organization x.}}
+\title{Name matching through deep learning}
 %
 %\titlerunning{Abbreviated paper title}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{First Author\inst{1}\orcidID{0000-1111-2222-3333} \and
-Second Author\inst{2,3}\orcidID{1111-2222-3333-4444} \and
-Third Author\inst{3}\orcidID{2222--3333-4444-5555}}
+\author{Kavitha Srinivas\inst{1} \and
+Yehuda Gale\inst{2} \and
+Julian Dolby\inst{1}}
 %
-\authorrunning{F. Author et al.}
+\authorrunning{K. Srinivas et al.}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Princeton University, Princeton NJ 08544, USA \and
-Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
-\email{lncs@springer.com}\\
-\url{http://www.springer.com/gp/computer-science/lncs} \and
-ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
-\email{\{abc,lncs\}@uni-heidelberg.de}}
+\institute{IBM Research \and
+Rutgers University}
+
 %
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+Merging datasets is a key operation for data analytics.  A frequent
+requirement for merging is joining across columns that have
+different surface forms for the same entity (e.g., the name of a
+person might be represented as \textit{Douglas Adams} or
+\textit{Adams, Douglas}).  Similarly,
+ontology alignment can require recognizing distinct surface forms of
+the same entity, especially when ontologies are independently
+developed.  However, data management systems are currently limited
+to performing merges based on string equality, or at best using
+string similarity.  We propose an approach to performing merges
+based on deep learning models.  Our approach depends on (a) creating
+a deep learning model that maps surface forms of an entity into a
+set of vectors such that alternate forms for the same entity are
+closest in vector space, (b) indexing these vectors using a nearest
+neighbors algorithm to find the forms that can be potentially joined
+together.  To build these models, we had to adapt techniques from
+metric learning due to the characteristics of the data; specifically we describe 
+novel sample selection techniques and loss functions that work for this problem.  
+To evaluate our approach, we used Wikidata as ground truth
+and built models from datasets with approximately 1.1M people's names
+(200K identities) and 130K company names (70K identities).  We developed models that 
+allow for joins with precision@1 of .75-.81 and
+recall of .74-.81.  We make the models available for aligning people or companies across multiple datasets.  
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{Name matching  \and Fuzzy join}
 \end{abstract}
 %
 %
