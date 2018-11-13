@@ -9,8 +9,9 @@ We report multiple metrics to measure the effectiveness of training, some of whi
 \item \textbf{Precision}.  Precision is measured by the fractions of all positives for each anchor that were closer to that anchor than was any negative.
 \end{itemize}
  
-\begin{table}[ht]
+\begin{wrapfigure}{r}{.4\textwidth}
 \subfloat[Precision and Recall by loss functions\label{precision_recall}]{%
+{\scriptsize
 \begin{tabular}{|l|l|r|r|r|}
 \hline
 Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
@@ -32,9 +33,9 @@ Entities & Loss & Recall & \multicolumn{2}{|c|}{Precision} \\
 \cline{2-5}
 & Angular & .26 & .32 & .22 \\
 \hline
-\end{tabular}}
-~
+\end{tabular}}}\\
 \subfloat[Distance estimates after training\label{distance}]{%
+{\scriptsize
 \begin{tabular}{|l|l|r|r|r|r|}
 \hline
 Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c|}{Neg} \\
@@ -56,8 +57,8 @@ Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c|}{Neg} \\
 \cline{2-6}
 & Angular & .07 & .04 & .04 & .01 \\
 \hline
-\end{tabular}}
-\end{table}
+\end{tabular}}}
+\end{wrapfigure}
 
 
 \subsection{Performance for Joins}
@@ -76,22 +77,22 @@ We hypothesized that training against hard negatives can potentially benefit on 
 
 We therefore compared the hard negative triplet selection mechanism directly to training against semi-hard negatives.  To compute semi-hard negatives, we took, for each entity, all its positives, and found all negatives in the nearest neighborhood of that positive that were further from the entity than is the positive.  We made triplets for each such pair of positive and negative.  We thus chose the hardest semi-hard triplets: the negatives are as close to the positive as possible while still being further from the entity.  We ran experiments again for adapted loss on our people dataset, changing only the triplets used; these results are in Table~\ref{hard-semi-hard}.  The same comparison on the company dataset showed no difference, mostly because company data seems easier and seems more immune to differences in loss functions or training regimens.
 
-\begin{table}[ht]
+\begin{wrapfigure}{r}{.4\textwidth}
+\begin{center}
 \caption{Precision and Recall for hard and semi-hard training}
 \label{hard-semi-hard}
-\begin{center}
-%{\scriptsize
+{\scriptsize 
 \begin{tabular}{|l|r|r|r|}
-\hline
+\hline 
 Training & Recall & Precision@1 & Precision \\
-\hline
+\hline 
 hard & .81 & .81 & .63 \\
-\hline
+\hline 
 semi-hard & .63 & .61 & .43 \\
-\hline
-\end{tabular}%}
+\hline 
+\end{tabular}}
 \end{center}
-\end{table}
+\end{wrapfigure}
 
  The results show training on hard negatives produces consistently better results, both for precision and recall.  Hard negative training resulted in recall of 81\% of positives in the nearest set versus 63\% for semi-hard negatives.  Precision@1 is similar, with 81\% for hard negatives versus 61\% for semi-hard.  Overall precision, defined as the fraction of positives closer than any negative is 63\% for hard negatives versus 43\% for semi-hard.
 
