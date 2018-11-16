@@ -25,7 +25,7 @@
 % an abbreviated paper title here
 %
 \author{Kavitha Srinivas\inst{1} \and
-Yehuda Gale\inst{2} \and
+Abraham Gale\inst{2} \and
 Julian Dolby\inst{1}}
 %
 \authorrunning{K. Srinivas et al.}
@@ -39,20 +39,14 @@ Rutgers University}
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-Merging datasets is a key operation for data analytics.  A frequent
-requirement for merging is joining across columns that have
+Merging datasets frequently requires joining across columns that have
 different surface forms for the same entity (e.g., the name of a
 person might be represented as \textit{Douglas Adams} or
-\textit{Adams, Douglas}).  Similarly,
-ontology alignment can require recognizing distinct surface forms of
-the same entity, especially when ontologies are independently
-developed.  However, data management systems are currently limited
+\textit{Adams, Douglas}).  However, data management systems are currently limited
 to performing merges based on string equality, or at best using
-string similarity.  We propose an approach to performing merges
-based on deep learning models.  Our approach depends on (a) creating
-a deep learning model that maps surface forms of an entity into a
-set of vectors such that alternate forms for the same entity are
-closest in vector space, (b) indexing these vectors using a nearest
+string similarity.  We propose an approach to name matching based on deep learning models.  
+Our approach depends on (a) creating
+a deep learning model that maps alternate forms for the same entity into vector space such that alternate forms are closest, (b) indexing these vectors using a nearest
 neighbors algorithm to find the forms that can be potentially joined
 together.  To build these models, we had to adapt techniques from
 metric learning due to the characteristics of the data; specifically we describe 
