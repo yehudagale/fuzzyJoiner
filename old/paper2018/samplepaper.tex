@@ -48,8 +48,8 @@ string similarity.  We propose an approach to name matching based on deep learni
 Our approach depends on (a) creating
 a deep learning model that maps alternate forms for the same entity into vector space such that alternate forms are closest, (b) indexing these vectors using a nearest
 neighbors algorithm to find the forms that can be potentially joined
-together.  To build these models, we had to adapt techniques from
-metric learning due to the characteristics of the data; specifically we describe 
+together.  To build these models, we adapted techniques from
+metric learning to the characteristics of the data; specifically we describe 
 novel sample selection techniques and loss functions that work for this problem.  
 To evaluate our approach, we used Wikidata as ground truth
 and built models from datasets with approximately 1.1M people's names
