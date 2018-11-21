@@ -1,12 +1,19 @@
 # fuzzyJoiner
 # fuzzyJoiner
 
-This repository has the code used to build machine learning models to preform fuzzy joins. Here is how to run a preloaded model from https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e on your own data:
+This repository has the code used to build machine learning models to preform fuzzy joins. Here is how to test a model with precomputed weights from https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e on your own data:
 
 first make sure to install requirements.txt using pip.
 
-To run the pre-compiled models first download two files (model weights file and serialized tokenizer)
-then run:
+To run the precomputed models first download two files (model weights file and serialized tokenizer)
+
+Next make sure the input data has one entity per line separated by the '|' character for example:
+
+Emma Beach Thayer|Emma B. Thayer|Emmeline Buckingham Thayer|Emma Thayer
+
+We include our data in the folders companies_to_cleanse and names_to_cleanse.
+
+once you have the data run:
 
  python ./pre-loaded_runner.py --input $DATA_TO_TEST --entity_type $ENTITY_TYPE --loss_function $LOSS_FUCNTION --model $MODEL_FILE --tokenizer $TOKENIZER_FILE
 where:
