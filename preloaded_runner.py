@@ -405,8 +405,8 @@ parser.add_argument('--input', type=str, help='Input file')
 parser.add_argument('--entity_type', type=str, help='people or companies')
 
 parser.add_argument('--model', type=str, help='name for model file')
-
-parser.add_argument('--previos_test', type=str, help='use previos test data')
+parser.add_argument('--tokenizer', type=str, help='location of tokenizer file')
+parser.add_argument('--previous_test', type=str, help='use previous test data')
 
 args = parser.parse_args()
 
@@ -430,7 +430,7 @@ print('Loss function: ' + args.loss_function)
 people = 'people' in args.entity_type
 
 # Load test data if specified
-if args.previos_test and args.previos_test.lower() in ("yes", "true", "t", "1"):
+if args.previous_test and args.previous_test.lower() in ("yes", "true", "t", "1"):
     test = pickle.load(open(filepath + '.test_data.pickle', 'rb'))
 else:
     test =  read_entities(args.input)
@@ -443,7 +443,7 @@ entity2same_test =  generate_names(test, people, limit_pairs=True)
 print(str(entity2same_test).encode('utf-8'))
 
 #load tokenizer
-tokenizer = pickle.load(open(args.model + '.tokenizer.pickle', 'rb'))
+tokenizer = pickle.load(open(args.tokenizer, 'rb'))
 #Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
 
 # build a set of data structures useful for annoy, the set of unique entities (unique_text), 
