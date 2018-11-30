@@ -1,6 +1,6 @@
 \section{Experiments}
 \label{results}
-In building the models, we employed early stopping using the usual metric of accuracy of the validation data, and we performed hyper-parameter tuning using grid search varying margins for the adapted loss function from 1-20.  Accuracy was defined as the percentage of validation triples where positive distances from anchor were less than negative distances from anchor.  For all our runs, test accuracy as measured by this metric ranged in the 97-99\% range for the people dataset and 92-94\% companies dataset for all losses except angular loss which was poor throughout.  Table \ref{precision_recall} shows the results for the people and company datasets, run with a fixed $k$ of 20 neighbors.  Because we compared across different losses, the results are categorized by each loss function for each dataset we tested.  For all the results reported here, we ran multiple runs because of the stochastic nature of neural network models; the results here are for the better of the two runs. 
+In building the models, we employed early stopping using the usual metric of accuracy of the validation data, and we performed hyper-parameter tuning using grid search varying margins for the adapted loss function from 1-20.  Accuracy was defined as the percentage of validation triples where positive distances from anchor were less than negative distances from anchor.  For all our runs, test accuracy as measured by this metric ranged in the 97-98\% range for the people dataset and 99\% companies dataset for all losses except angular loss which was poor throughout.  Table \ref{precision_recall} shows the results for the people and company datasets, run with a fixed $k$ of 20 neighbors.  Because we compared across different losses, the results are categorized by each loss function for each dataset we tested.  For all the results reported here, we ran multiple runs because of the stochastic nature of neural network models; the results here are for the better of the two runs. 
 
 We report multiple metrics to measure the effectiveness of training, some of which are not standard because of the experimental setup, so we define them below:
 \begin{itemize}
@@ -58,6 +58,8 @@ Entities & Loss & \multicolumn{2}{|c|}{Pos} & \multicolumn{2}{|c|}{Neg} \\
 & Angular & .03 & .02 & .05 & .02 \\
 \hline
 \end{tabular}}}
+\caption{Effect of training}
+\label{training-impact}
 \end{wrapfigure}
 
 
@@ -75,7 +77,7 @@ For fuzzy joins, we need both precision and recall to be high.  Without good rec
 We hypothesized that training against hard negatives can potentially benefit on datasets with characteristics like those of our people dataset, when compared to training against semi-hard negatives.  Such datasets have large numbers of hard negatives, as suggested by Figure~\ref{people_characteristics}, which shows positive distances higher on average than negative ones.  
 %Our strategy of focusing on the hardest negatives, i.e. those in the nearest neighborhood, ought to learn a nearest neighborhood with fewer negatives.  The common technique of using semi-hard negatives will focus more on negatives that are further than already-distant positives, and hence place less emphasis on the nearest neighborhood.
 
-We therefore compared the hard negative triplet selection mechanism directly to training against semi-hard negatives.  To compute semi-hard negatives, we took, for each entity, all its positives, and found all negatives in the nearest neighborhood of that positive that were further from the entity than is the positive.  We made triplets for each such pair of positive and negative.  We thus chose the hardest semi-hard triplets: the negatives are as close to the positive as possible while still being further from the entity.  We ran experiments again for adapted loss on our people dataset, changing only the triplets used; these results are in Table~\ref{hard-semi-hard}.  The same comparison on the company dataset showed no difference, mostly because company data seems easier and seems more immune to differences in loss functions or training regimens.
+We therefore compared the hard negative triplet selection mechanism directly to training against semi-hard negatives.  To compute semi-hard negatives, we took, for each entity, all its positives, and found all negatives in the nearest neighborhood of that positive that were further from the entity than is the positive.  We made triplets for each such pair of positive and negative.  We thus chose the hardest semi-hard triplets: the negatives are as close to the positive as possible while still being further from the entity.  We ran experiments again for adapted loss on our people dataset, changing only the triplets used; these results are in Figure~\ref{hard-semi-hard}.  The same comparison on the company dataset showed no difference, mostly because company data seems easier and seems more immune to differences in loss functions or training regimens.
 
 \begin{wrapfigure}{r}{.4\textwidth}
 \begin{center}
