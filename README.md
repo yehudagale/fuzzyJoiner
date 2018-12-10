@@ -1,9 +1,16 @@
-# fuzzyJoiner
-# fuzzyJoiner
+# Name matching across surface forms of entity names
 
-This repository has the code used to build machine learning models to preform fuzzy joins. Here is how to test a model with precomputed weights from https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e on your own data:
+This repository has the code used to build machine learning models to perform joins across variations in people's and company names; e.g. to match across names such as <it>Douglas Adams</it> and <it>Adams, Douglas</it>.
 
-first make sure to install requirements.txt using pip.
+For details about how these models were built, or how they may be used for fuzzy joins, [see here](https://arxiv.org/abs/1809.01604).  All the models built using the techniques described in this paper are available at https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e.
+
+# Installation
+First make sure to install requirements.txt using pip.
+
+`pip install -r requirements.txt`
+
+# Testing with existing models:
+Here is how to test a model with precomputed weights from https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e on your own data:
 
 To run the precomputed models first download two files (model weights file and serialized tokenizer)
 
