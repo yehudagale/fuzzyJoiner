@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage[caption=false]{subfig}
 \usepackage{multirow}
+\usepackage{wrapfig}
 
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
@@ -17,34 +18,46 @@
 
 \begin{document}
 %
-\title{Contribution Title\thanks{Supported by organization x.}}
+\title{Name matching through deep learning}
 %
 %\titlerunning{Abbreviated paper title}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{First Author\inst{1}\orcidID{0000-1111-2222-3333} \and
-Second Author\inst{2,3}\orcidID{1111-2222-3333-4444} \and
-Third Author\inst{3}\orcidID{2222--3333-4444-5555}}
+\author{Kavitha Srinivas\inst{1} \and
+Abraham Gale\inst{2} \and
+Julian Dolby\inst{1}}
 %
-\authorrunning{F. Author et al.}
+\authorrunning{K. Srinivas et al.}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Princeton University, Princeton NJ 08544, USA \and
-Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
-\email{lncs@springer.com}\\
-\url{http://www.springer.com/gp/computer-science/lncs} \and
-ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
-\email{\{abc,lncs\}@uni-heidelberg.de}}
+\institute{IBM Research \and
+Rutgers University}
+
 %
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+Merging datasets frequently requires joining across columns that have
+different surface forms for the same entity (e.g., the name of a
+person might be represented as \textit{Douglas Adams} or
+\textit{Adams, Douglas}).  However, data management systems are currently limited
+to performing merges based on string equality, or at best using
+string similarity.  We propose an approach to name matching based on deep learning models.  
+Our approach depends on (a) creating
+a deep learning model that maps alternate forms for the same entity into vector space such that alternate forms are closest, (b) indexing these vectors using a nearest
+neighbors algorithm to find the forms that can be potentially joined
+together.  To build these models, we adapted techniques from
+metric learning to the characteristics of the data; specifically we describe 
+novel sample selection techniques and loss functions that work for this problem.  
+To evaluate our approach, we used Wikidata as ground truth
+and built models from datasets with approximately 1.1M people's names
+(200K identities) and 130K company names (70K identities).  We developed models that 
+allow for joins with precision@1 of .76-.82 and
+recall of .74-.79.  We make the models available for aligning people or company names across multiple datasets.  
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{Name matching  \and Fuzzy join}
 \end{abstract}
 %
 %
@@ -63,28 +76,7 @@ The abstract should briefly summarize the contents of the paper in
 % BibTeX users should specify bibliography style 'splncs04'.
 % References will then be sorted and formatted in the correct style.
 %
-% \bibliographystyle{splncs04}
-% \bibliography{mybibliography}
-%
-\begin{thebibliography}{8}
-\bibitem{ref_article1}
-Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
-
-\bibitem{ref_lncs1}
-Author, F., Author, S.: Title of a proceedings paper. In: Editor,
-F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
-Springer, Heidelberg (2016). \doi{10.10007/1234567890}
-
-\bibitem{ref_book1}
-Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
-Location (1999)
-
-\bibitem{ref_proc1}
-Author, A.-B.: Contribution title. In: 9th International Proceedings
-on Proceedings, pp. 1--2. Publisher, Location (2010)
-
-\bibitem{ref_url1}
-LNCS Homepage, \url{http://www.springer.com/lncs}. Last accessed 4
-Oct 2017
-\end{thebibliography}
+\bibliographystyle{splncs04}
+\bibliography{paper}
+ 
 \end{document}
