@@ -408,6 +408,8 @@ parser.add_argument('--model', type=str, help='name for model file')
 
 parser.add_argument('--previos_test', type=str, help='use previos test data')
 
+parser.add_argument('--tokenizer', type=str, help='file with tokenizer to use')
+
 args = parser.parse_args()
 
 filepath = args.model
@@ -431,7 +433,7 @@ people = 'people' in args.entity_type
 
 # Load test data if specified
 if args.previos_test and args.previos_test.lower() in ("yes", "true", "t", "1"):
-    test = pickle.load(open(filepath + '.test_data.pickle', 'rb'))
+    test = pickle.load(open(args.input, 'rb'))
 else:
     test =  read_entities(args.input)
 
@@ -443,7 +445,7 @@ entity2same_test =  generate_names(test, people, limit_pairs=True)
 print(str(entity2same_test).encode('utf-8'))
 
 #load tokenizer
-tokenizer = pickle.load(open(args.model + '.tokenizer.pickle', 'rb'))
+tokenizer = pickle.load(open(args.tokenizer, 'rb'))
 #Tokenizer(num_words=MAX_NB_WORDS, lower=True, filters='!"#$%&()*+/:;<=>?@[\]^_`{|}~', split=" ")   
 
 # build a set of data structures useful for annoy, the set of unique entities (unique_text), 
