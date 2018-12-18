@@ -18,6 +18,7 @@ To replicate the results reported in the paper for the adpapted loss function fo
 `python3 preloaded_runner.py --input testdata --entity_type people --loss_function adapted-loss --model model --tokenizer tokenizer --previous_test yes`
 
 Here's example output from that run:
+
 `mean closest positive count:0.6699706305093758
 mean positive distance:0.7825878046258231
 stdev positive distance:0.6112825495769008
