@@ -17,9 +17,10 @@ To replicate the results reported in the paper for the adpapted loss function fo
 
 `python3 preloaded_runner.py --input testdata --entity_type people --loss_function adapted-loss --model model --tokenizer tokenizer --previous_test yes`
 
+
 Here's example output from that run:
 
-`mean closest positive count:0.6699706305093758
+mean closest positive count:0.6699706305093758
 
 mean positive distance:0.7825878046258231
 
@@ -49,7 +50,7 @@ Accuracy in the ANN for triplets that obey the distance func:0.9359872199075374
 
 Precision at 1: 0.850601929164278
 
-Test stats:0.8387458185950479`
+Test stats:0.8387458185950479
 
 These results are replicable but may vary slightly across machines.
 
