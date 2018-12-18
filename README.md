@@ -41,7 +41,8 @@ These results are replicable but may vary slightly across machines.
 # Training your own model
 If you have your own data you would like to use to train your own model (your own sets of people or company data), ensure you have entities organized as in names_to_cleanse/peoplesNames.txt.  You can then create a new model with the following command as an example (here we are building a people model with the adapted loss function):
 
-`python3 build_model.py --input names_to_cleanse/peoplesNames.txt --loss_function adapted-loss --use_l2_norm true --num_layers 3 --entity_type people --model /tmp/model`
+`python3 build_model.py --input names_to_cleanse/peoplesNames.txt --loss_function adapted-loss --use_l2_norm False --num_layers 3 --entity_type people --model /tmp/model`
 
 Note that if you have a different set of entities you have to change the code in NamesCleanser and add some cleansing code if you need to.  Also you will need to add support for that entity in `build_model.py`.
 
+For a description of various parameter settings (e.g. `--use_l2_norm`) refer to the paper.  
