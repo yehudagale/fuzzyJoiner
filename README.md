@@ -20,20 +20,35 @@ To replicate the results reported in the paper for the adpapted loss function fo
 Here's example output from that run:
 
 `mean closest positive count:0.6699706305093758
+
 mean positive distance:0.7825878046258231
+
 stdev positive distance:0.6112825495769008
+
 max positive distance:25.267065048217773
+
 mean neg distance:2.9535758542870725
+
 stdev neg distance:1.380804040010406
+
 max neg distance:28.699949264526367
+
 mean all positive distance:1.5341067807035704
+
 stdev all positive distance:2.2664244913768132
+
 max all positive distance:84.53878784179688
+
 mean all neg distance:2.9164267418596084
+
 stdev all neg distance:1.3876352138587738
+
 max all neg distance:28.699949264526367
+
 Accuracy in the ANN for triplets that obey the distance func:0.9359872199075374
+
 Precision at 1: 0.850601929164278
+
 Test stats:0.8387458185950479`
 
 These results are replicable but may vary slightly across machines.
