@@ -408,8 +408,6 @@ parser.add_argument('--model', type=str, help='name for model file')
 parser.add_argument('--tokenizer', type=str, help='location of tokenizer file')
 parser.add_argument('--previous_test', type=str, help='use previous test data')
 
-parser.add_argument('--tokenizer', type=str, help='file with tokenizer to use')
-
 args = parser.parse_args()
 
 filepath = args.model
