@@ -5,39 +5,42 @@ This repository has the code used to build machine learning models to perform jo
 For details about how these models were built, or how they may be used for fuzzy joins, [see here](https://arxiv.org/abs/1809.01604).  All the models built using the techniques described in this paper are available at https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e.
 
 # Installation
-First make sure to install requirements.txt using pip.
+First make sure to install requirements.txt using pip.  Use Python3.
 
 `pip install -r requirements.txt`
 
 # Testing with existing models:
-Here is how to test a model with precomputed weights from https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e on your own data:
 
-To run the precomputed models first download two files (model weights file and serialized tokenizer)
+Here is how to test a model with precomputed weights from https://drive.google.com/drive/folders/1zivCTGkq2_AkfjGLHMnlehzTmYUwcQ9e.  The models directory is organized with a separate directory for the people data and a separate directory for the company data.  In each directory we have the results organized by loss function.  Adapted loss contains the test/train/validation splits, and it contains the model and the corresponding tokenizer.  
 
-Next make sure the input data has one entity per line separated by the '|' character for example:
+To replicate the results reported in the paper for the adpapted loss function for people data use:
 
-Emma Beach Thayer|Emma B. Thayer|Emmeline Buckingham Thayer|Emma Thayer
+`python3 preloaded_runner.py --input testdata --entity_type people --loss_function adapted-loss --model model --tokenizer tokenizer --previous_test yes`
 
-We include our data in the folders companies_to_cleanse and names_to_cleanse.
+Here's example output from that run:
+`mean closest positive count:0.6699706305093758
+mean positive distance:0.7825878046258231
+stdev positive distance:0.6112825495769008
+max positive distance:25.267065048217773
+mean neg distance:2.9535758542870725
+stdev neg distance:1.380804040010406
+max neg distance:28.699949264526367
+mean all positive distance:1.5341067807035704
+stdev all positive distance:2.2664244913768132
+max all positive distance:84.53878784179688
+mean all neg distance:2.9164267418596084
+stdev all neg distance:1.3876352138587738
+max all neg distance:28.699949264526367
+Accuracy in the ANN for triplets that obey the distance func:0.9359872199075374
+Precision at 1: 0.850601929164278
+Test stats:0.8387458185950479`
 
-once you have the data run:
+These results are replicable but may vary slightly across machines.
 
- python ./pre-loaded_runner.py --input $DATA_TO_TEST --entity_type $ENTITY_TYPE --loss_function $LOSS_FUCNTION --model $MODEL_FILE --tokenizer $TOKENIZER_FILE
-where:
+# Training your own model
+If you have your own data you would like to use to train your own model (your own sets of people or company data), ensure you have entities organized as in names_to_cleanse/peoplesNames.txt.  You can then create a new model with the following command as an example (here we are building a people model with the adapted loss function):
 
-$DATA_TO_TEST is the uncleansed unaugmented data to test, a sample input for people is included in data_for_testing.txt
-$ENTITY_TYPE is people or companies
-$LOSS_FUCNTION is the loss function (triplet-loss, improved-loss, angular-loss, or adapted-loss)
-$MODEL_FILE is the weights file downloaded separately
-$TOKENIZER_FILE is the serialized tokenizer downloaded separately
-if you have test data in a pickle file ending in '.test_data.pickle' but otherwise the same as the model file, you can use the '--previous_test' flag to load that data instead of the input file.
+`python3 build_model.py --input names_to_cleanse/peoplesNames.txt --loss_function adapted-loss --use_l2_norm true --num_layers 3 --entity_type people --model /tmp/model`
 
-here is an example:
-python ./preloaded_runner.py --loss_function adapted-loss --input ./data_for_testing.txt --entity_type people --model adapted.people.model --tokenizer adapted_people_model_1.tokenizer.pickle 
+Note that if you have a different set of entities you have to change the code in NamesCleanser and add some cleansing code if you need to.  Also you will need to add support for that entity in `build_model.py`.
 
-You can use random_test_selecter.py to choose a random subset of the data to test
-simply type random_test_selecter.py $INPUT_FILE $OUTPUT_FILE $NUMBER_TO_SELECT
-where 
-$INPUT_FILE is the original file
-$OUTPUT_FILE is the file you want to write to
-$NUMBER_TO_SELECT is the number of items to select (before augmentation and cleansing)
