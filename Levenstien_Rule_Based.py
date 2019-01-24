@@ -44,6 +44,7 @@ def get_stats(entity2same, bucket_dict):
     def get_closest(items, key, number_to_get):
         low_key = key.lower()
         closest = [(x, Levenshtein.distance(low_key, x.lower())) for x in items]
+        closest = list(set(closest))
         # print('key')
         # # print(key.encode('utf-8'))
         # print('unsorted')
@@ -94,15 +95,17 @@ def get_stats(entity2same, bucket_dict):
             if not word:
                 continue
             nearest = nearest + bucket_dict[word]
-        if key == "Abu al - Qasim Muhammad ibn 'Abd Allah ibn 'Abd al - Muttalib ibn Hashim":
-            print(nearest)
+        #if key == "Abu al - Qasim Muhammad ibn 'Abd Allah ibn 'Abd al - Muttalib ibn Hashim":
+            #print(nearest)
         if len(nearest) > NNlen:
             nearest = get_closest(nearest, key, NNlen)
+        #if key == "Abu al - Qasim Muhammad ibn 'Abd Allah ibn 'Abd al - Muttalib ibn Hashim":
+            #print(nearest)
 
         nearest_text = set(nearest)
         expected_text = set(entity2same[key])
         print_num += 1
-        if print_num % 100 == 0:
+        if print_num % 1000 == 0:
             print(key.encode('utf-8'))
             print([item.encode('utf-8') for item in nearest])
 
@@ -157,8 +160,8 @@ def get_stats(entity2same, bucket_dict):
 
         if closest_pos_count > 0:
             precise+=1
-        print(len(expected_text))
-        print(len(nearest_text))
+        #print(len(expected_text))
+        #print(len(nearest_text))
         closest_positive_counts.append(closest_pos_count / min(len(expected_text),len(nearest_text)))
 
 
