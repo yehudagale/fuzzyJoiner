@@ -89,7 +89,11 @@ def get_stats(entity2same, bucket_dict):
     NNlen = 20
     translator = str.maketrans(string.punctuation, ' '*len(string.punctuation))
     print_num = 0
+    skipped = 0
     for key in entity2same:
+        if not key.translate(translator).strip():
+            skipped += 1
+            continue
         nearest = []
         for word in key.translate(translator).lower().split():
             if not word:
@@ -104,10 +108,11 @@ def get_stats(entity2same, bucket_dict):
 
         nearest_text = set(nearest)
         expected_text = set(entity2same[key])
-        print_num += 1
         if print_num % 1000 == 0:
+            print(print_num)
             print(key.encode('utf-8'))
             print([item.encode('utf-8') for item in nearest])
+        print_num += 1
 
         # annoy has this annoying habit of returning the queried item back as a nearest neighbor.  Remove it.
         if key in nearest_text:
@@ -162,6 +167,17 @@ def get_stats(entity2same, bucket_dict):
             precise+=1
         #print(len(expected_text))
         #print(len(nearest_text))
+        if min(len(expected_text),len(nearest_text)) == 0:
+            print(nearest)
+            print(expected_text)
+            print(nearest_text)
+            print('key' + str(key))
+            for word in key.translate(translator).lower().split():
+                if not word:
+                    continue
+                print(bucket_dict[word])
+                print(word)
+
         closest_positive_counts.append(closest_pos_count / min(len(expected_text),len(nearest_text)))
 
 
@@ -171,7 +187,7 @@ def get_stats(entity2same, bucket_dict):
         #         triplets['anchor'].append(key)
         #         triplets['positive'].append(j)
         #         triplets['negative'].append(i)
-
+    print('bad entities' + str(skipped))
     print("mean closest positive count:" + str(statistics.mean(closest_positive_counts)))
     print("mean positive distance:" + str(statistics.mean(pos_distances)))
     print("stdev positive distance:" + str(statistics.stdev(pos_distances)))
@@ -186,7 +202,7 @@ def get_stats(entity2same, bucket_dict):
     print("stdev all neg distance:" + str(statistics.stdev(all_neg_distances)))
     print("max all neg distance:" + str(max(all_neg_distances)))
     print("Accuracy in the ANN for triplets that obey the distance func:" + str(lev_accuracy / total))
-    print("Precision at 1: " +  str(precise / len(entity2same)))
+    print("Precision at 1: " +  str(precise / (len(entity2same) - skipped)))
     
     # obj = {}
     # obj['accuracy'] = lev_accuracy / total
@@ -207,7 +223,6 @@ print(people)
 entities = read_entities(input_file)
 entity2same = generate_names(entities, people)
 bucket_dict = load_buckets(entity2same)
-print(bucket_dict['abu'])
 # for key in bucket_dict:
 # 	print('key {} value {}'.format(key, bucket_dict[key]).encode('utf-8'))
 print(get_stats(entity2same, bucket_dict))
