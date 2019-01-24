@@ -94,8 +94,11 @@ def get_stats(entity2same, bucket_dict):
             if not word:
                 continue
             nearest = nearest + bucket_dict[word]
+        if key == "Abu al - Qasim Muhammad ibn 'Abd Allah ibn 'Abd al - Muttalib ibn Hashim":
+            print(nearest)
         if len(nearest) > NNlen:
             nearest = get_closest(nearest, key, NNlen)
+
         nearest_text = set(nearest)
         expected_text = set(entity2same[key])
         print_num += 1
@@ -154,7 +157,8 @@ def get_stats(entity2same, bucket_dict):
 
         if closest_pos_count > 0:
             precise+=1
-
+        print(len(expected_text))
+        print(len(nearest_text))
         closest_positive_counts.append(closest_pos_count / min(len(expected_text),len(nearest_text)))
 
 
@@ -200,6 +204,7 @@ print(people)
 entities = read_entities(input_file)
 entity2same = generate_names(entities, people)
 bucket_dict = load_buckets(entity2same)
+print(bucket_dict['abu'])
 # for key in bucket_dict:
 # 	print('key {} value {}'.format(key, bucket_dict[key]).encode('utf-8'))
 print(get_stats(entity2same, bucket_dict))
