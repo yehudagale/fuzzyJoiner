@@ -43,9 +43,17 @@ def load_buckets(entity2same):
 def get_stats(entity2same, bucket_dict):
     def get_closest(items, key, number_to_get):
         low_key = key.lower()
-        closest = [(x, Levenshtein.ratio(low_key, x.lower())) for x in items]
+        closest = [(x, Levenshtein.distance(low_key, x.lower())) for x in items]
+        # print('key')
+        # # print(key.encode('utf-8'))
+        # print('unsorted')
+        # # print([(thing[0].encode('utf-8'), thing[1]) for thing in closest])
+        # print('sorted')
         closest = sorted(closest, key=lambda a: a[1])
+        # print([(thing[0].encode('utf-8'), thing[1]) for thing in closest])
+        # print('dist removed')
         closest = [item[0] for item in closest]
+        # print([thing.encode('utf-8') for thing in closest])
         # print([thing.encode('utf-8') for thing in closest[:number_to_get]])
         return closest[:number_to_get]
 
@@ -116,9 +124,9 @@ def get_stats(entity2same, bucket_dict):
         # print(key + str(expected_text) + str(nearest_text))
         for i in negatives:
             for j in positives:
-                dist_pos = Levenshtein.ratio(key.lower(), j.lower())
+                dist_pos = Levenshtein.distance(key.lower(), j.lower())
                 pos_distances.append(dist_pos)
-                dist_neg = Levenshtein.ratio(key.lower(), i.lower())
+                dist_neg = Levenshtein.distance(key.lower(), i.lower())
                 neg_distances.append(dist_neg)
                 if dist_pos < dist_neg:
                     lev_accuracy += 1
@@ -129,25 +137,25 @@ def get_stats(entity2same, bucket_dict):
 
         min_neg_distance = 1000000        
         for i in negatives:
-            dist_neg = Levenshtein.ratio(key.lower(), i.lower())
+            dist_neg = Levenshtein.distance(key.lower(), i.lower())
             all_neg_distances.append(dist_neg)
             if dist_neg < min_neg_distance:
                     min_neg_distance = dist_neg
 
         for j in expected_text:
-            dist_pos =  Levenshtein.ratio(key.lower(), j.lower())
+            dist_pos =  Levenshtein.distance(key.lower(), j.lower())
             all_pos_distances.append(dist_pos)
 
         closest_pos_count = 0
         for p in overlap:
-            dist_pos =  Levenshtein.ratio(key.lower(), p.lower())
+            dist_pos =  Levenshtein.distance(key.lower(), p.lower())
             if dist_pos < min_neg_distance:
                 closest_pos_count+=1
 
         if closest_pos_count > 0:
             precise+=1
 
-        closest_positive_counts.append(closest_pos_count / min(len(expected_text), NNlen - 1))
+        closest_positive_counts.append(closest_pos_count / min(len(expected_text),len(nearest_text)))
 
 
             
