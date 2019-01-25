@@ -20,7 +20,7 @@ To replicate the results reported in the paper for the adpapted loss function fo
 
 Here's example output from that run:
 
-mean closest positive count:0.6699706305093758
+mean closest positive count (precision-all):0.6699706305093758
 
 mean positive distance:0.7825878046258231
 
@@ -50,7 +50,7 @@ Accuracy in the ANN for triplets that obey the distance func:0.9359872199075374
 
 Precision at 1: 0.850601929164278
 
-Test stats:0.8387458185950479
+Test stats (Recall):0.8387458185950479
 
 These results are replicable but may vary slightly across machines.
 
@@ -62,3 +62,11 @@ If you have your own data you would like to use to train your own model (your ow
 Note that if you have a different set of entities you have to change the code in NamesCleanser and add some cleansing code if you need to.  Also you will need to add support for that entity in `build_model.py`.
 
 For a description of various parameter settings (e.g. `--use_l2_norm`) refer to the paper.  
+
+# How does this relate to entity resolution?
+This approach is not directly the same as entity resolution or entity linking.  In entity resolution or entity linking *multiple* attributes of an entity are considered in linking an entity.  For instance, a person's social security number, their address, their home phone number, their name etc are different attributes that are considered in linking the entity with another.  In most entity linking system, *similarity* functions are used to determine similarity of the attribute in question.  Typically, generic similarity functions are included such as string similarity functions (Levenshtein distance, Jaccard similarity etc).  The point of this work is that when there is sufficient data for a specific entity type (e.g. people's names, company names etc), one can use deep neural net models like the ones built here as similarity functions.  How effective is this compared to existing string similarity functions?  The trouble with existing string similarity functions is that one needs to compare every name with every other name or implement *blocking* (i.e., only compare names that might be comparable in some form).  We implemented a straightforward type of blocking and examined if we considered the top 20 neighbors (20 closest in terms of Levenshtein distance) what the precision@1, precision-all and recall would be.  To reproduce these results, run `python Levenstien_Rule_Based.py names_to_cleanse/peoplesNames.txt people`.
+
+Here are the results:
+mean closest positive count (Precision-all):0.1360894849189292 
+Precision at 1: 0.4194811175928769 
+(Recall): 0.3109830209635783
