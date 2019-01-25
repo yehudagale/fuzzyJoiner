@@ -91,9 +91,9 @@ def get_stats(entity2same, bucket_dict):
     print_num = 0
     skipped = 0
     for key in entity2same:
-        if not key.translate(translator).strip():
-            skipped += 1
-            continue
+        # if not key.translate(translator).strip():
+        #     skipped += 1
+        #     continue
         nearest = []
         for word in key.translate(translator).lower().split():
             if not word:
@@ -117,6 +117,9 @@ def get_stats(entity2same, bucket_dict):
         # annoy has this annoying habit of returning the queried item back as a nearest neighbor.  Remove it.
         if key in nearest_text:
             nearest_text.remove(key)
+        if len(nearest_text) == 0:
+            skipped += 1
+            continue
         # print("query={} names = {} true_match = {}".format(unique_text[index], nearest_text, expected_text))
         overlap = expected_text.intersection(nearest_text)
         # collect up some statistics on how well we did on the match
